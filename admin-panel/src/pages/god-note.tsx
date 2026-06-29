@@ -17,14 +17,14 @@ const TABS = [
 
 const DIVINE_ACTIONS = [
   { key: 'Bless',        label: 'Bless',         desc: 'Tăng devotion +10%, giảm corruption risk, có thể awaken talent (20% chance)' },
-  { key: 'SendDream',    label: 'Send Dream',     desc: 'Gửi giấc mơ thần linh, tăng Trust +5-15, NPC Dream Sensitive nhận nhiều hơn' },
+  { key: 'SendDream',    label: 'Send Dream',     desc: 'Gửi giấc mơ the gods, tăng Trust +5-15, NPC Dream Sensitive nhận nhiều hơn' },
   { key: 'Test',         label: 'Test',           desc: 'Tạo divine trial — 70% unlock saint/prophet/champion path, 30% tăng corruption' },
   { key: 'Promote',      label: 'Promote',        desc: 'Đẩy NPC lên church rank tiếp theo nếu đủ điều kiện' },
   { key: 'MarkAsChosen', label: 'Mark as Chosen', desc: 'Đánh dấu là "Chosen One" — tăng Destiny Modifier +30, thu hút rival gods' },
   { key: 'Protect',      label: 'Protect',        desc: 'Giảm corruption risk -15, bảo vệ khỏi assassination/accident' },
   { key: 'Ignore',       label: 'Ignore',         desc: 'Không làm gì — tiết kiệm Faith nhưng NPC có thể biến mất' },
   { key: 'Punish',       label: 'Punish',         desc: 'Phạt — giảm corruption nhưng cũng giảm loyalty' },
-  { key: 'Corrupt',      label: 'Corrupt 🌑',     desc: '(Dark Gods) Đẩy NPC vào Dark Path — awaken cursed_blood talent' },
+  { key: 'Corrupt',      label: 'Corrupt 🌑',     desc: '(Dark Gods) Đẩy NPC ando Dark Path — awaken cursed_blood talent' },
 ]
 
 const POTENTIAL_COLOR: Record<string, any> = {
@@ -76,7 +76,7 @@ export default function GodNotePage() {
   async function applyAction(action: string) {
     if (!selected) return
     await godNoteApi.applyAction(selected.npcId, godId, action)
-    setMsg(`${action} đã áp dụng lên ${selected.name}`)
+    setMsg(`${action} applied to ${selected.name}`)
     setActionModal(false)
     load()
   }
@@ -88,7 +88,7 @@ export default function GodNotePage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">God Note</h2>
-            <p className="text-gray-400 text-sm mt-1">Danh sách tín đồ nổi bật — Achievements, Talents, Divine Actions</p>
+            <p className="text-gray-400 text-sm mt-1">Notable followers — Achievements, Talents, Divine Actions</p>
           </div>
           <div className="flex gap-3">
             <select value={worldId} onChange={e => setWorldId(e.target.value)}
@@ -120,12 +120,12 @@ export default function GodNotePage() {
 
         {/* Entries grid */}
         {loading ? (
-          <div className="text-center py-16 text-gray-500 animate-pulse">Đang tải God Note...</div>
+          <div className="text-center py-16 text-gray-500 animate-pulse">Loading God Note...</div>
         ) : entries.length === 0 ? (
           <div className="text-center py-16 text-gray-600">
             <p className="text-4xl mb-3">📖</p>
-            <p>Chưa có NPC nào trong God Note</p>
-            <p className="text-xs text-gray-700 mt-2">NPCs cần có achievements hoặc talents để xuất hiện ở đây</p>
+            <p>No NPCs in the God Note yet</p>
+            <p className="text-xs text-gray-700 mt-2">NPCs need achievements or talents to appear here</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -189,7 +189,7 @@ export default function GodNotePage() {
 
                 {/* Actions hint */}
                 <div className="mt-3 pt-3 border-t border-gray-800">
-                  <p className="text-xs text-gray-600">Nhấn để thực hiện Divine Action</p>
+                  <p className="text-xs text-gray-600">Click to perform a Divine Action</p>
                 </div>
               </div>
             ))}
@@ -237,7 +237,7 @@ export default function GodNotePage() {
               {/* Recommended Actions */}
               {selected.recommendedActions?.length > 0 && (
                 <div>
-                  <p className="text-xs text-gray-500 mb-2">💡 Gợi ý:</p>
+                  <p className="text-xs text-gray-500 mb-2">💡 Suggested:</p>
                   <div className="flex flex-wrap gap-2">
                     {selected.recommendedActions.map((a: string, i: number) => (
                       <span key={i} className="text-xs px-2 py-1 bg-purple-900/30 border border-purple-800 text-purple-300 rounded">

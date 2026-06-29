@@ -51,13 +51,13 @@ public class WorldGeneratorService : IWorldGeneratorService
             {
                 // Elevation: nhiều octave để có địa hình phong phú
                 float e = noise.Octave(x * 0.04f, y * 0.04f, octaves: 6, persistence: 0.5f);
-                // Gradient hướng vào trung tâm để tạo đảo (optional)
+                // Gradient hướng ando trung tâm để tạo đảo (optional)
                 float cx = (x - width * 0.5f) / (width * 0.5f);
                 float cy = (y - height * 0.5f) / (height * 0.5f);
                 float islandGrad = 1f - (cx * cx + cy * cy);
                 elevation[x, y] = Clamp01(e * 0.7f + islandGrad * 0.3f);
 
-                // Moisture độc lập với elevation
+                // Moisture độc lập with elevation
                 moisture[x, y] = noise.Octave(x * 0.05f + 100f, y * 0.05f + 100f, octaves: 4, persistence: 0.6f);
                 // Temperature giảm theo vĩ độ (y)
                 float latTemp = 1f - MathF.Abs((y - height * 0.5f) / (height * 0.5f));
@@ -65,7 +65,7 @@ public class WorldGeneratorService : IWorldGeneratorService
             }
         }
 
-        // Pass 2: classify biome và assign TileType
+        // Pass 2: classify biome and assign TileType
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -90,7 +90,7 @@ public class WorldGeneratorService : IWorldGeneratorService
         // Pass 3: đặt Sacred sites ngẫu nhiên (5-8 điểm)
         PlaceSacredSites(tiles, width, height, seed);
 
-        // Lưu tiles vào DB
+        // Lưu tiles ando DB
         await _worldRepo.UpdateTilesAsync(worldId, tiles);
 
         // Spawn civilizations trên tiles phù hợp
@@ -203,7 +203,7 @@ public class WorldGeneratorService : IWorldGeneratorService
             var sp = spawnPoints[i];
             var name = prefixes[rng.Next(prefixes.Length)] + suffixes[rng.Next(suffixes.Length)];
 
-            // Lấy 3 tile xung quanh điểm spawn
+            // Get 3 tile xung quanh điểm spawn
             var controlledTiles = GetNeighborLandTiles(tiles, sp.X, sp.Y, width, height, 3);
 
             var civ = new CivilizationDocument
@@ -219,12 +219,12 @@ public class WorldGeneratorService : IWorldGeneratorService
 
             await _civRepo.CreateAsync(civ);
 
-            // Cập nhật tiles để biết civ nào ở đó
+            // Update tiles để biết civ nào ở đó
             foreach (var t in controlledTiles)
                 t.CivilizationId = civ.Id;
         }
 
-        // Lưu lại tiles đã cập nhật CivId
+        // Lưu lại tiles has cập nhật CivId
         await _worldRepo.UpdateTilesAsync(worldId, tiles);
         _logger.LogInformation("Spawned {Count} civilizations", spawnPoints.Count);
     }
@@ -246,7 +246,7 @@ public class WorldGeneratorService : IWorldGeneratorService
 
 // ─── Perlin Noise Implementation ─────────────────────────
 /// <summary>
-/// Perlin noise 2D tự implement, không cần thư viện ngoài.
+/// Perlin noise 2D tự implement, not cần thư viện ngoài.
 /// </summary>
 public class PerlinNoise
 {
@@ -307,7 +307,7 @@ public class PerlinNoise
 
 // ─── Evolution Entity Spawner (helper) ───────────────────
 /// <summary>
-/// Tách riêng để WorldGeneratorService không cần inject IEvolutionService trực tiếp.
+/// Tách riêng để WorldGeneratorService not cần inject IEvolutionService trực tiếp.
 /// </summary>
 internal class EvolutionEntitySpawner
 {

@@ -88,7 +88,7 @@ public class OrganizationService : IOrganizationService
         var head = await _npcRepo.GetByIdAsync(org.LeaderNpcId);
         if (head == null || head.State != NpcState.Alive) return deltas;
 
-        // 1. Loyalty decay nếu King approval thấp
+        // 1. Loyalty decays if King approval is low
         var civ = await _civRepo.GetByCivilizationByIdAsync(org.CivilizationId);
         if (civ != null && civ.AiMemory.GodTrustLevel < 30f)
         {
@@ -97,7 +97,7 @@ public class OrganizationService : IOrganizationService
             await _npcRepo.UpdateAsync(head);
         }
 
-        // 2. Rival Noble House — nếu hai nhà có Power tương đương
+        // 2. Rival Noble House — if two houses have similar Power
         var otherHouses = (await _orgRepo.GetByCivilizationAsync(org.CivilizationId))
             .Where(o => o.Type == OrganizationType.NobleHouse && o.Id != org.Id).ToList();
 
@@ -105,7 +105,7 @@ public class OrganizationService : IOrganizationService
         {
             if (MathF.Abs(org.Power - rival.Power) < 10f && _rng.NextDouble() < 0.05)
             {
-                // Tạo rivalry
+                // Create rivalry
                 if (org.RivalOrgId == null)
                 {
                     org.RivalOrgId = rival.Id;
@@ -117,7 +117,7 @@ public class OrganizationService : IOrganizationService
                     {
                         Type = WorldEventType.DivineConflict,
                         TargetId = org.CivilizationId,
-                        Description = $"{org.Name} và {rival.Name} trở thành đối thủ tranh giành ảnh hưởng!"
+                        Description = $"{org.Name} and {rival.Name} have become rivals competing for influence!"
                     });
                     _logger.LogInformation("Noble rivalry formed: {A} vs {B}", org.Name, rival.Name);
                 }
@@ -136,7 +136,7 @@ public class OrganizationService : IOrganizationService
                     Type = WorldEventType.MiraclePerformed,
                     SourceGodId = head.GodInfluenceId,
                     TargetId = org.CivilizationId,
-                    Description = $"{org.Name} trở thành đồng minh của Thần Linh!"
+                    Description = $"{org.Name} has become an ally of the Divine!"
                 });
             }
         }
@@ -181,7 +181,7 @@ public class OrganizationService : IOrganizationService
                 {
                     Type = WorldEventType.DivineConflict,
                     TargetId = org.CivilizationId,
-                    Description = "Triều đình bất đồng vì các quan đại thần phục vụ thần khác nhau. Vương quốc suy yếu!"
+                    Description = "The court is deadlocked as advisors serve rival gods. The kingdom weakens!"
                 });
             }
         }
@@ -208,7 +208,7 @@ public class OrganizationService : IOrganizationService
                     Type = WorldEventType.MiraclePerformed,
                     SourceGodId = spymasterOrHighPriest.GodInfluenceId,
                     TargetId = org.CivilizationId,
-                    Description = $"Vua {king.Name} chính thức theo tôn giáo {religion.Name}!"
+                    Description = $"King {king.Name} officially converts to religion {religion.Name}!"
                 });
             }
         }
@@ -246,7 +246,7 @@ public class OrganizationService : IOrganizationService
                         Type = WorldEventType.MiraclePerformed,
                         SourceGodId = org.GodInfluenceId,
                         TargetId = targetCiv.Id,
-                        Description = $"{traveler.Name} mang đức tin đến {targetCiv.Name}!"
+                        Description = $"{traveler.Name} carries the faith to {targetCiv.Name}!"
                     });
             }
         }
@@ -284,7 +284,7 @@ public class OrganizationService : IOrganizationService
                                 Type = WorldEventType.EvolutionOccurred,
                                 SourceGodId = adv.GodInfluenceId,
                                 TargetId = org.CivilizationId,
-                                Description = $"🌟 {adv.Name} trở thành Champion của Thần Linh!"
+                                Description = $"🌟 {adv.Name} has become a Champion of the Divine!"
                             });
                         }
                 }
@@ -294,7 +294,7 @@ public class OrganizationService : IOrganizationService
                     {
                         Type = WorldEventType.DivineConflict,
                         TargetId = org.CivilizationId,
-                        Description = $"🗡️ {adventurers.Count} thành viên Guild lên đường thực hiện nhiệm vụ!"
+                        Description = $"🗡️ {adventurers.Count} guild members set out on a mission!"
                     });
                 }
             }
@@ -325,7 +325,7 @@ public class OrganizationService : IOrganizationService
                 {
                     Type = WorldEventType.DivineConflict,
                     TargetId = org.CivilizationId,
-                    Description = $"Giáo chủ {highPriest.Name} bị phát hiện tham nhũng! Uy tín tôn giáo sụt giảm nghiêm trọng."
+                    Description = $"High Priest {highPriest.Name} has been found corrupt! Religious reputation collapses."
                 });
             }
         }
@@ -337,7 +337,7 @@ public class OrganizationService : IOrganizationService
             {
                 Type = WorldEventType.DivineConflict,
                 TargetId = org.CivilizationId,
-                Description = "Giáo hội mở phiên tòa dị giáo. Tín đồ chính thống tăng devotion, dị giáo bị đàn áp."
+                Description = "The church convenes a heresy trial. Orthodox devotion rises; heretics are suppressed."
             });
             var civ = await _civRepo.GetByCivilizationByIdAsync(org.CivilizationId);
             if (civ != null)
@@ -357,10 +357,10 @@ public class OrganizationService : IOrganizationService
     {
         var deltas = new List<DeltaEvent>();
 
-        // Tăng Heat mỗi tick (risk of exposure)
+        // Heat increases each tick (exposure risk)
         org.HeatLevel += 0.5f;
 
-        // Hoạt động: tạo Fear cho dark god
+        // Activity: generate Fear for dark god
         if (org.GodInfluenceId != null)
         {
             var god = await _godRepo.GetByIdAsync(org.GodInfluenceId);
@@ -384,7 +384,7 @@ public class OrganizationService : IOrganizationService
             {
                 Type = WorldEventType.DivineConflict,
                 TargetId = org.CivilizationId,
-                Description = $"Tổ chức ngầm '{org.Name}' bị phát hiện! Vương quốc tiến hành trấn áp."
+                Description = $"Underground organization '{org.Name}' has been exposed! The kingdom moves to suppress it."
             });
             return deltas;
         }

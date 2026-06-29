@@ -322,7 +322,7 @@ public class NpcEventDocument
     public DateTime OccurredAt { get; set; } = DateTime.UtcNow;
 }
 
-// ─── Race Affinity System (GDD v1.0 Mục 9) ───────────────
+// ─── Race Affinity System (GDD v1.0 Section 9) ───────────────
 public class RaceAffinityEntry
 {
     public GodArchetype Domain { get; set; }
@@ -343,7 +343,7 @@ public class RaceDocument
     public Dictionary<string, float> EnvironmentalMemory { get; set; } = new(); // godId → trust modifier
 }
 
-// ─── God Rank + Memory (GDD v1.0 Mục 7 + 22) ────────────
+// ─── God Rank + Memory (GDD v1.0 Section 7 + 22) ────────────
 public class GodMemoryEntry
 {
     public MemoryType Type { get; set; }
@@ -353,7 +353,7 @@ public class GodMemoryEntry
     public float TrustImpact { get; set; }
 }
 
-// GodDocument: thêm Rank, Memory, RelicIds, ForbiddenIn
+// GodDocument: added Rank, Memory, RelicIds, ForbiddenIn
 public class GodRankData
 {
     public GodRank Rank { get; set; } = GodRank.Nascent;
@@ -371,10 +371,10 @@ public class GodRankData
     };
 }
 
-// ─── Doctrine System (GDD v1.0 Mục 13) ───────────────────
+// ─── Doctrine System (GDD v1.0 Section 13) ───────────────────
 public class DoctrineValues
 {
-    // Mỗi axis: -100 (low end) đến +100 (high end)
+    // Each axis: -100 (low end) to +100 (high end)
     public float MercyVsPunishment { get; set; } = 0f;    // -100=mercy, +100=punishment
     public float IsolationVsExpansion { get; set; } = 0f; // -100=isolate, +100=expand
     public float HarmonyVsDominion { get; set; } = 0f;    // -100=harmony, +100=dominion
@@ -382,7 +382,7 @@ public class DoctrineValues
     public float SacrificeVsProsperity { get; set; } = 0f;// -100=sacrifice, +100=prosperity
 }
 
-// ─── Dungeon System (GDD v1.0 Mục 12, 16) ────────────────
+// ─── Dungeon System (GDD v1.0 Section 12, 16) ────────────────
 public class DungeonDocument
 {
     [BsonId]
@@ -447,7 +447,7 @@ public class NpcAchievement
     public string Description { get; set; } = string.Empty;
     public AchievementCategory Category { get; set; }
     public AchievementRarity Rarity { get; set; }
-    public int GodNoteWeight { get; set; }     // +1 đến +150
+    public int GodNoteWeight { get; set; }     // +1 to +150
     public long EarnedAtTick { get; set; }
 }
 
@@ -455,13 +455,13 @@ public class NpcTalent
 {
     public string Name { get; set; } = string.Empty;
     public NpcTalentGroup Group { get; set; }
-    public int RarityScore { get; set; }        // 1-100, dùng trong DivineAttentionScore
-    public bool IsAwakened { get; set; }        // talent có thể ẩn đến khi được kích hoạt
+    public int RarityScore { get; set; }        // 1-100, used in DivineAttentionScore
+    public bool IsAwakened { get; set; }        // talent may be hidden until awakened
     public string? AwakenedByEvent { get; set; }
 }
 
-// Lưu profile đầy đủ v1.1 cho NPC tier 2-5
-// (Tier 1 commoners dùng aggregate, không có profile này)
+// Full v1.1 profile for NPC tier 2-5
+// (Tier 1 commoners use aggregate, no individual profile)
 public class NpcDivineProfile
 {
     // Achievement & Talent

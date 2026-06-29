@@ -30,9 +30,9 @@ public class DungeonService : IDungeonService
 
     private static readonly string[] RelicNames =
     {
-        "Viên Đá Ký Ức", "Cuốn Kinh Cổ", "Mảnh Vỡ Thần Thánh", "Vũ Khí Huyền Thoại",
-        "Tượng Thần Quên Lãng", "Xương Thánh Nhân", "Ngọc Huyền Bí", "Di Vật Thần Linh",
-        "Bình Đựng Niềm Tin", "Lá Cờ Thánh Chiến Cũ"
+        "Memory Stone", "Ancient Scripture", "Divine Shard", "Mythic Weapon",
+        "Forgotten Idol", "Sacred Bone", "Mystic Gem", "Divine Relic",
+        "Faith Vessel", "Old Crusade Banner"
     };
 
     private static readonly Dictionary<DungeonType, (float minDanger, float maxDanger, float reward)> DungeonStats = new()
@@ -83,7 +83,7 @@ public class DungeonService : IDungeonService
             SpawnedAtTick = 0
         };
 
-        // 40% chance có relic bên trong
+        // 40% chance of relic inside
         if (_rng.NextDouble() < 0.4 && godId != null)
         {
             var relic = await CreateRelicAsync(worldId, godId, PickRelicType());
@@ -97,14 +97,14 @@ public class DungeonService : IDungeonService
         return dungeon;
     }
 
-    // ─── Tick — Auto-spawn và Infest ─────────────────────────
+    // ─── Tick — Auto-spawn and Infest ─────────────────────────
 
     public async Task<List<DeltaEvent>> TickAsync(string worldId, long tick)
     {
         var deltas = new List<DeltaEvent>();
         var dungeons = await _dungeonRepo.GetByWorldAsync(worldId);
 
-        // 1% chance mỗi 50 tick spawn dungeon mới tự nhiên
+        // 1% chance per 50 ticks to spawn a natural dungeon
         if (tick % 50 == 0 && _rng.NextDouble() < 0.01)
         {
             int x = _rng.Next(0, 64);
@@ -114,14 +114,14 @@ public class DungeonService : IDungeonService
             deltas.Add(new DeltaEvent
             {
                 Type = WorldEventType.DivineConflict,
-                Description = $"Một {d.Type} bí ẩn xuất hiện tại ({d.X},{d.Y})!"
+                Description = $"A {d.Type} dungeon has appeared at ({d.X},{d.Y})!"
             });
         }
 
-        // Kiểm tra dungeons chưa được clear
+        // Check dungeons chưa was clear
         foreach (var dungeon in dungeons.Where(d => d.State == DungeonState.Active))
         {
-            // Sau 200 ticks không ai clear → Infested
+            // Sau 200 ticks not ai clear → Infested
             long age = tick - dungeon.SpawnedAtTick;
             if (age > 200 && dungeon.State == DungeonState.Active && _rng.NextDouble() < 0.05)
             {
@@ -131,18 +131,18 @@ public class DungeonService : IDungeonService
                 deltas.Add(new DeltaEvent
                 {
                     Type = WorldEventType.DivineConflict,
-                    Description = $"Dungeon {dungeon.Type} tại ({dungeon.X},{dungeon.Y}) đã bị nhiễm độc và nguy hiểm hơn!"
+                    Description = $"Dungeon {dungeon.Type} at ({dungeon.X},{dungeon.Y}) has become infested and more dangerous!"
                 });
             }
 
-            // DarkPortal: có thể spawn entities nếu không được seal
+            // DarkPortal: có thể spawn entities nếu not was seal
             if (dungeon.Type == DungeonType.DarkPortal && dungeon.State == DungeonState.Active
                 && tick % 30 == 0 && _rng.NextDouble() < 0.15)
             {
                 deltas.Add(new DeltaEvent
                 {
                     Type = WorldEventType.DivineConflict,
-                    Description = $"⚠️ Cổng Tối tại ({dungeon.X},{dungeon.Y}) đang rò rỉ năng lượng đen tối!"
+                    Description = $"⚠️ Dark Portal at ({dungeon.X},{dungeon.Y}) is leaking dark energy!"
                 });
             }
         }
@@ -178,7 +178,7 @@ public class DungeonService : IDungeonService
         var dungeon = await _dungeonRepo.GetByIdAsync(mission.DungeonId);
         if (dungeon == null) { mission.State = GuildMissionState.Failed; return mission; }
 
-        // Tính survival chance từ adventurer stats vs danger
+        // Calculate survival chance from adventurer stats vs danger
         var adventurers = new List<NpcDocument>();
         foreach (var id in mission.AdventurerIds)
         {
@@ -209,7 +209,7 @@ public class DungeonService : IDungeonService
                 }
             }
 
-            // EXP cho adventurers
+            // EXP for adventurers
             foreach (var adv in adventurers)
             {
                 adv.EvolutionPoints += (int)(dungeon.DangerLevel * 0.5f);
@@ -218,13 +218,13 @@ public class DungeonService : IDungeonService
 
             float faithGain = dungeon.Reward;
             mission.FaithImpact = faithGain;
-            mission.OutcomeDescription = $"Đoàn mạo hiểm thành công! Nhận {faithGain:F0} faith. {(dungeon.RelicId != null ? "Phát hiện Relic!" : "")}";
+            mission.OutcomeDescription = $"The party succeeded! Gained {faithGain:F0} faith. {(dungeon.RelicId != null ? "Relic discovered!" : "")}";
         }
         else
         {
             // Failure — some adventurers may die
             mission.State = _rng.NextDouble() < 0.3
-                ? GuildMissionState.Corrupted  // bị corrupt bởi dungeon
+                ? GuildMissionState.Corrupted  // was corrupt bởi dungeon
                 : GuildMissionState.Failed;
 
             int deaths = _rng.Next(1, MathF.Min(3, adventurers.Count) + 1);
@@ -236,7 +236,7 @@ public class DungeonService : IDungeonService
             }
 
             mission.FaithImpact = -dungeon.Reward * 0.3f; // faith loss từ deaths
-            mission.OutcomeDescription = $"{deaths} người hy sinh trong dungeon. Faith -{MathF.Abs(mission.FaithImpact):F0}.";
+            mission.OutcomeDescription = $"{deaths} fell in the dungeon. Faith -{MathF.Abs(mission.FaithImpact):F0}.";
         }
 
         mission.CompletedAtTick = 0;
@@ -252,7 +252,7 @@ public class DungeonService : IDungeonService
     public async Task<RelicDocument> CreateRelicAsync(string worldId, string godId, RelicType type)
     {
         var god = await _godRepo.GetByIdAsync(godId);
-        string relicName = $"{RelicNames[_rng.Next(RelicNames.Length)]} của {god?.Name ?? "Thần Vô Danh"}";
+        string relicName = $"{RelicNames[_rng.Next(RelicNames.Length)]} of {god?.Name ?? "Thần Vô Danh"}";
 
         var relic = new RelicDocument
         {

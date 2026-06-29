@@ -133,7 +133,7 @@ public class FaithService : IFaithService
             {
                 float totalAffinityMult = 0f;
                 int civCount = 0;
-                foreach (var civId in civIds.Take(10)) // sample max 10 civs để tránh quá chậm
+                foreach (var civId in civIds.Take(10)) // sample max 10 civs to avoid slowdown
                 {
                     var civ = await _civRepo.GetByIdAsync(civId);
                     if (civ == null) continue;

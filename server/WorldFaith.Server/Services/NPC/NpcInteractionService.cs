@@ -85,34 +85,34 @@ public class NpcInteractionService : INpcInteractionService
         var events = new List<NpcEventDocument>();
         var npcs = await _npcRepo.GetByCivilizationAsync(civ.Id);
 
-        // Theft: khi economy thấp, Commoner-level crime
+        // Theft: when economy is low, Commoner-level crime
         if (civ.Economy < 20f && _rng.NextDouble() < 0.08)
         {
             var evt = await LogEventAsync(worldId, civ.Id, NpcEventType.Theft, tick,
-                "Một vụ trộm xảy ra trong chợ vì nạn đói lan rộng.",
+                "A theft occurred in the marketplace due to widespread famine.",
                 faithImpact: -2f, economyImpact: -3f, stabilityImpact: -1f);
             events.Add(evt);
         }
 
-        // Corruption Scandal: Noble với Loyalty thấp
+        // Corruption Scandal: Noble with low Loyalty
         var corruptNoble = npcs
             .Where(n => n.Tier == NpcTier.Noble && n.Loyalty < 35f)
             .OrderBy(_ => _rng.Next()).FirstOrDefault();
         if (corruptNoble != null && _rng.NextDouble() < 0.05)
         {
             var evt = await LogEventAsync(worldId, civ.Id, NpcEventType.CorruptionScandal, tick,
-                $"{corruptNoble.Name} bị phát hiện nhận hối lộ từ thương nhân nước ngoài.",
+                $"{corruptNoble.Name} was discovered accepting bribes from foreign merchants.",
                 faithImpact: -10f, economyImpact: -5f, stabilityImpact: -8f,
                 involvedIds: new List<string> { corruptNoble.Id });
 
-            // Noble mất ảnh hưởng
+            // Noble loses influence
             corruptNoble.Loyalty -= 10f;
             corruptNoble.Wealth -= 15f;
             await _npcRepo.UpdateAsync(corruptNoble);
             events.Add(evt);
         }
 
-        // Assassination attempt: Royalty khi Noble Ambition cao
+        // Assassination attempt: Royalty when Noble Ambition cao
         var assassin = npcs
             .Where(n => n.Tier == NpcTier.Noble && n.Ambition > 75f && n.Loyalty < 40f)
             .OrderBy(_ => _rng.Next()).FirstOrDefault();
@@ -122,8 +122,8 @@ public class NpcInteractionService : INpcInteractionService
         {
             bool success = _rng.NextDouble() < 0.3;
             string desc = success
-                ? $"{assassin.Name} tổ chức ám sát thành công {king.Name}! Khủng hoảng kế vị xảy ra."
-                : $"{assassin.Name} âm mưu ám sát {king.Name} nhưng thất bại và bị xử tử.";
+                ? $"{assassin.Name} successfully orchestrated an assassination of {king.Name}! A succession crisis has erupted."
+                : $"{assassin.Name} conspired to assassinate {king.Name} but failed and was executed.";
 
             var evt = await LogEventAsync(worldId, civ.Id, NpcEventType.Assassination, tick,
                 desc, faithImpact: success ? -20f : 5f, economyImpact: -10f, stabilityImpact: -25f,
@@ -145,7 +145,7 @@ public class NpcInteractionService : INpcInteractionService
             events.Add(evt);
         }
 
-        // Extortion: Servant biết bí mật Noble
+        // Extortion: Servant knows Noble's secret
         var servantWithSecret = npcs
             .FirstOrDefault(n => n.Tier == NpcTier.Servant && n.KnownSecretAboutNpcId != null);
         if (servantWithSecret != null && _rng.NextDouble() < 0.04)
@@ -154,7 +154,7 @@ public class NpcInteractionService : INpcInteractionService
             if (target != null)
             {
                 var evt = await LogEventAsync(worldId, civ.Id, NpcEventType.Extortion, tick,
-                    $"{servantWithSecret.Name} tống tiền {target.Name} bằng bí mật nguy hiểm.",
+                    $"{servantWithSecret.Name} is extorting {target.Name} with a dangerous secret.",
                     faithImpact: -5f, economyImpact: -8f, stabilityImpact: -5f,
                     involvedIds: new List<string> { servantWithSecret.Id, target.Id });
                 target.Wealth -= 15f;
@@ -180,7 +180,7 @@ public class NpcInteractionService : INpcInteractionService
             if (fertility < 0.3f && _rng.NextDouble() < 0.05)
             {
                 var evt = await LogEventAsync(worldId, civ.Id, NpcEventType.CropFailure, tick,
-                    "Mùa màng thất bát. Người dân cầu nguyện thần linh ban phước.",
+                    "The harvest has failed. People pray to the gods for blessings.",
                     faithImpact: -5f, economyImpact: -8f, stabilityImpact: -3f);
                 civ.Economy -= 8f;
                 await _civRepo.UpdateAsync(civ);
@@ -192,12 +192,12 @@ public class NpcInteractionService : INpcInteractionService
         if (_rng.NextDouble() < 0.03 && tick % 50 == 0)
         {
             var evt = await LogEventAsync(worldId, civ.Id, NpcEventType.DiseaseOutbreak, tick,
-                "Bệnh dịch bùng phát trong thành phố. Dân số giảm, mọi người tìm đến đền thờ.",
+                "A plague has broken out in the city. Population falls as people flock to the temples.",
                 faithImpact: 8f, economyImpact: -5f, stabilityImpact: -10f);
             civ.Population = (int)(civ.Population * 0.9f);
             await _civRepo.UpdateAsync(civ);
 
-            // NPCs pious với piety cao có thể earn achievement "survived_plague_prayer"
+            // Pious NPCs with high piety can earn the achievement "survived_plague_prayer"
             var piousNpcs = await _npcRepo.GetByTierAsync(civ.WorldId, NpcTier.Servant);
             var survivor = piousNpcs.Where(n => n.CivilizationId == civ.Id && n.Piety > 70f)
                 .OrderBy(_ => _rng.Next()).FirstOrDefault();
@@ -211,7 +211,7 @@ public class NpcInteractionService : INpcInteractionService
         if (_rng.NextDouble() < 0.01 && tick % 100 == 0)
         {
             var evt = await LogEventAsync(worldId, civ.Id, NpcEventType.BuildingCollapse, tick,
-                "Công trình đổ sập khiến nhiều người thiệt mạng.",
+                "A building collapse has killed many people.",
                 faithImpact: -3f, economyImpact: -5f, stabilityImpact: -3f);
             events.Add(evt);
         }
@@ -274,7 +274,7 @@ public class NpcInteractionService : INpcInteractionService
         var npcs = await _npcRepo.GetByCivilizationAsync(civ.Id);
         var king = npcs.FirstOrDefault(n => n.Tier == NpcTier.Royalty);
 
-        // Rebellion khi King approval thấp (thể hiện qua civ.AiMemory.GodTrustLevel proxy)
+        // Rebellion when King approval is low (approximated by civ.AiMemory.GodTrustLevel)
         float approval = civ.AiMemory.GodTrustLevel;
         if (approval < 20f && _rng.NextDouble() < 0.1)
         {
@@ -283,8 +283,8 @@ public class NpcInteractionService : INpcInteractionService
                 .OrderByDescending(n => n.Ambition).FirstOrDefault();
 
             string desc = rebel != null
-                ? $"{rebel.Name} dẫn đầu nổi loạn chống lại triều đình. Vương quốc bất ổn."
-                : "Người dân nổi loạn vì bất mãn với vua.";
+                ? $"{rebel.Name} leads a rebellion against the court. The kingdom is destabilized."
+                : "The people have risen in revolt against the king.";
 
             var evt = await LogEventAsync(worldId, civ.Id, NpcEventType.Rebellion, tick,
                 desc, faithImpact: -15f, economyImpact: -12f, stabilityImpact: -30f,
@@ -294,7 +294,7 @@ public class NpcInteractionService : INpcInteractionService
             events.Add(evt);
         }
 
-        // Coronation khi có King mới (sau assassination)
+        // Coronation when a new King emerges (after assassination)
         bool noKing = !npcs.Any(n => n.Tier == NpcTier.Royalty && n.State == NpcState.Alive);
         if (noKing)
         {
@@ -309,7 +309,7 @@ public class NpcInteractionService : INpcInteractionService
                 await _npcRepo.UpdateAsync(successor);
 
                 var evt = await LogEventAsync(worldId, civ.Id, NpcEventType.Coronation, tick,
-                    $"{successor.Name} được tôn làm vua mới. Vương quốc bước sang trang mới.",
+                    $"{successor.Name} has been crowned the new king. The kingdom enters a new era.",
                     faithImpact: 10f, economyImpact: 0f, stabilityImpact: 15f,
                     involvedIds: new List<string> { successor.Id });
                 events.Add(evt);
@@ -326,7 +326,7 @@ public class NpcInteractionService : INpcInteractionService
     {
         var events = new List<NpcEventDocument>();
 
-        // Tính luck roll với devotion bonus
+        // Tính luck roll with devotion bonus
         float devotionBonus = civ.AiMemory.GodTrustLevel / 10f;
         float luckRoll = (float)(_rng.NextDouble() * 100f + devotionBonus);
 
@@ -336,7 +336,7 @@ public class NpcInteractionService : INpcInteractionService
             if (_rng.NextDouble() < 0.3)
             {
                 var evt = await LogEventAsync(worldId, civ.Id, NpcEventType.TreasureFound, tick,
-                    "Người dân phát hiện kho báu cổ xưa! Họ coi đây là phước lành từ thần linh.",
+                    "The people discovered ancient treasure! They consider it a blessing from the gods.",
                     faithImpact: 15f, economyImpact: 20f, stabilityImpact: 5f);
                 civ.Economy += 20f;
                 await _civRepo.UpdateAsync(civ);
@@ -349,7 +349,7 @@ public class NpcInteractionService : INpcInteractionService
             if (_rng.NextDouble() < 0.2)
             {
                 var evt = await LogEventAsync(worldId, civ.Id, NpcEventType.CrisisOfFaith, tick,
-                    "Một thảm họa xảy đến không báo trước. Người dân bắt đầu hoài nghi về thần linh.",
+                    "An unexpected disaster strikes. People begin to doubt the gods.",
                     faithImpact: -12f, economyImpact: -5f, stabilityImpact: -5f);
                 events.Add(evt);
             }
@@ -408,7 +408,7 @@ public class NpcInteractionService : INpcInteractionService
         await _npcRepo.UpdateAsync(n2);
 
         var evt = await LogEventAsync(worldId, civ.Id, NpcEventType.Marriage, tick,
-            $"{n1.Name} và {n2.Name} kết hôn. Hai gia tộc liên minh.",
+            $"{n1.Name} and {n2.Name} kết hôn. Hai gia tộc liên minh.",
             faithImpact: 10f, economyImpact: 5f, stabilityImpact: 8f,
             involvedIds: new List<string> { n1.Id, n2.Id });
         events.Add(evt);
@@ -420,8 +420,8 @@ public class NpcInteractionService : INpcInteractionService
         List<NpcEventDocument> events)
     {
         string description = betrayer.Tier == NpcTier.Noble
-            ? $"Quý tộc {betrayer.Name} bí mật liên kết với thế lực ngoại bang để phản lại vương quốc!"
-            : $"Người hầu {betrayer.Name} bán bí mật hoàng gia cho gián điệp.";
+            ? $"Noble {betrayer.Name} has secretly allied with foreign powers to betray the kingdom!"
+            : $"Servant {betrayer.Name} sold royal secrets to spies.";
 
         var evt = await LogEventAsync(worldId, civ.Id, NpcEventType.Betrayal, tick,
             description, faithImpact: -8f, economyImpact: -5f, stabilityImpact: -20f,

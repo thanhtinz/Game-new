@@ -6,7 +6,7 @@ namespace WorldFaith.Server.Middleware;
 /// <summary>
 /// Sliding window rate limiter per IP.
 /// Config: max requests per window, window duration.
-/// Bypass: SignalR endpoints và health check.
+/// Bypass: SignalR endpoints and health check.
 /// </summary>
 public class RateLimitMiddleware
 {
@@ -28,7 +28,7 @@ public class RateLimitMiddleware
     {
         var path = context.Request.Path.Value ?? "";
 
-        // Không rate-limit: SignalR, health, static files
+        // No rate-limit: SignalR, health, static files
         if (path.StartsWith("/hubs/") || path == "/health" || path.StartsWith("/swagger"))
         {
             await _next(context);
@@ -38,7 +38,7 @@ public class RateLimitMiddleware
         var ip = GetClientIp(context);
         var now = DateTime.UtcNow;
 
-        // Auth endpoints có limit chặt hơn
+        // Auth endpoints have stricter limits
         var (maxReq, windowSec) = path.StartsWith("/api/auth/")
             ? (_options.AuthMaxRequests, _options.AuthWindowSeconds)
             : (_options.ApiMaxRequests, _options.ApiWindowSeconds);
@@ -81,7 +81,7 @@ public class RateLimitMiddleware
 
     private static string GetClientIp(HttpContext context)
     {
-        // Support X-Forwarded-For từ Nginx reverse proxy
+        // Support X-Forwarded-For from Nginx reverse proxy
         var forwarded = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
         if (!string.IsNullOrEmpty(forwarded))
             return forwarded.Split(',')[0].Trim();

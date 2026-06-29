@@ -66,12 +66,12 @@ export default function CivsPage() {
   }
 
   async function save() {
-    await civsApi.update(selected.id, form); setMsg('Đã cập nhật'); setModal(false); load()
+    await civsApi.update(selected.id, form); setMsg('Updated'); setModal(false); load()
   }
 
   async function collapse(id: string) {
-    if (!confirm('Collapse civ này?')) return
-    await civsApi.collapse(id); setMsg('Civ đã sụp đổ'); load()
+    if (!confirm('Collapse this civ?')) return
+    await civsApi.collapse(id); setMsg('Civ collapsed'); load()
   }
 
   async function boost(id: string, stat: string) {
@@ -100,14 +100,14 @@ export default function CivsPage() {
         {msg && <div className="mb-4 p-3 bg-green-900/40 border border-green-700 rounded-lg text-green-300 text-sm">{msg}</div>}
 
         <div className="grid grid-cols-4 gap-3 mb-6">
-          <StatCard icon="🏰" label="Tổng"        value={civs.length} />
-          <StatCard icon="✅" label="Còn sống"     value={alive.length}            color="text-green-400" />
-          <StatCard icon="⚔️"  label="Đang chiến"  value={atWar.length}            color="text-red-400" />
-          <StatCard icon="🌾" label="Nạn đói"      value={famines.length}           color="text-yellow-400" />
+          <StatCard icon="🏰" label="Total"        value={civs.length} />
+          <StatCard icon="✅" label="Alive"     value={alive.length}            color="text-green-400" />
+          <StatCard icon="⚔️"  label="At War"  value={atWar.length}            color="text-red-400" />
+          <StatCard icon="🌾" label="Famine"      value={famines.length}           color="text-yellow-400" />
         </div>
 
         <Table loading={loading} onRowClick={openEdit} data={civs} columns={[
-          { key: 'name',        label: 'Tên' },
+          { key: 'name',        label: 'Name' },
           { key: 'primaryRace', label: 'Race', render: r =>
             <span className="text-xs text-cyan-400">{r.primaryRace ?? 'Human'}</span> },
           { key: 'government',  label: 'Govt', render: r =>
@@ -144,7 +144,7 @@ export default function CivsPage() {
               {/* Core stats */}
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { key: 'population', label: 'Dân số' },
+                  { key: 'population', label: 'Population' },
                   { key: 'economy',    label: 'Economy' },
                   { key: 'military',   label: 'Military' },
                   { key: 'food',       label: 'Food' },
@@ -193,12 +193,12 @@ export default function CivsPage() {
               <div className="flex items-center gap-3">
                 <input type="checkbox" id="atwar" checked={form.isAtWar ?? false}
                   onChange={e => setForm((p: any) => ({ ...p, isAtWar: e.target.checked }))} />
-                <label htmlFor="atwar" className="text-sm text-gray-300">Đang chiến tranh</label>
+                <label htmlFor="atwar" className="text-sm text-gray-300">At War tranh</label>
               </div>
 
               <div className="flex justify-end gap-3">
-                <button onClick={() => setModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Hủy</button>
-                <button onClick={save} className="px-4 py-2 text-sm bg-purple-700 rounded-lg">Lưu</button>
+                <button onClick={() => setModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Cancel</button>
+                <button onClick={save} className="px-4 py-2 text-sm bg-purple-700 rounded-lg">Save</button>
               </div>
             </div>
           )}

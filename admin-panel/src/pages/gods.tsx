@@ -36,20 +36,20 @@ export default function GodsPage() {
 
   async function saveStats() {
     await godsApi.updateStats(selected.id, form)
-    setMsg('Đã cập nhật stats'); setEditModal(false)
+    setMsg('Stats updated'); setEditModal(false)
     godsApi.getByWorld(worldId).then(setGods)
   }
 
   async function handleUnlock(godId: string, miracle: string) {
     await godsApi.unlockMiracle(godId, miracle)
-    setMsg(`Đã unlock ${miracle}`)
+    setMsg(`Unlocked ${miracle}`)
     godsApi.getByWorld(worldId).then(setGods)
   }
 
   async function handleEliminate(godId: string) {
     if (!confirm('Eliminate god này?')) return
     await godsApi.eliminate(godId)
-    setMsg('God đã bị eliminate')
+    setMsg('God eliminated')
     godsApi.getByWorld(worldId).then(setGods)
   }
 
@@ -64,7 +64,7 @@ export default function GodsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Gods</h2>
-            <p className="text-gray-400 text-sm mt-1">Quản lý Faith, Trust, Fear, Miracles của các thần</p>
+            <p className="text-gray-400 text-sm mt-1">Manage Faith, Trust, Fear, Miracles for gods</p>
           </div>
           <select
             value={worldId}
@@ -81,7 +81,7 @@ export default function GodsPage() {
           loading={loading}
           onRowClick={openEdit}
           columns={[
-            { key: 'name', label: 'Tên Thần' },
+            { key: 'name', label: 'God Name' },
             { key: 'archetype', label: 'Archetype', render: r =>
               <Badge label={r.archetype} color={archetypeColor[r.archetype] ?? 'gray'} /> },
             { key: 'faith', label: 'Faith', render: r =>
@@ -103,7 +103,7 @@ export default function GodsPage() {
               <div className="flex gap-2">
                 <button onClick={e => { e.stopPropagation(); openEdit(r) }}
                   className="text-xs px-2 py-1 bg-blue-900/50 text-blue-300 rounded hover:bg-blue-800">
-                  Chỉnh
+                  Edit
                 </button>
                 <button onClick={e => { e.stopPropagation(); handleEliminate(r.id) }}
                   className="text-xs px-2 py-1 bg-red-900/50 text-red-300 rounded hover:bg-red-800">
@@ -116,7 +116,7 @@ export default function GodsPage() {
         />
 
         {/* Edit Modal */}
-        <Modal open={editModal} title={`Chỉnh God: ${selected?.name}`} onClose={() => setEditModal(false)} width="max-w-2xl">
+        <Modal open={editModal} title={`Edit God: ${selected?.name}`} onClose={() => setEditModal(false)} width="max-w-2xl">
           {selected && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -132,7 +132,7 @@ export default function GodsPage() {
               </div>
 
               <div>
-                <p className="text-xs text-gray-400 mb-2">Miracles đã unlock</p>
+                <p className="text-xs text-gray-400 mb-2">Unlocked Miracles</p>
                 <div className="flex flex-wrap gap-2">
                   {MIRACLES.map(m => {
                     const unlocked = selected.unlockedMiracles?.includes(m)
@@ -154,9 +154,9 @@ export default function GodsPage() {
 
               <div className="flex justify-end gap-3 pt-2">
                 <button onClick={() => setEditModal(false)}
-                  className="px-4 py-2 text-sm bg-gray-800 rounded-lg hover:bg-gray-700">Hủy</button>
+                  className="px-4 py-2 text-sm bg-gray-800 rounded-lg hover:bg-gray-700">Cancel</button>
                 <button onClick={saveStats}
-                  className="px-4 py-2 text-sm bg-purple-700 rounded-lg hover:bg-purple-600">Lưu</button>
+                  className="px-4 py-2 text-sm bg-purple-700 rounded-lg hover:bg-purple-600">Save</button>
               </div>
             </div>
           )}

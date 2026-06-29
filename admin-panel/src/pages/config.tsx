@@ -31,13 +31,13 @@ export default function ConfigPage() {
     await serverApi.updateConfig(key, val)
     setSaved(p => ({ ...p, [key]: true }))
     setTimeout(() => setSaved(p => ({ ...p, [key]: false })), 2000)
-    setMsg(`✓ Đã lưu: ${key}`)
+    setMsg(`✓ Saved: ${key}`)
     setTimeout(() => setMsg(''), 3000)
   }
 
   async function seedDefaults() {
-    if (!confirm('Reset toàn bộ về default? Các chỉnh sửa hiện tại sẽ bị mất!')) return
-    await serverApi.seedConfig(); setMsg('Đã reset về default'); load()
+    if (!confirm('Reset all to defaults? Current edits will be lost!')) return
+    await serverApi.seedConfig(); setMsg('Reset to defaults'); load()
   }
 
   const categories = [...new Set(configs.map(c => c.category))].filter(Boolean)
@@ -61,10 +61,10 @@ export default function ConfigPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Balance Config</h2>
-            <p className="text-gray-400 text-sm mt-1">{configs.length} params — thay đổi có hiệu lực sau 60 giây</p>
+            <p className="text-gray-400 text-sm mt-1">{configs.length} params — changes take effect after 60 seconds</p>
           </div>
           <div className="flex gap-3">
-            <input placeholder="Tìm tham số..."
+            <input placeholder="Search params..."
               value={search} onChange={e => setSearch(e.target.value)}
               className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm w-48 focus:border-purple-600 outline-none"
             />
@@ -79,7 +79,7 @@ export default function ConfigPage() {
         <div className="flex flex-wrap gap-2 mb-5">
           <button onClick={() => setCategory('')}
             className={`px-3 py-1.5 rounded-lg text-xs ${!category ? 'bg-purple-700 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>
-            Tất cả ({configs.length})
+            All ({configs.length})
           </button>
           {categories.map(c => (
             <button key={c} onClick={() => setCategory(category === c ? '' : c)}
@@ -94,7 +94,7 @@ export default function ConfigPage() {
         {msg && <div className="mb-4 p-3 bg-green-900/40 border border-green-700 rounded-lg text-green-300 text-sm">{msg}</div>}
 
         {loading ? (
-          <div className="text-center py-20 text-gray-500 animate-pulse">Đang tải...</div>
+          <div className="text-center py-20 text-gray-500 animate-pulse">Loading...</div>
         ) : (
           <div className="space-y-6">
             {Object.entries(grouped).map(([cat, items]) => (
@@ -134,7 +134,7 @@ export default function ConfigPage() {
                               'bg-gray-800 text-gray-600 cursor-default'
                             }`}
                           >
-                            {saved[c.key] ? '✓' : 'Lưu'}
+                            {saved[c.key] ? '✓' : 'Save'}
                           </button>
                         </div>
                       </div>

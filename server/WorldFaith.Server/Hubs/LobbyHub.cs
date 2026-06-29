@@ -6,7 +6,7 @@ using WorldFaith.Shared.Contracts.Auth;
 
 namespace WorldFaith.Server.Hubs;
 
-// Interface strongly-typed cho lobby clients
+// Interface strongly-typed for lobby clients
 public interface ILobbyHubClient
 {
     Task OnRoomUpdated(RoomUpdatedEvent evt);

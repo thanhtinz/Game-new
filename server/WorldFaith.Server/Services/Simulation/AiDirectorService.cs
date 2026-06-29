@@ -72,7 +72,7 @@ public class AiDirectorService : IAiDirectorService
             deltas.Add(new DeltaEvent
             {
                 Type = WorldEventType.MiraclePerformed,
-                Description = $"🌍 Thế giới bước vào {GetAgeName(newAge)}!",
+                Description = $"🌍 Thế giới bước ando {GetAgeName(newAge)}!",
             });
             _logger.LogInformation("World {Id} entered {Age}", worldId, newAge);
 
@@ -110,11 +110,11 @@ public class AiDirectorService : IAiDirectorService
 
     private static string GetAgeName(WorldAge age) => age switch
     {
-        WorldAge.EarlyAge    => "Thời Kỳ Sơ Khai",
-        WorldAge.KingdomAge  => "Thời Kỳ Vương Quốc",
-        WorldAge.ConflictAge => "Thời Kỳ Xung Đột",
-        WorldAge.CollapseAge => "Thời Kỳ Sụp Đổ",
-        WorldAge.RebirthAge  => "Thời Kỳ Tái Sinh",
+        WorldAge.EarlyAge    => "Early Age",
+        WorldAge.KingdomAge  => "Kingdom Age",
+        WorldAge.ConflictAge => "Conflict Age",
+        WorldAge.CollapseAge => "Collapse Age",
+        WorldAge.RebirthAge  => "Rebirth Age",
         _ => age.ToString()
     };
 
@@ -140,7 +140,7 @@ public class AiDirectorService : IAiDirectorService
                 deltas.Add(new DeltaEvent
                 {
                     Type = WorldEventType.DivineConflict,
-                    Description = "Các vương quốc đang mở rộng. Đống tàn tích cổ đại lộ ra khắp nơi."
+                    Description = "Kingdoms are expanding. Ancient ruins emerge across the land."
                 });
                 break;
 
@@ -151,7 +151,7 @@ public class AiDirectorService : IAiDirectorService
                 deltas.Add(new DeltaEvent
                 {
                     Type = WorldEventType.DivineConflict,
-                    Description = "⚔️ Thời kỳ xung đột! Thánh chiến nổ ra. Thánh địa bị phong ấn."
+                    Description = "⚔️ The Age of Conflict! Holy wars erupt. Sacred sites are sealed."
                 });
                 break;
 
@@ -163,7 +163,7 @@ public class AiDirectorService : IAiDirectorService
                 deltas.Add(new DeltaEvent
                 {
                     Type = WorldEventType.DivineConflict,
-                    Description = "💀 Thế giới đang sụp đổ! Cổng tối xuất hiện. Các đế chế bắt đầu tan vỡ."
+                    Description = "💀 The world is collapsing! Dark portals open. Empires begin to crumble."
                 });
                 break;
 
@@ -172,7 +172,7 @@ public class AiDirectorService : IAiDirectorService
                 deltas.Add(new DeltaEvent
                 {
                     Type = WorldEventType.MiraclePerformed,
-                    Description = "🌱 Thời kỳ tái sinh. Các nền văn minh mới đang nảy mầm từ đống đổ nát."
+                    Description = "🌱 The Rebirth Age. New civilizations sprout from the ruins."
                 });
                 break;
         }
@@ -210,7 +210,7 @@ public class AiDirectorService : IAiDirectorService
                     {
                         Type = WorldEventType.DivineConflict,
                         TargetId = target.Id,
-                        Description = $"⚡ Thiên tai bất ngờ giáng xuống {target.Name}!"
+                        Description = $"⚡ An unexpected natural disaster strikes {target.Name}!"
                     });
                 }
             }
@@ -227,7 +227,7 @@ public class AiDirectorService : IAiDirectorService
             {
                 Type = WorldEventType.DivineConflict,
                 SourceGodId = dominant.Id,
-                Description = $"👑 {dominant.Name} đang thống trị — liên minh chống lại đang hình thành!"
+                Description = $"👑 {dominant.Name} is dominant — an alliance is forming against them!"
             });
         }
 
@@ -258,7 +258,7 @@ public class AiDirectorService : IAiDirectorService
             {
                 Type = WorldEventType.DivineConflict,
                 SourceGodId = weakest.Id,
-                Description = $"Sự bất mãn với tôn giáo thống trị đang dâng cao — {weakest.Name} nhận được sự quan tâm."
+                Description = $"Discontent with the dominant religion is rising — {weakest.Name} is gaining attention."
             });
         }
 
@@ -284,7 +284,7 @@ public class AiDirectorService : IAiDirectorService
             {
                 Type = WorldEventType.CivilizationCollapsed,
                 TargetId = target.Id,
-                Description = $"💔 {target.Name} đang sụp đổ! Người dân tản mác. Đây là cơ hội cuối để cứu tín đồ."
+                Description = $"💔 {target.Name} is collapsing! People scatter. This is the last chance to save your believers."
             });
         }
 

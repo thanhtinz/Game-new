@@ -69,16 +69,16 @@ export default function ReligionsPage() {
 
   async function save() {
     await religionsApi.update(selected.id, form)
-    setMsg('Đã cập nhật'); setModal(false); load()
+    setMsg('Updated'); setModal(false); load()
   }
 
   async function erase(id: string) {
-    if (!confirm('Xóa tôn giáo này? Không thể hoàn tác!')) return
-    await religionsApi.erase(id); setMsg('Đã xóa'); load()
+    if (!confirm('Delete religion này? Không thể hoàn tác!')) return
+    await religionsApi.erase(id); setMsg('Deleted'); load()
   }
 
   async function forceSchism(id: string) {
-    await religionsApi.forceSchism(id); setMsg('Schism đã kích hoạt'); load()
+    await religionsApi.forceSchism(id); setMsg('Schism triggered'); load()
   }
 
   const totalFollowers = religions.reduce((s, r) => s + (r.followerCount ?? 0), 0)
@@ -98,13 +98,13 @@ export default function ReligionsPage() {
         </div>
 
         {msg && <div className="mb-4 p-3 bg-green-900/40 border border-green-700 rounded-lg text-green-300 text-sm">{msg}</div>}
-        <p className="text-xs text-gray-500 mb-4">Tổng tín đồ: {totalFollowers.toLocaleString()}</p>
+        <p className="text-xs text-gray-500 mb-4">Total believers: {totalFollowers.toLocaleString()}</p>
 
         <Table loading={loading} onRowClick={openEdit} data={religions} columns={[
-          { key: 'name', label: 'Tên Tôn Giáo' },
-          { key: 'isHidden', label: 'Loại', render: r =>
+          { key: 'name', label: 'Name Tôn Giáo' },
+          { key: 'isHidden', label: 'Type', render: r =>
             <Badge label={r.isHidden ? 'Secret Cult' : 'Public'} color={r.isHidden ? 'orange' : 'blue'} /> },
-          { key: 'followerCount', label: 'Tín đồ', render: r =>
+          { key: 'followerCount', label: 'Believers', render: r =>
             <span className="text-purple-300 font-mono">{r.followerCount?.toLocaleString()}</span> },
           { key: 'templeCount', label: 'Temples', render: r =>
             <span className="text-yellow-400 font-mono">{r.templeCount}</span> },
@@ -142,19 +142,19 @@ export default function ReligionsPage() {
               <button onClick={e => { e.stopPropagation(); forceSchism(r.id) }}
                 className="text-xs px-2 py-1 bg-orange-900/50 text-orange-300 rounded hover:bg-orange-900">Schism</button>
               <button onClick={e => { e.stopPropagation(); erase(r.id) }}
-                className="text-xs px-2 py-1 bg-red-900/50 text-red-300 rounded hover:bg-red-900">Xóa</button>
+                className="text-xs px-2 py-1 bg-red-900/50 text-red-300 rounded hover:bg-red-900">Delete</button>
             </div>
           )},
         ]} />
 
-        <Modal open={modal} title={`Tôn giáo: ${selected?.name}`} onClose={() => setModal(false)} width="max-w-2xl">
+        <Modal open={modal} title={`Religion: ${selected?.name}`} onClose={() => setModal(false)} width="max-w-2xl">
           {selected && (
             <div className="space-y-4">
               {/* Tabs */}
               <div className="flex gap-2 border-b border-gray-800 pb-2">
                 <button onClick={() => setDoctrineTab(false)}
                   className={`text-sm px-3 py-1 rounded-t ${!doctrineTab ? 'bg-purple-900 text-purple-200' : 'text-gray-400 hover:text-gray-200'}`}>
-                  Thông tin
+                  Info
                 </button>
                 <button onClick={() => setDoctrineTab(true)}
                   className={`text-sm px-3 py-1 rounded-t ${doctrineTab ? 'bg-purple-900 text-purple-200' : 'text-gray-400 hover:text-gray-200'}`}>
@@ -166,10 +166,10 @@ export default function ReligionsPage() {
                 <>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { key: 'name', label: 'Tên', type: 'text' },
-                      { key: 'followerCount', label: 'Số tín đồ', type: 'number' },
-                      { key: 'templeCount', label: 'Số temple', type: 'number' },
-                      { key: 'devotionLevel', label: 'Devotion (0–1)', type: 'number', step: '0.01', min: '0', max: '1' },
+                      { key: 'name', label: 'Name', type: 'text' },
+                      { key: 'followerCount', label: 'Follower Count', type: 'number' },
+                      { key: 'templeCount', label: 'Temple Count', type: 'number' },
+                      { key: 'devotionLevel', label: 'Devotion (0-1)', type: 'number', step: '0.01', min: '0', max: '1' },
                     ].map(f => (
                       <div key={f.key}>
                         <label className="block text-xs text-gray-400 mb-1">{f.label}</label>
@@ -207,7 +207,7 @@ export default function ReligionsPage() {
                 </>
               ) : (
                 <div className="space-y-4">
-                  <p className="text-xs text-gray-400">Điều chỉnh doctrine axes (−100 đến +100). Ảnh hưởng AI behavior, spread, race compatibility.</p>
+                  <p className="text-xs text-gray-400">Adjust doctrine axes (−100 to +100). Affects AI behavior, spread, race compatibility.</p>
                   {DOCTRINE_AXES.map(axis => (
                     <div key={axis.key}>
                       <div className="flex justify-between text-xs text-gray-400 mb-1">
@@ -233,8 +233,8 @@ export default function ReligionsPage() {
               )}
 
               <div className="flex justify-end gap-3 pt-2">
-                <button onClick={() => setModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Hủy</button>
-                <button onClick={save} className="px-4 py-2 text-sm bg-purple-700 rounded-lg">Lưu</button>
+                <button onClick={() => setModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Cancel</button>
+                <button onClick={save} className="px-4 py-2 text-sm bg-purple-700 rounded-lg">Save</button>
               </div>
             </div>
           )}

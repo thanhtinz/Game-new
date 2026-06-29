@@ -39,15 +39,15 @@ export default function DungeonsPage() {
 
   async function spawn() {
     await dungeonsApi.spawn(worldId, spawnForm.type, spawnForm.x, spawnForm.y, spawnForm.godId || undefined)
-    setMsg('Dungeon đã được spawn'); setSpawnModal(false); load()
+    setMsg('Dungeon has was spawn'); setSpawnModal(false); load()
   }
 
   async function seal(id: string) {
-    await dungeonsApi.seal(id); setMsg('Dungeon đã bị phong ấn'); load()
+    await dungeonsApi.seal(id); setMsg('Dungeon has was phong ấn'); load()
   }
 
   async function clear(id: string) {
-    await dungeonsApi.clear(id); setMsg('Dungeon đã được clear'); load()
+    await dungeonsApi.clear(id); setMsg('Dungeon has was clear'); load()
   }
 
   const byState = (s: string) => dungeons.filter(d => d.state === s).length
@@ -58,7 +58,7 @@ export default function DungeonsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Dungeons</h2>
-            <p className="text-gray-400 text-sm mt-1">Quản lý dungeon, spawn, seal, relic bên trong</p>
+            <p className="text-gray-400 text-sm mt-1">Manage dungeons, spawn, seal, relics inside</p>
           </div>
           <div className="flex gap-3">
             <button onClick={() => setSpawnModal(true)}
@@ -100,7 +100,7 @@ export default function DungeonsPage() {
           { key: 'reward', label: 'Reward', render: r =>
             <span className="text-yellow-400 font-mono text-xs">{r.reward?.toFixed(0)} faith</span> },
           { key: 'relicId', label: 'Relic', render: r =>
-            r.relicId ? <Badge label="Có Relic" color="yellow" /> : <span className="text-gray-600">—</span> },
+            r.relicId ? <Badge label="Has Relic" color="yellow" /> : <span className="text-gray-600">—</span> },
           { key: 'activeMissionId', label: 'Mission', render: r =>
             r.activeMissionId ? <Badge label="Active Mission" color="blue" /> : <span className="text-gray-600">—</span> },
           { key: 'originGodId', label: 'Origin', render: r =>
@@ -126,16 +126,16 @@ export default function DungeonsPage() {
         <Modal open={spawnModal} title="Spawn Dungeon" onClose={() => setSpawnModal(false)}>
           <div className="space-y-4">
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Loại Dungeon</label>
+              <label className="block text-xs text-gray-400 mb-1">Type Dungeon</label>
               <select value={spawnForm.type}
                 onChange={e => setSpawnForm(p => ({ ...p, type: e.target.value }))}
                 className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
                 {DUNGEON_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
               <p className="text-xs text-gray-600 mt-1">
-                {spawnForm.type === 'DarkPortal' && '⚠️ DarkPortal rất nguy hiểm — spawn liên tục monsters nếu không bị seal'}
-                {spawnForm.type === 'ForbiddenSanctum' && 'Chứa relic mạnh, danger level cao 60-90'}
-                {spawnForm.type === 'LostTemple' && 'Có relic xác suất cao, liên quan đến forgotten gods'}
+                {spawnForm.type === 'DarkPortal' && '⚠️ DarkPortal is very dangerous — continuously spawns monsters if not sealed'}
+                {spawnForm.type === 'ForbiddenSanctum' && 'Contains powerful relic, danger level 60-90'}
+                {spawnForm.type === 'LostTemple' && 'High relic chance, linked to forgotten gods'}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -153,14 +153,14 @@ export default function DungeonsPage() {
               </div>
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1">God ID (tùy chọn — để trống = spawn tự nhiên)</label>
-              <input type="text" value={spawnForm.godId} placeholder="Để trống nếu không liên kết god"
+              <label className="block text-xs text-gray-400 mb-1">God ID (optional — leave blank = natural spawn)</label>
+              <input type="text" value={spawnForm.godId} placeholder="Leave blank if not linking a god"
                 onChange={e => setSpawnForm(p => ({ ...p, godId: e.target.value }))}
                 className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm" />
-              <p className="text-xs text-gray-600 mt-1">Khi liên kết god: dungeon có thể chứa relic của god đó (40% chance)</p>
+              <p className="text-xs text-gray-600 mt-1">When linking a god: dungeon may contain that god's relic (40% chance)</p>
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setSpawnModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Hủy</button>
+              <button onClick={() => setSpawnModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Cancel</button>
               <button onClick={spawn} className="px-4 py-2 text-sm bg-purple-700 rounded-lg hover:bg-purple-600">Spawn</button>
             </div>
           </div>

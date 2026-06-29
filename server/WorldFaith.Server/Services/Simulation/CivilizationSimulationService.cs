@@ -229,7 +229,7 @@ public class CivilizationSimulationService : ICivilizationSimulationService
 
     private bool SimulateAggressive(CivilizationDocument civ, List<CivilizationDocument> allCivs, long tick)
     {
-        // Mỗi 10 tick thử tấn công civ gần nhất nếu đủ military
+        // Mỗi 10 tick thử attacks civ gần nhất nếu đủ military
         if (tick % 10 != 0) return false;
         if (civ.Military < 40f) return false;
         if (civ.State == CivilizationState.Collapsing) return false;
@@ -249,7 +249,7 @@ public class CivilizationSimulationService : ICivilizationSimulationService
 
     private bool SimulateDefensive(CivilizationDocument civ, long tick)
     {
-        // Tập trung build economy và military
+        // Tập trung build economy and military
         if (tick % 5 != 0) return false;
 
         civ.Economy += _rng.Next(1, 5);
@@ -276,7 +276,7 @@ public class CivilizationSimulationService : ICivilizationSimulationService
 
     private bool SimulateLogical(CivilizationDocument civ, long tick)
     {
-        // Cân bằng economy và military dựa theo situation
+        // Cân bằng economy and military dựa theo situation
         if (tick % 8 != 0) return false;
 
         if (civ.Economy < civ.Military)

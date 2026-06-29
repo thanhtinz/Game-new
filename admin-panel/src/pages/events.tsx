@@ -78,7 +78,7 @@ export default function EventsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Events Log</h2>
-            <p className="text-gray-400 text-sm mt-1">Toàn bộ sự kiện game — realtime</p>
+            <p className="text-gray-400 text-sm mt-1">All game events — realtime</p>
           </div>
           <div className="flex gap-3 items-center">
             <label className="flex items-center gap-2 text-sm text-gray-400">
@@ -123,9 +123,9 @@ export default function EventsPage() {
         {/* Event feed */}
         <div className="space-y-2 max-h-[60vh] overflow-y-auto">
           {loading ? (
-            <p className="text-center text-gray-500 py-8 animate-pulse">Đang tải...</p>
+            <p className="text-center text-gray-500 py-8 animate-pulse">Loading...</p>
           ) : filtered.length === 0 ? (
-            <p className="text-center text-gray-600 py-8">Không có sự kiện</p>
+            <p className="text-center text-gray-600 py-8">No events</p>
           ) : (
             filtered.map((e, i) => (
               <div key={i} className="flex items-start gap-3 p-3 bg-gray-900/60 border border-gray-800/60 rounded-lg hover:border-gray-700 transition-colors">

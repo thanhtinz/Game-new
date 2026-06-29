@@ -6,7 +6,7 @@ import Modal from '@/components/ui/Modal'
 import { npcsApi, worldsApi } from '@/services/api'
 
 const TIERS = [
-  { value: '', label: 'Tất cả' },
+  { value: '', label: 'All' },
   { value: '1', label: 'Tier 1 — Commoner' },
   { value: '2', label: 'Tier 2 — Servant' },
   { value: '3', label: 'Tier 3 — Adventurer' },
@@ -48,16 +48,16 @@ export default function NpcsPage() {
 
   async function save() {
     await npcsApi.update(selected.id, form)
-    setMsg('Đã cập nhật NPC'); setModal(false); load()
+    setMsg('NPC updated'); setModal(false); load()
   }
 
   async function kill(id: string) {
     if (!confirm('Kill NPC này?')) return
-    await npcsApi.kill(id); setMsg('NPC đã chết'); load()
+    await npcsApi.kill(id); setMsg('NPC died'); load()
   }
 
   async function exile(id: string) {
-    await npcsApi.exile(id); setMsg('NPC đã bị trục xuất'); load()
+    await npcsApi.exile(id); setMsg('NPC exiled'); load()
   }
 
   return (
@@ -66,7 +66,7 @@ export default function NpcsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">NPCs</h2>
-            <p className="text-gray-400 text-sm mt-1">Quản lý 5 tầng NPC — Commoner đến Royalty</p>
+            <p className="text-gray-400 text-sm mt-1">Manage 5 NPC tiers — Commoner to Royalty</p>
           </div>
           <div className="flex gap-3">
             <select value={tier} onChange={e => setTier(e.target.value)}
@@ -85,7 +85,7 @@ export default function NpcsPage() {
         <div className="mb-3 text-sm text-gray-500">{npcs.length} NPCs</div>
 
         <Table loading={loading} onRowClick={openEdit} data={npcs} columns={[
-          { key: 'name', label: 'Tên' },
+          { key: 'name', label: 'Name' },
           { key: 'tier', label: 'Tier', render: r =>
             <Badge label={`T${r.tier} ${['','Commoner','Servant','Adventurer','Noble','Royalty'][r.tier]}`}
               color={tierColor[r.tier]} /> },
@@ -113,7 +113,7 @@ export default function NpcsPage() {
           { key: 'actions', label: '', render: r => (
             <div className="flex gap-1">
               <button onClick={e => { e.stopPropagation(); openEdit(r) }}
-                className="text-xs px-2 py-1 bg-blue-900/50 text-blue-300 rounded">Chỉnh</button>
+                className="text-xs px-2 py-1 bg-blue-900/50 text-blue-300 rounded">Edit</button>
               <button onClick={e => { e.stopPropagation(); exile(r.id) }}
                 className="text-xs px-2 py-1 bg-orange-900/50 text-orange-300 rounded">Exile</button>
               <button onClick={e => { e.stopPropagation(); kill(r.id) }}
@@ -144,8 +144,8 @@ export default function NpcsPage() {
                 <p>God Influence: <span className="text-gray-300">{selected.godInfluenceId ?? 'none'}</span></p>
               </div>
               <div className="flex justify-end gap-3">
-                <button onClick={() => setModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Hủy</button>
-                <button onClick={save} className="px-4 py-2 text-sm bg-purple-700 rounded-lg">Lưu</button>
+                <button onClick={() => setModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Cancel</button>
+                <button onClick={save} className="px-4 py-2 text-sm bg-purple-700 rounded-lg">Save</button>
               </div>
             </div>
           )}

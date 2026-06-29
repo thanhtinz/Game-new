@@ -17,11 +17,11 @@ export default function LoginPage() {
     setLoading(true)
     try {
       const res = await authApi.login(email, password)
-      if (!res.success) { setError(res.error ?? 'Đăng nhập thất bại'); return }
+      if (!res.success) { setError(res.error ?? 'Login failed'); return }
       Cookies.set('admin_token', res.accessToken, { expires: 1 })
       router.push('/dashboard')
     } catch {
-      setError('Không thể kết nối server')
+      setError('Unable to connect to server')
     } finally {
       setLoading(false)
     }
@@ -70,7 +70,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-purple-700 hover:bg-purple-600 disabled:opacity-50 py-2.5 rounded-lg font-semibold transition-colors"
           >
-            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
       </div>

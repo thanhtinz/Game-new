@@ -6,8 +6,8 @@ namespace WorldFaith.Server.Services.Religion;
 
 /// <summary>
 /// Believer Type System — GDD v1.0 Section 8.
-/// Mỗi religion có 5 believer types, mỗi loại có faith output khác nhau.
-/// Types chuyển đổi dựa vào events, doctrine, trust, trauma.
+/// Each religion has 5 believer types, each with different faith output.
+/// Types shift based on events, doctrine, trust, and trauma.
 /// </summary>
 public interface IBelieverTypeService
 {

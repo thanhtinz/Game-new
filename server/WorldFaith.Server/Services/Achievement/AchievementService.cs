@@ -29,73 +29,73 @@ public class AchievementService : IAchievementService
     private static readonly Dictionary<string, (string name, string desc, AchievementCategory cat, AchievementRarity rarity, int weight)> AchievementCatalogue = new()
     {
         // Common Life
-        ["donated_food"]         = ("Người Hảo Tâm",     "Đã quyên góp thức ăn cho đền thờ",            AchievementCategory.CommonLife,      AchievementRarity.Common,    3),
-        ["survived_famine"]      = ("Sức Mạnh Sinh Tồn", "Sống sót qua nạn đói",                        AchievementCategory.CommonLife,      AchievementRarity.Uncommon, 10),
-        ["saved_family"]         = ("Trụ Cột Gia Đình",  "Cứu sống thành viên gia đình khỏi nguy hiểm", AchievementCategory.CommonLife,      AchievementRarity.Uncommon, 12),
-        ["rebuilt_home"]         = ("Tái Thiết",          "Xây dựng lại nhà sau thảm họa",               AchievementCategory.CommonLife,      AchievementRarity.Common,    5),
+        ["donated_food"]         = ("Generous Soul",     "Donated food to the temple",            AchievementCategory.CommonLife,      AchievementRarity.Common,    3),
+        ["survived_famine"]      = ("Survival Strength", "Survived a famine",                        AchievementCategory.CommonLife,      AchievementRarity.Uncommon, 10),
+        ["saved_family"]         = ("Family Pillar",  "Saved a family member from danger", AchievementCategory.CommonLife,      AchievementRarity.Uncommon, 12),
+        ["rebuilt_home"]         = ("Reconstruction",          "Rebuilt home after disaster",               AchievementCategory.CommonLife,      AchievementRarity.Common,    5),
 
         // Religious Devotion
-        ["daily_prayer"]         = ("Tín Tâm Vững Chắc", "Cầu nguyện mỗi ngày trong 30 ticks",          AchievementCategory.ReligiousDevot,  AchievementRarity.Common,    6),
-        ["maintained_shrine"]    = ("Người Giữ Đền",     "Duy trì và chăm sóc đền thờ",                 AchievementCategory.ReligiousDevot,  AchievementRarity.Uncommon, 10),
-        ["converted_neighbors"]  = ("Sứ Giả Đức Tin",   "Cải đạo ít nhất 3 người hàng xóm",            AchievementCategory.ReligiousDevot,  AchievementRarity.Uncommon, 15),
-        ["completed_pilgrimage"] = ("Hành Hương Thánh",  "Hoàn thành hành trình hành hương",             AchievementCategory.ReligiousDevot,  AchievementRarity.Rare,     25),
-        ["survived_plague_prayer"]= ("Phép Lạ Sống Còn", "Sống sót qua dịch bệnh bằng đức tin",         AchievementCategory.ReligiousDevot,  AchievementRarity.Rare,     30),
+        ["daily_prayer"]         = ("Steadfast Faith", "Prayed every day for 30 ticks",          AchievementCategory.ReligiousDevot,  AchievementRarity.Common,    6),
+        ["maintained_shrine"]    = ("Shrine Keeper",     "Maintained and cared for the shrine",                 AchievementCategory.ReligiousDevot,  AchievementRarity.Uncommon, 10),
+        ["converted_neighbors"]  = ("Faith Messenger",   "Converted at least 3 neighbors",            AchievementCategory.ReligiousDevot,  AchievementRarity.Uncommon, 15),
+        ["completed_pilgrimage"] = ("Holy Pilgrimage",  "Completed a pilgrimage journey",             AchievementCategory.ReligiousDevot,  AchievementRarity.Rare,     25),
+        ["survived_plague_prayer"]= ("Miracle Survival", "Survived a plague through faith",         AchievementCategory.ReligiousDevot,  AchievementRarity.Rare,     30),
 
         // Adventurer
-        ["cleared_dungeon"]      = ("Chiến Thắng Bóng Tối","Đã clear thành công một dungeon",            AchievementCategory.Adventurer,      AchievementRarity.Rare,     20),
-        ["slew_monster_leader"]  = ("Kẻ Diệt Ác",        "Giết chết thủ lĩnh quái vật",                 AchievementCategory.Adventurer,      AchievementRarity.Rare,     25),
-        ["rescued_village"]      = ("Anh Hùng Làng",     "Cứu cả một làng khỏi tấn công",               AchievementCategory.Adventurer,      AchievementRarity.Epic,     40),
-        ["found_relic"]          = ("Khám Phá Cổ Vật",   "Tìm thấy Relic trong đống đổ nát",            AchievementCategory.Adventurer,      AchievementRarity.Epic,     45),
-        ["survived_divine_trial"]= ("Chứng Nhân Thánh",  "Sống sót qua thử thách thần linh",            AchievementCategory.Adventurer,      AchievementRarity.Legendary,90),
+        ["cleared_dungeon"]      = ("Conqueror of Darkness","Successfully cleared a dungeon",            AchievementCategory.Adventurer,      AchievementRarity.Rare,     20),
+        ["slew_monster_leader"]  = ("Evil Slayer",        "Slew the monster leader",                 AchievementCategory.Adventurer,      AchievementRarity.Rare,     25),
+        ["rescued_village"]      = ("Village Hero",     "Saved an entire village from attack",               AchievementCategory.Adventurer,      AchievementRarity.Epic,     40),
+        ["found_relic"]          = ("Relic Discovery",   "Found a Relic in ancient ruins",            AchievementCategory.Adventurer,      AchievementRarity.Epic,     45),
+        ["survived_divine_trial"]= ("Holy Witness",  "Survived a divine trial",            AchievementCategory.Adventurer,      AchievementRarity.Legendary,90),
 
         // Royal / Noble Service
-        ["protected_royal"]      = ("Vệ Sĩ Hoàng Gia",  "Bảo vệ thành viên hoàng gia",                 AchievementCategory.RoyalService,    AchievementRarity.Epic,     50),
-        ["built_temple"]         = ("Người Sáng Lập Đền","Tài trợ xây dựng đền thờ",                    AchievementCategory.RoyalService,    AchievementRarity.Rare,     30),
-        ["converted_noble_house"]= ("Đại Sứ Đức Tin",    "Cải đạo cả một gia tộc quý tộc",              AchievementCategory.RoyalService,    AchievementRarity.Epic,     60),
-        ["saved_royal_heir"]     = ("Cứu Thái Tử",       "Cứu sống người kế vị hoàng gia",              AchievementCategory.RoyalService,    AchievementRarity.Epic,     70),
+        ["protected_royal"]      = ("Royal Guard",  "Protected a royal family member",                 AchievementCategory.RoyalService,    AchievementRarity.Epic,     50),
+        ["built_temple"]         = ("Temple Founder","Funded temple construction",                    AchievementCategory.RoyalService,    AchievementRarity.Rare,     30),
+        ["converted_noble_house"]= ("Faith Ambassador",    "Converted an entire noble house",              AchievementCategory.RoyalService,    AchievementRarity.Epic,     60),
+        ["saved_royal_heir"]     = ("Saved the Crown Prince",       "Saved the royal heir",              AchievementCategory.RoyalService,    AchievementRarity.Epic,     70),
 
         // Miracle Exposure
-        ["witnessed_revelation"] = ("Mắt Thấy Thần Linh","Chứng kiến trực tiếp Revelation miracle",     AchievementCategory.MiracleExposure, AchievementRarity.Rare,     25),
-        ["healed_by_miracle"]    = ("Được Chữa Lành",    "Được thần linh trực tiếp chữa bệnh",           AchievementCategory.MiracleExposure, AchievementRarity.Uncommon, 15),
-        ["survived_disaster"]    = ("Sống Qua Thảm Họa", "Sống sót qua miracle Volcano hoặc Earthquake", AchievementCategory.MiracleExposure, AchievementRarity.Rare,     20),
+        ["witnessed_revelation"] = ("Witnessed the Divine","Directly witnessed a Revelation miracle",     AchievementCategory.MiracleExposure, AchievementRarity.Rare,     25),
+        ["healed_by_miracle"]    = ("Divinely Healed",    "Directly healed by divine power",           AchievementCategory.MiracleExposure, AchievementRarity.Uncommon, 15),
+        ["survived_disaster"]    = ("Disaster Survivor", "Survived a Volcano or Earthquake miracle", AchievementCategory.MiracleExposure, AchievementRarity.Rare,     20),
 
         // Dark / Forbidden
-        ["led_cult"]             = ("Lãnh Đạo Tà Đạo",  "Lãnh đạo một underground cult",               AchievementCategory.DarkForbidden,   AchievementRarity.Rare,     25),
-        ["opened_cursed_relic"]  = ("Kẻ Phá Cấm",       "Mở một Relic bị nguyền rủa",                  AchievementCategory.DarkForbidden,   AchievementRarity.Epic,     35),
-        ["betrayed_temple"]      = ("Kẻ Phản Đạo",      "Phản bội đền thờ và tôn giáo",                AchievementCategory.DarkForbidden,   AchievementRarity.Uncommon, 12),
-        ["survived_curse"]       = ("Mang Lời Nguyền",   "Sống sót qua Curse miracle",                  AchievementCategory.DarkForbidden,   AchievementRarity.Rare,     20),
+        ["led_cult"]             = ("Cult Leader",  "Led an underground cult",               AchievementCategory.DarkForbidden,   AchievementRarity.Rare,     25),
+        ["opened_cursed_relic"]  = ("Seal Breaker",       "Opened a cursed Relic",                  AchievementCategory.DarkForbidden,   AchievementRarity.Epic,     35),
+        ["betrayed_temple"]      = ("Temple Betrayer",      "Betrayed the temple and religion",                AchievementCategory.DarkForbidden,   AchievementRarity.Uncommon, 12),
+        ["survived_curse"]       = ("Curse Bearer",   "Survived a Curse miracle",                  AchievementCategory.DarkForbidden,   AchievementRarity.Rare,     20),
     };
 
     // ─── Talent Catalogue ─────────────────────────────────
     private static readonly Dictionary<string, (string name, NpcTalentGroup group, int rarityScore)> TalentCatalogue = new()
     {
         // Spiritual
-        ["pure_soul"]          = ("Tâm Hồn Thuần Khiết", NpcTalentGroup.Spiritual,    90),
-        ["strong_faith"]       = ("Đức Tin Mãnh Liệt",   NpcTalentGroup.Spiritual,    70),
-        ["divine_listener"]    = ("Nghe Được Tiếng Thần",NpcTalentGroup.Spiritual,    80),
-        ["dream_sensitive"]    = ("Nhạy Cảm Với Giấc Mơ",NpcTalentGroup.Spiritual,   85),
-        ["miracle_vessel"]     = ("Bình Chứa Phép Màu",  NpcTalentGroup.Spiritual,    95),
+        ["pure_soul"]          = ("Pure Soul", NpcTalentGroup.Spiritual,    90),
+        ["strong_faith"]       = ("Strong Faith",   NpcTalentGroup.Spiritual,    70),
+        ["divine_listener"]    = ("Divine Listener",NpcTalentGroup.Spiritual,    80),
+        ["dream_sensitive"]    = ("Dream Sensitive",NpcTalentGroup.Spiritual,   85),
+        ["miracle_vessel"]     = ("Miracle Vessel",  NpcTalentGroup.Spiritual,    95),
         // Combat
-        ["sword_genius"]       = ("Thiên Tài Kiếm Thuật",NpcTalentGroup.Combat,       75),
-        ["warborn"]            = ("Sinh Ra Từ Chiến Trận",NpcTalentGroup.Combat,       70),
-        ["monster_slayer"]     = ("Kẻ Diệt Quái",        NpcTalentGroup.Combat,       80),
-        ["shield_of_weak"]     = ("Lá Chắn Kẻ Yếu",     NpcTalentGroup.Combat,       65),
+        ["sword_genius"]       = ("Sword Genius",NpcTalentGroup.Combat,       75),
+        ["warborn"]            = ("Warborn",NpcTalentGroup.Combat,       70),
+        ["monster_slayer"]     = ("Monster Slayer",        NpcTalentGroup.Combat,       80),
+        ["shield_of_weak"]     = ("Shield of the Weak",     NpcTalentGroup.Combat,       65),
         // Mental
-        ["genius"]             = ("Thiên Tài",            NpcTalentGroup.Mental,       85),
-        ["wise_speaker"]       = ("Lời Nói Khôn Ngoan",  NpcTalentGroup.Mental,       70),
-        ["strategist"]         = ("Nhà Chiến Lược",       NpcTalentGroup.Mental,       75),
+        ["genius"]             = ("Genius",            NpcTalentGroup.Mental,       85),
+        ["wise_speaker"]       = ("Wise Speaker",  NpcTalentGroup.Mental,       70),
+        ["strategist"]         = ("Strategist",       NpcTalentGroup.Mental,       75),
         // Social
-        ["beloved"]            = ("Được Yêu Mến",         NpcTalentGroup.Social,       65),
-        ["hidden_charisma"]    = ("Sức Hút Ẩn",           NpcTalentGroup.Social,       70),
-        ["silver_tongue"]      = ("Miệng Nam Mô",         NpcTalentGroup.Social,       72),
+        ["beloved"]            = ("Beloved",         NpcTalentGroup.Social,       65),
+        ["hidden_charisma"]    = ("Hidden Charisma",           NpcTalentGroup.Social,       70),
+        ["silver_tongue"]      = ("Silver Tongue",         NpcTalentGroup.Social,       72),
         // Dark / Forbidden
-        ["cursed_blood"]       = ("Dòng Máu Nguyền Rủa",  NpcTalentGroup.DarkForbidden, 80),
-        ["demon_vessel"]       = ("Bình Chứa Quỷ Dữ",   NpcTalentGroup.DarkForbidden, 95),
-        ["shadow_mind"]        = ("Tâm Trí Bóng Tối",    NpcTalentGroup.DarkForbidden, 85),
+        ["cursed_blood"]       = ("Cursed Blood",  NpcTalentGroup.DarkForbidden, 80),
+        ["demon_vessel"]       = ("Demon Vessel",   NpcTalentGroup.DarkForbidden, 95),
+        ["shadow_mind"]        = ("Shadow Mind",    NpcTalentGroup.DarkForbidden, 85),
         // Resistance
-        ["corruption_resistant"]= ("Kháng Tha Hóa",      NpcTalentGroup.Resistance,   75),
-        ["unshaken_will"]      = ("Ý Chí Bất Khuất",     NpcTalentGroup.Resistance,   80),
-        ["pain_endurance"]     = ("Chịu Đựng Đau Khổ",   NpcTalentGroup.Resistance,   65),
+        ["corruption_resistant"]= ("Corruption Resistant",      NpcTalentGroup.Resistance,   75),
+        ["unshaken_will"]      = ("Unshaken Will",     NpcTalentGroup.Resistance,   80),
+        ["pain_endurance"]     = ("Pain Endurance",   NpcTalentGroup.Resistance,   65),
     };
 
     public AchievementService(
@@ -119,7 +119,7 @@ public class AchievementService : IAchievementService
         var npc = await _npcRepo.GetByIdAsync(npcId);
         if (npc == null) throw new InvalidOperationException($"NPC {npcId} not found");
 
-        // Không cho earn trùng
+        // Không for earn trùng
         if (npc.DivineProfile.Achievements.Any(a => a.Name == AchievementCatalogue[achievementKey].name))
         {
             return npc.DivineProfile.Achievements.First(a => a.Name == AchievementCatalogue[achievementKey].name);
@@ -145,7 +145,7 @@ public class AchievementService : IAchievementService
         await RecalcDivineAttentionAsync(npc);
         await _npcRepo.UpdateAsync(npc);
 
-        // Check saint/prophet/champion candidates sau khi earn
+        // Check saint/prophet/champion candidates sau when earn
         await UpdateCandidacyAsync(npc);
         await _npcRepo.UpdateAsync(npc);
 
@@ -162,7 +162,7 @@ public class AchievementService : IAchievementService
         var npc = await _npcRepo.GetByIdAsync(npcId);
         if (npc == null) return;
 
-        // Talent đã awakened chưa?
+        // Talent has awakened chưa?
         if (npc.DivineProfile.Talents.Any(t => t.Name == talentName && t.IsAwakened)) return;
 
         var existing = npc.DivineProfile.Talents.FirstOrDefault(t => t.Name == talentName);
@@ -209,7 +209,7 @@ public class AchievementService : IAchievementService
             .Where(t => t.IsAwakened)
             .Sum(t => t.RarityScore * 0.5f);
 
-        // Reputation từ tier
+        // Reputation from tier
         npc.DivineProfile.Reputation = npc.Tier switch
         {
             NpcTier.Royalty    => 50f,
@@ -248,7 +248,7 @@ public class AchievementService : IAchievementService
             && profile.CorruptionRisk < 15f;
 
         // Prophet: Dream Sensitive + high faith + miracle exposure
-        bool isDreamSensitive = profile.Talents.Any(t => t.Name.Contains("Giấc Mơ") && t.IsAwakened);
+        bool isDreamSensitive = profile.Talents.Any(t => t.Name.Contains("Dream") && t.IsAwakened);
         profile.IsProphetCandidate = isDreamSensitive
             && profile.MiracleExposure > 20f
             && faithLevel > 0.7f;
@@ -271,14 +271,14 @@ public class AchievementService : IAchievementService
         var god = await _godRepo.GetByIdAsync(godId);
         if (god == null) return new();
 
-        // Lấy tất cả NPC của world này (tier 2-5)
+        // Get tất cả NPC of world này (tier 2-5)
         var allNpcs = await _npcRepo.GetByWorldAsync(worldId);
         var relevantNpcs = allNpcs
             .Where(n => n.Tier >= NpcTier.Servant && n.State == NpcState.Alive)
             .Where(n => n.PersonalReligionId != null || n.GodInfluenceId == godId)
             .ToList();
 
-        // Tính divine attention và sort
+        // Tính divine attention and sort
         var scored = new List<(NpcDocument npc, float score)>();
         foreach (var npc in relevantNpcs)
         {
@@ -304,7 +304,7 @@ public class AchievementService : IAchievementService
                 DivineAttentionScore = score
             };
 
-            // Xác định tab
+            // Determine tab
             entry.Tab = DetermineTab(npc, profile);
 
             // Potential label
@@ -316,7 +316,7 @@ public class AchievementService : IAchievementService
             // Recommended actions
             entry.RecommendedActions = BuildRecommendedActions(profile, npc, godId);
 
-            // Filter theo tab nếu có
+            // Filter by tab if specified
             if (tab == null || entry.Tab == tab)
                 entries.Add(entry);
         }
@@ -400,7 +400,7 @@ public class AchievementService : IAchievementService
         switch (action)
         {
             case DivineAction.Bless:
-                // Tăng devotion, giảm corruption risk, có thể awaken talent
+                // Increase devotion, giảm corruption risk, có thể awaken talent
                 npc.DevotionLevel = MathF.Min(1f, npc.DevotionLevel + 0.1f);
                 npc.DivineProfile.CorruptionRisk = MathF.Max(0f, npc.DivineProfile.CorruptionRisk - 10f);
                 npc.GodTrustLevel = MathF.Min(100f, npc.GodTrustLevel + 10f);
@@ -415,7 +415,7 @@ public class AchievementService : IAchievementService
                 npc.DivineProfile.MiracleExposure += 5f;
                 npc.GodTrustLevel = MathF.Min(100f, npc.GodTrustLevel + 5f);
                 // Dream-sensitive NPCs react more
-                bool isDreamSens = npc.DivineProfile.Talents.Any(t => t.Name.Contains("Giấc Mơ") && t.IsAwakened);
+                bool isDreamSens = npc.DivineProfile.Talents.Any(t => t.Name.Contains("Dream") && t.IsAwakened);
                 if (isDreamSens) npc.GodTrustLevel = MathF.Min(100f, npc.GodTrustLevel + 10f);
                 changed = true;
                 break;
@@ -509,7 +509,7 @@ public class AchievementService : IAchievementService
         }
         else
         {
-            // Holy path — cần đủ điều kiện
+            // Holy path — requires all conditions
             next = current switch
             {
                 ChurchRank.Believer when npc.DevotionLevel > 0.5f
@@ -540,7 +540,7 @@ public class AchievementService : IAchievementService
         if (next != current)
         {
             profile.ChurchRank = next;
-            profile.ChurchRankEarnedAt = 0; // tick sẽ được set bởi caller
+            profile.ChurchRankEarnedAt = 0; // tick sẽ was set bởi caller
             await _npcRepo.UpdateAsync(npc);
             _logger.LogInformation("NPC {Name} church promoted: {Old} → {New}", npc.Name, current, next);
         }

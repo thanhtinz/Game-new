@@ -56,7 +56,7 @@ export default function LeaderboardAdminPage() {
           </div>
         </div>
 
-        {isLoading && <p className="text-gray-500">Đang tải...</p>}
+        {isLoading && <p className="text-gray-500">Loading...</p>}
 
         <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
           <table className="w-full text-sm">

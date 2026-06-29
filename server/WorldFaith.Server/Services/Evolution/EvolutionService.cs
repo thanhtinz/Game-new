@@ -52,7 +52,7 @@ public class EvolutionService : IEvolutionService
     public static float GetStagePower(EvolutionStage stage)
         => StagePower.TryGetValue(stage, out var p) ? p : 10f;
 
-    // Tên entity theo stage
+    // Name entity theo stage
     private static readonly Dictionary<EvolutionStage, string[]> StageNames = new()
     {
         { EvolutionStage.WildAnimal,        new[] { "Sói Hoang", "Gấu Rừng", "Đại Bàng", "Hổ Đen" } },
@@ -62,7 +62,7 @@ public class EvolutionService : IEvolutionService
         { EvolutionStage.Saint,             new[] { "Thánh Nhân", "Tiên Tri", "Đại Thánh", "Thần Sứ" } },
         { EvolutionStage.FallenDemonLord,   new[] { "Ma Vương Sa Đọa", "Ác Thần Tàn Bạo", "Quỷ Chúa" } },
         { EvolutionStage.Monster,           new[] { "Quái Vật", "Thủy Quái", "Thạch Khổng Lồ", "Ác Thú" } },
-        { EvolutionStage.Titan,             new[] { "Titan Cổ Đại", "Khổng Lồ Bóng Tối", "Thần Thú Titan" } },
+        { EvolutionStage.Titan,             new[] { "Titan Cổ Đại", "Khổng Lồ Shadow", "Thần Thú Titan" } },
         { EvolutionStage.ApocalypticEntity, new[] { "Thực Thể Tận Thế", "Hủy Diệt Giả", "Quái Vật Cổ Thần" } },
     };
 
@@ -152,7 +152,7 @@ public class EvolutionService : IEvolutionService
             await _entityRepo.CreateAsync(entity);
         }
 
-        _logger.LogInformation("Spawned {Count} initial entities cho world {WorldId}",
+        _logger.LogInformation("Spawned {Count} initial entities for world {WorldId}",
             landTiles.Count + harshTiles.Count + sacredTiles.Count, worldId);
     }
 
@@ -177,7 +177,7 @@ public class EvolutionService : IEvolutionService
                 _ => _rng.Next(1, 3)
             };
 
-            // Bonus nếu được god influence
+            // Bonus nếu was god influence
             if (entity.GodInfluenceId != null)
             {
                 var god = gods.FirstOrDefault(g => g.Id == entity.GodInfluenceId);
@@ -200,7 +200,7 @@ public class EvolutionService : IEvolutionService
             entity.EvolutionPoints += naturalGain;
             changed = true;
 
-            // Kiểm tra evolve tự động (dùng balance config threshold)
+            // Check evolve tự động (dùng balance config threshold)
             int threshold = await GetThresholdAsync(entity.Stage);
             if (entity.EvolutionPoints >= threshold)
             {
@@ -219,13 +219,13 @@ public class EvolutionService : IEvolutionService
                         TargetId = entity.Id,
                         X = entity.X,
                         Y = entity.Y,
-                        Description = $"{entity.Name} tiến hóa từ {oldStage} → {nextStage.Value}!"
+                        Description = $"{entity.Name} evolved from {oldStage} → {nextStage.Value}!"
                     });
 
                     _logger.LogInformation("Entity {Name} evolved: {Old} → {New}",
                         entity.Name, oldStage, nextStage.Value);
 
-                    // Apex entities gây sự kiện thế giới
+                    // Apex entities trigger world events
                     if (nextStage.Value is EvolutionStage.ApocalypticEntity or EvolutionStage.CelestialGuardian)
                         await HandleApexEventAsync(worldId, entity, civs, deltas);
                 }
@@ -238,7 +238,7 @@ public class EvolutionService : IEvolutionService
                 changed = true;
             }
 
-            // Entity tấn công civilization lân cận (chỉ Monster/Titan/Apocalyptic)
+            // Entity attacks civilization lân cận (chỉ Monster/Titan/Apocalyptic)
             if (tick % 20 == 0 && IsAggressiveStage(entity.Stage))
             {
                 var attacked = await AttackNearbyCivAsync(entity, civs, deltas);
@@ -351,7 +351,7 @@ public class EvolutionService : IEvolutionService
             TargetId = nearby.Id,
             X = entity.X,
             Y = entity.Y,
-            Description = $"{entity.Name} tấn công {nearby.Name}! Military -{damage:F0}, Population -{(int)(damage * 2)}"
+            Description = $"{entity.Name} attacks {nearby.Name}! Military -{damage:F0}, Population -{(int)(damage * 2)}"
         });
 
         return true;
@@ -361,7 +361,7 @@ public class EvolutionService : IEvolutionService
         string worldId, EvolutionEntityDocument entity,
         List<CivilizationDocument> civs, List<DeltaEvent> deltas)
     {
-        // Apex entity gây hoảng loạn cho tất cả civ trong bán kính 15
+        // Apex entity gây hoảng loạn for tất cả civ trong bán kính 15
         var nearbyCivs = civs.Where(c =>
             c.ControlledTiles.Any(t =>
                 MathF.Sqrt(MathF.Pow(t.X - entity.X, 2) + MathF.Pow(t.Y - entity.Y, 2)) <= 15f))

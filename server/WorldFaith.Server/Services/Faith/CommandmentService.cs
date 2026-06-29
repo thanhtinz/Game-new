@@ -10,14 +10,14 @@ namespace WorldFaith.Server.Services.Faith;
 // ─── Commandment Types ────────────────────────────────────
 public enum CommandmentType
 {
-    ExpandTerritory,     // Mở rộng lãnh thổ
-    BuildTemple,         // Xây đền thờ
-    SpreadFaith,         // Lan truyền tôn giáo
-    MakeWar,             // Tấn công civ khác
-    MakePeace,           // Dừng chiến tranh
-    FocusEconomy,        // Tập trung kinh tế
-    FocusMilitary,       // Tăng cường quân sự
-    Worship,             // Tăng devotion
+    ExpandTerritory,     // Expand territory
+    BuildTemple,         // Build temple
+    SpreadFaith,         // Spread the faith
+    MakeWar,             // Attack another civ
+    MakePeace,           // Stop the war
+    FocusEconomy,        // Focus on economy
+    FocusMilitary,       // Strengthen military
+    Worship,             // Increase devotion
 }
 
 // ─── Document ─────────────────────────────────────────────
@@ -30,9 +30,9 @@ public class CommandmentDocument
     public string GodId { get; set; } = string.Empty;
     public string CivilizationId { get; set; } = string.Empty;
     public CommandmentType Type { get; set; }
-    public string Message { get; set; } = string.Empty;  // Lời phán của thần
+    public string Message { get; set; } = string.Empty;  // Divine proclamation
     public bool Obeyed { get; set; } = false;
-    public float TrustRequired { get; set; } = 50f;      // Civ phải có trust >= này mới nghe
+    public float TrustRequired { get; set; } = 50f;      // Civ must have trust >= this to obey
     public float FaithCost { get; set; } = 15f;
     public DateTime IssuedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ObeyedAt { get; set; }
@@ -107,56 +107,56 @@ public class CommandmentService : ICommandmentService
     private readonly IFaithService _faithService;
     private readonly ILogger<CommandmentService> _logger;
 
-    // Lời phán mẫu theo loại commandment
+    // Sample proclamations per commandment type
     private static readonly Dictionary<CommandmentType, string[]> CommandMessages = new()
     {
         [CommandmentType.ExpandTerritory] = new[]
         {
-            "Hãy mở rộng bờ cõi, con của ta!",
-            "Vùng đất phía đông đang chờ ngươi chinh phục!",
-            "Sức mạnh của ngươi phải lan rộng khắp thế giới!"
+            "Expand your borders, my child!",
+            "The eastern lands await your conquest!",
+            "Your power must spread across the world!"
         },
         [CommandmentType.BuildTemple] = new[]
         {
-            "Hãy xây dựng nơi thờ phụng ta ngay lập tức!",
-            "Ta cần một ngôi đền xứng đáng trong lãnh thổ của ngươi!",
-            "Đền thờ sẽ mang lại phước lành cho người dân của ngươi!"
+            "Build a place of worship for me at once!",
+            "I need a worthy temple in your domain!",
+            "The temple will bring blessings to your people!"
         },
         [CommandmentType.SpreadFaith] = new[]
         {
-            "Hãy truyền bá đức tin của ta đến mọi nơi!",
-            "Những kẻ không tin phải được khai sáng!",
-            "Ta muốn toàn thế giới biết đến danh ta!"
+            "Spread my faith to every corner!",
+            "The unbelievers must be enlightened!",
+            "I want the whole world to know my name!"
         },
         [CommandmentType.MakeWar] = new[]
         {
-            "Đã đến lúc trừng phạt những kẻ không tin!",
-            "Tấn công ngay! Chiến thắng là ý ta!",
-            "Máu của kẻ thù sẽ là lễ vật dâng ta!"
+            "It is time to punish the unbelievers!",
+            "Attack now! Victory is my will!",
+            "The blood of enemies shall be my offering!"
         },
         [CommandmentType.MakePeace] = new[]
         {
-            "Hãy buông vũ khí xuống. Đây là lệnh của ta.",
-            "Hòa bình là sức mạnh thực sự.",
-            "Ta không muốn tín đồ của ta chết vô nghĩa nữa."
+            "Lay down your weapons. This is my command.",
+            "Peace is the true strength.",
+            "I do not want my followers dying in vain."
         },
         [CommandmentType.FocusEconomy] = new[]
         {
-            "Hãy xây dựng, không phải chiến đấu!",
-            "Sự giàu có sẽ thu hút nhiều tín đồ hơn.",
-            "Thịnh vượng là cách tốt nhất để vinh danh ta."
+            "Build, do not fight!",
+            "Wealth will attract more believers.",
+            "Prosperity is the best way to honor me."
         },
         [CommandmentType.FocusMilitary] = new[]
         {
-            "Tăng cường quân đội! Kẻ thù đang đến!",
-            "Sức mạnh quân sự bảo vệ đức tin!",
-            "Những tín đồ yếu đuối không xứng đáng với ta!"
+            "Strengthen the army! The enemy is coming!",
+            "Military strength protects the faith!",
+            "Weak believers are not worthy of me!"
         },
         [CommandmentType.Worship] = new[]
         {
-            "Hãy cầu nguyện nhiều hơn! Ta đang lắng nghe!",
-            "Đức tin mạnh mẽ hơn là điều ta đòi hỏi!",
-            "Devotion của các ngươi cần phải toàn tâm toàn ý!"
+            "Pray more! I am listening!",
+            "Stronger faith is what I demand!",
+            "Your devotion must be wholehearted!"
         },
     };
 
@@ -193,39 +193,39 @@ public class CommandmentService : ICommandmentService
         CommandmentType type, string? customMessage = null)
     {
         var god = await _godRepo.GetByIdAsync(godId);
-        if (god == null || !god.IsAlive) return (null!, "God không tồn tại");
+        if (god == null || !god.IsAlive) return (null!, "God does not exist");
 
         var civ = await _civRepo.GetByIdAsync(civId);
-        if (civ == null) return (null!, "Civilization không tồn tại");
+        if (civ == null) return (null!, "Civilization does not exist");
 
         float cost = CommandFaithCosts.TryGetValue(type, out var c) ? c : 15f;
-        if (god.Faith < cost) return (null!, $"Không đủ Faith (cần {cost})");
+        if (god.Faith < cost) return (null!, $"Insufficient Faith (need {cost})");
 
-        // Chọn message
+        // Select message
         string msg = customMessage ?? PickMessage(type);
 
-        // Kiểm tra civ có nghe lệnh không (dựa vào GodTrustLevel)
+        // Check if civ obeys (based on GodTrustLevel)
         float trustLevel = civ.AiMemory.GodTrustLevel;
         float trustRequired = type == CommandmentType.MakeWar ? 70f : 40f;
         bool obeyed = trustLevel >= trustRequired;
 
-        // Tốn faith dù civ có nghe hay không
+        // Faith consumed whether civ obeys or not
         var newFaith = MathF.Max(0f, god.Faith - cost);
         await _godRepo.UpdateFaithAsync(godId, newFaith, god.Trust, god.Fear, god.FollowerCount);
 
-        // Áp dụng hiệu ứng nếu civ nghe lệnh
+        // Apply effect if civ obeys
         string obeyReason;
         if (obeyed)
         {
             await ApplyCommandmentEffectAsync(civ, type);
-            obeyReason = $"{civ.Name} tuân lệnh thần! (Trust: {trustLevel:F0})";
+            obeyReason = $"{civ.Name} obeyed the divine command! (Trust: {trustLevel:F0})";
         }
         else
         {
-            // Phản ứng từ chối: trust giảm nhẹ
+            // Refusal reaction: trust decreases slightly
             civ.AiMemory.GodTrustLevel = MathF.Max(0f, trustLevel - 5f);
             await _civRepo.UpdateAsync(civ);
-            obeyReason = $"{civ.Name} phớt lờ lệnh thần (Trust quá thấp: {trustLevel:F0}/{trustRequired:F0})";
+            obeyReason = $"{civ.Name} ignored the divine command (Trust too low: {trustLevel:F0}/{trustRequired:F0})";
         }
 
         var doc = new CommandmentDocument
@@ -283,8 +283,8 @@ public class CommandmentService : ICommandmentService
 
     public async Task ProcessPendingCommandmentsAsync(string worldId)
     {
-        // Placeholder: xử lý commandments chưa hoàn thành sau nhiều ticks
-        // (vd: ExpandTerritory cần nhiều ticks để xảy ra)
+        // Placeholder: handle multi-tick commandment effects
+        // (e.g. ExpandTerritory takes multiple ticks to complete)
     }
 
     // ─── Effects ──────────────────────────────────────────────
@@ -295,7 +295,7 @@ public class CommandmentService : ICommandmentService
         {
             case CommandmentType.ExpandTerritory:
                 civ.Military += 15f;
-                civ.IsAtWar = false; // reset để trigger expansion behavior
+                civ.IsAtWar = false; // reset to trigger expansion behavior
                 break;
 
             case CommandmentType.BuildTemple:
@@ -337,7 +337,7 @@ public class CommandmentService : ICommandmentService
 
     private static string PickMessage(CommandmentType type)
     {
-        if (!CommandMessages.TryGetValue(type, out var msgs)) return "Hãy làm theo ý ta!";
+        if (!CommandMessages.TryGetValue(type, out var msgs)) return "Follow my will!";
         return msgs[Random.Shared.Next(msgs.Length)];
     }
 }

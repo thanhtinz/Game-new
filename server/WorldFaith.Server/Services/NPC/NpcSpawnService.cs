@@ -4,9 +4,9 @@ using WorldFaith.Server.Repositories;
 namespace WorldFaith.Server.Services.NPC;
 
 /// <summary>
-/// Sinh NPC theo tier khi civilization được tạo.
-/// Tier 1-2 sinh ngầm (không có document riêng, đại diện bởi population).
-/// Tier 3-5 có NpcDocument riêng với tên và stats cụ thể.
+/// Sinh NPC theo tier when civilization was tạo.
+/// Tier 1-2 sinh ngầm (not có document riêng, đại diện bởi population).
+/// Tier 3-5 có NpcDocument riêng with tên and stats cụ thể.
 /// </summary>
 public interface INpcSpawnService
 {
@@ -22,7 +22,7 @@ public class NpcSpawnService : INpcSpawnService
     private readonly ILogger<NpcSpawnService> _logger;
     private readonly Random _rng = new();
 
-    // Tên NPC mẫu
+    // Sample NPC names
     private static readonly string[] NpcFirstNames =
     {
         "Aldric", "Brynn", "Caelan", "Dara", "Erin", "Fionn", "Gwen", "Hadwin",
@@ -69,7 +69,7 @@ public class NpcSpawnService : INpcSpawnService
 
     private async Task SpawnRoyaltyAsync(string worldId, CivilizationDocument civ)
     {
-        // Tạo Royal Court Organization
+        // Create Royal Court Organization
         var court = new OrganizationDocument
         {
             WorldId = worldId,
@@ -82,7 +82,7 @@ public class NpcSpawnService : INpcSpawnService
         };
         await _orgRepo.CreateAsync(court);
 
-        // Tạo King/Queen
+        // Create King/Queen
         var king = new NpcDocument
         {
             WorldId = worldId,
@@ -273,7 +273,7 @@ public class NpcSpawnService : INpcSpawnService
 
     public async Task SpawnAdventureGuildAsync(string worldId, string civId)
     {
-        // Kiểm tra đã có Guild cho world này chưa
+        // Check if Guild already exists for this world
         var existing = await _orgRepo.GetByTypeAsync(worldId, OrganizationType.AdventureGuild);
         OrganizationDocument guild;
 
@@ -287,7 +287,7 @@ public class NpcSpawnService : INpcSpawnService
                 Type = OrganizationType.AdventureGuild,
                 Power = 40f,
                 Wealth = 50f,
-                Loyalty = 50f  // không trung thành với kingdom cụ thể nào
+                Loyalty = 50f  // not trung thành with kingdom cụ thể nào
             };
             await _orgRepo.CreateAsync(guild);
         }

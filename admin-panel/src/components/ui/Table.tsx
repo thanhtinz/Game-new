@@ -16,7 +16,7 @@ interface Props<T> {
 }
 
 export default function Table<T extends Record<string, any>>({
-  columns, data, loading, emptyText = 'Không có dữ liệu', onRowClick
+  columns, data, loading, emptyText = 'No data', onRowClick
 }: Props<T>) {
   return (
     <div className="overflow-x-auto rounded-xl border border-gray-800">
@@ -34,7 +34,7 @@ export default function Table<T extends Record<string, any>>({
           {loading ? (
             <tr>
               <td colSpan={columns.length} className="text-center py-12 text-gray-500">
-                <span className="animate-pulse">Đang tải...</span>
+                <span className="animate-pulse">Loading...</span>
               </td>
             </tr>
           ) : data.length === 0 ? (

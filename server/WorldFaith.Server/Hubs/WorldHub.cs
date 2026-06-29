@@ -11,7 +11,7 @@ using WorldFaith.Shared.Contracts;
 using WorldFaith.Shared.Enums;
 using WorldFaith.Shared.Models;
 
-// Interface cho client methods (strongly-typed hub)
+// Interface for client methods (strongly-typed hub)
 public interface IWorldHubClient
 {
     Task OnWorldTick(WorldTickEvent evt);
@@ -75,13 +75,13 @@ public class WorldHub : Hub<IWorldHubClient>
         var world = await _worldRepo.GetByIdAsync(req.WorldId);
         if (world == null)
         {
-            await Clients.Caller.OnError(new ErrorEvent { Code = "WORLD_NOT_FOUND", Message = "World không tồn tại" });
+            await Clients.Caller.OnError(new ErrorEvent { Code = "WORLD_NOT_FOUND", Message = "World not tồn tại" });
             return;
         }
 
         var playerId = PlayerId;
 
-        // Kiểm tra god đã tồn tại chưa
+        // Check god has tồn tại chưa
         var existingGod = await _godRepo.GetByPlayerAndWorldAsync(playerId, req.WorldId);
         GodDocument god;
 
@@ -91,11 +91,11 @@ public class WorldHub : Hub<IWorldHubClient>
         }
         else
         {
-            // Kiểm tra số lượng god
+            // Check số lượng god
             var currentGods = await _godRepo.GetByWorldAsync(req.WorldId);
             if (currentGods.Count >= world.MaxGods)
             {
-                await Clients.Caller.OnError(new ErrorEvent { Code = "WORLD_FULL", Message = "World đã đầy god" });
+                await Clients.Caller.OnError(new ErrorEvent { Code = "WORLD_FULL", Message = "World has đầy god" });
                 return;
             }
 
@@ -114,7 +114,7 @@ public class WorldHub : Hub<IWorldHubClient>
 
         await Groups.AddToGroupAsync(Context.ConnectionId, req.WorldId);
 
-        // Gửi world state hiện tại cho client
+        // Gửi world state hiện tại for client
         var state = await BuildWorldStateAsync(req.WorldId);
         await Clients.Caller.OnWorldState(state);
         await Clients.Caller.OnJoinedWorld(MapGodToDto(god));
@@ -167,7 +167,7 @@ public class WorldHub : Hub<IWorldHubClient>
         await _civSim.SpawnInitialCivilizationsAsync(world.Id, 6);
 
         await Clients.Caller.OnJoinedWorld(new GodDto { });
-        _logger.LogInformation("World mới được tạo: {WorldId} ({WorldName})", world.Id, world.Name);
+        _logger.LogInformation("World mới was tạo: {WorldId} ({WorldName})", world.Id, world.Name);
     }
 
     public async Task RequestWorldState()
@@ -220,7 +220,7 @@ public class WorldHub : Hub<IWorldHubClient>
             await Clients.Caller.OnError(new ErrorEvent
             {
                 Code = "EVOLVE_FAILED",
-                Message = "Không đủ Faith hoặc entity đã đạt max stage"
+                Message = "Không đủ Faith hoặc entity has đạt max stage"
             });
         }
         else
@@ -232,7 +232,7 @@ public class WorldHub : Hub<IWorldHubClient>
                 Deltas = new List<DeltaEvent>
                 {
                     new() { Type = WorldEventType.EvolutionOccurred, TargetId = entityId,
-                        Description = "Entity được tiến hóa bởi thần lực!" }
+                        Description = "Entity was evolved through divine power!" }
                 }
             });
         }
@@ -248,7 +248,7 @@ public class WorldHub : Hub<IWorldHubClient>
 
         if (!Enum.TryParse<CommandmentType>(commandmentType, out var type))
         {
-            await Clients.Caller.OnError(new ErrorEvent { Code = "INVALID_COMMANDMENT", Message = "Loại lệnh không hợp lệ" });
+            await Clients.Caller.OnError(new ErrorEvent { Code = "INVALID_COMMANDMENT", Message = "Type lệnh not hợp lệ" });
             return;
         }
 
@@ -262,7 +262,7 @@ public class WorldHub : Hub<IWorldHubClient>
             return;
         }
 
-        // Broadcast kết quả cho tất cả gods trong world
+        // Broadcast kết quả for tất cả gods trong world
         await Clients.Group(worldId).OnWorldTick(new WorldTickEvent
         {
             Tick = 0, Cycle = 0,

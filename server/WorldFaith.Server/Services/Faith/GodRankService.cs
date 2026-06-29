@@ -7,9 +7,9 @@ namespace WorldFaith.Server.Services.Faith;
 
 /// <summary>
 /// God Rank System — GDD v1.0 Section 7.
-/// Rank tăng theo cumulative faith milestones.
-/// Rank modifier ảnh hưởng miracle efficiency và faith generation.
-/// Forgotten god: 0 followers nhưng còn relics/cults → survive in diminished form.
+/// Rank increases based on cumulative faith milestones.
+/// Rank modifier affects miracle efficiency and faith generation.
+/// Forgotten god: 0 followers but still has relics/cults → survives in diminished form.
 /// </summary>
 public interface IGodRankService
 {
@@ -27,7 +27,7 @@ public class GodRankService : IGodRankService
     private readonly IReligionRepository _religionRepo;
     private readonly ILogger<GodRankService> _logger;
 
-    // Faith thresholds cho mỗi rank
+    // Faith thresholds for each rank
     private static readonly Dictionary<GodRank, int> RankThresholds = new()
     {
         [GodRank.Nascent]     = 0,
@@ -76,7 +76,7 @@ public class GodRankService : IGodRankService
             await RecordMemoryAsync(godId, new GodMemoryEntry
             {
                 Type = MemoryType.MiracleSuccess,
-                Description = $"{god.Name} đạt cấp độ {newRank}",
+                Description = $"{god.Name} reached rank {newRank}",
                 Tick = 0,
                 TrustImpact = 5f
             });
@@ -113,9 +113,9 @@ public class GodRankService : IGodRankService
     // ─── Forgotten God ────────────────────────────────────────
 
     /// <summary>
-    /// Kiểm tra và cập nhật trạng thái Forgotten.
-    /// God với 0 followers có thể survive nếu còn relics hoặc hidden cults.
-    /// Returns true nếu god vẫn sống sót (dù Forgotten).
+    /// Checks and updates the Forgotten state.
+    /// A god with 0 followers may survive if they still have relics or hidden cults.
+    /// Returns true if the god still survives (even as Forgotten).
     /// </summary>
     public async Task<bool> CheckForgottenStateAsync(string worldId, string godId)
     {
@@ -124,7 +124,7 @@ public class GodRankService : IGodRankService
 
         if (god.FollowerCount > 0)
         {
-            // Không Forgotten
+            // Not Forgotten
             if (god.IsForgotten)
             {
                 god.IsForgotten = false;
@@ -135,7 +135,7 @@ public class GodRankService : IGodRankService
             return true;
         }
 
-        // 0 followers — kiểm tra relics và hidden cults
+        // 0 followers — check relics and hidden cults
         var relics = await _relicRepo.GetByGodAsync(worldId, godId);
         var hiddenReligions = await _religionRepo.GetByGodAsync(godId);
         var activeCults = hiddenReligions.Where(r => r.IsHidden && r.FollowerCount > 0).ToList();
@@ -145,14 +145,14 @@ public class GodRankService : IGodRankService
 
         if (hasRelics || hasCults)
         {
-            // Survive as Forgotten — giảm Faith gen xuống 10%
+            // Survive as Forgotten — Faith gen reduced to 10%
             god.IsForgotten = true;
             god.RankData.Rank = GodRank.Forgotten;
 
-            // Faith từ relics và hidden cults
+            // Faith from relics and hidden cults
             float relicFaith = relics.Sum(r => r.FaithBonus);
             float cultFaith  = activeCults.Sum(c => c.FollowerCount * 0.01f);
-            god.Faith = MathF.Min(god.Faith + relicFaith + cultFaith, 500f); // cap thấp khi Forgotten
+            god.Faith = MathF.Min(god.Faith + relicFaith + cultFaith, 500f); // low cap when Forgotten
 
             await _godRepo.UpdateAsync(god);
 
@@ -161,7 +161,7 @@ public class GodRankService : IGodRankService
             return true;
         }
 
-        // Thực sự biến mất
+        // Truly gone
         god.IsAlive = false;
         god.IsForgotten = true;
         god.RankData.Rank = GodRank.Forgotten;
@@ -186,7 +186,7 @@ public class GodRankService : IGodRankService
         if (god == null) return;
 
         god.Memories.Insert(0, memory);
-        if (god.Memories.Count > 50) // Giữ 50 memories gần nhất
+        if (god.Memories.Count > 50) // Keep 50 most recent memories
             god.Memories = god.Memories.Take(50).ToList();
 
         await _godRepo.UpdateAsync(god);
@@ -198,9 +198,9 @@ public class GodRankService : IGodRankService
         return god?.Memories.Take(limit).ToList() ?? new();
     }
 
-    // Helper để GodRepository UpdateAsync
+    // Helper for GodRepository UpdateAsync
     private async Task UpdateGodAsync(GodDocument god)
     {
-        // GodRepository cần UpdateAsync method — implement nếu chưa có
+        // GodRepository needs UpdateAsync method — implement if missing
     }
 }

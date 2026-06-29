@@ -33,7 +33,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Dashboard</h2>
-            <p className="text-gray-400 text-sm mt-1">Tổng quan server — cập nhật mỗi 5 giây</p>
+            <p className="text-gray-400 text-sm mt-1">Server overview — updates every 5 seconds</p>
           </div>
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border ${
             health === 'ok' ? 'bg-green-900/40 border-green-700 text-green-300' :

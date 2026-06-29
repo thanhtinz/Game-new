@@ -7,8 +7,8 @@ namespace WorldFaith.Server.Services.Memory;
 
 /// <summary>
 /// Memory System — GDD v1.0 Section 7 (God resources: Memory).
-/// Relics generate passive Faith cho origin god.
-/// Forgotten gods survive qua relics và cults.
+/// Relics generate passive Faith for origin god.
+/// Forgotten gods survive qua relics and cults.
 /// Environmental memory tích lũy theo race/region.
 /// </summary>
 public interface IMemoryService
@@ -54,16 +54,16 @@ public class MemoryService : IMemoryService
             var god = await _godRepo.GetByIdAsync(relic.OriginGodId);
             if (god == null) continue;
 
-            // Relic phát Faith thụ động cho origin god
+            // Relic phát Faith thụ động for origin god
             float faithGen = relic.FaithBonus;
 
-            // Bonus nếu civ đang giữ relic theo đúng god's religion
+            // Bonus if civ holding relic follows the god's religion
             if (relic.LocationCivId != null)
             {
                 var civ = await _civRepo.GetByIdAsync(relic.LocationCivId);
                 if (civ?.RulingReligionId != null)
                 {
-                    // Thêm 50% nếu ruling religion của civ là của god này
+                    // Add 50% if ruling religion of civ matches this god
                     faithGen *= 1.5f;
                 }
             }
@@ -81,12 +81,12 @@ public class MemoryService : IMemoryService
             }
             else
             {
-                // God vẫn sống — relic là bonus
+                // God is alive — relic is a bonus
                 god.Faith = MathF.Min(1000f, god.Faith + faithGen * 0.5f);
                 await _godRepo.UpdateAsync(god);
             }
 
-            // Relic decay nếu không ai giữ
+            // Relic decay nếu not ai giữ
             bool isAbandoned = relic.CurrentOwnerId == null && relic.LocationCivId == null && relic.LocationDungeonId == null;
             if (isAbandoned && tick % 200 == 0)
             {

@@ -20,7 +20,7 @@ public class PlayerStatsDocument
     public int TotalWins { get; set; }
     public int TotalCycles { get; set; }       // Tổng số cycles sống sót
     public long TotalFollowers { get; set; }    // Tổng followers accumulated
-    public int ReligionsErased { get; set; }    // Số tôn giáo đối thủ bị xóa
+    public int ReligionsErased { get; set; }    // Số religion đối thủ was xóa
     public int MiraclesPerformed { get; set; }
     public int MiraclesCountered { get; set; }
     public int EntitiesEvolved { get; set; }
@@ -138,7 +138,7 @@ public class LeaderboardService : ILeaderboardService
 
             await UpsertStatsAsync(stats);
 
-            // Redis sorted sets cho leaderboard
+            // Redis sorted sets for leaderboard
             await db.SortedSetAddAsync(LeaderboardKey, playerId, stats.Rating);
             await db.SortedSetAddAsync(LeaderboardWinsKey, playerId, stats.TotalWins);
             await db.SortedSetAddAsync(LeaderboardFollowersKey, playerId, stats.TotalFollowers);
@@ -187,7 +187,7 @@ public class LeaderboardService : ILeaderboardService
     {
         var db = _redis.GetDatabase();
 
-        // Lấy từ Redis sorted set (nhanh)
+        // Get từ Redis sorted set (nhanh)
         var entries = await db.SortedSetRangeByRankWithScoresAsync(
             LeaderboardKey, 0, limit - 1, Order.Descending);
 

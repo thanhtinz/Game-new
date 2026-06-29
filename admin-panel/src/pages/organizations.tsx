@@ -39,16 +39,16 @@ export default function OrgsPage() {
   }
 
   async function save() {
-    await orgsApi.update(selected.id, form); setMsg('Cập nhật thành công'); setModal(false); load()
+    await orgsApi.update(selected.id, form); setMsg('Updated successfully'); setModal(false); load()
   }
 
   async function expose(id: string) {
-    await orgsApi.expose(id); setMsg('Tổ chức đã bị lộ'); load()
+    await orgsApi.expose(id); setMsg('Organization exposed'); load()
   }
 
   async function disband(id: string) {
-    if (!confirm('Giải tán tổ chức này?')) return
-    await orgsApi.disband(id); setMsg('Đã giải tán'); load()
+    if (!confirm('Disband this organization?')) return
+    await orgsApi.disband(id); setMsg('Disbanded'); load()
   }
 
   return (
@@ -68,8 +68,8 @@ export default function OrgsPage() {
         {msg && <div className="mb-4 p-3 bg-green-900/40 border border-green-700 rounded-lg text-green-300 text-sm">{msg}</div>}
 
         <Table loading={loading} onRowClick={openEdit} data={orgs} columns={[
-          { key: 'name', label: 'Tên' },
-          { key: 'type', label: 'Loại', render: r =>
+          { key: 'name', label: 'Name' },
+          { key: 'type', label: 'Type', render: r =>
             <Badge label={r.type} color={ORG_TYPE_COLOR[r.type] ?? 'gray'} /> },
           { key: 'power', label: 'Power', render: r =>
             <div className="flex items-center gap-1">
@@ -105,7 +105,7 @@ export default function OrgsPage() {
           {selected && (
             <div className="space-y-3">
               <div className="text-xs text-gray-500 mb-2">
-                Loại: {selected.type} | Members: {selected.members?.length ?? 0}
+                Type: {selected.type} | Members: {selected.members?.length ?? 0}
               </div>
               {[
                 { key: 'power', label: 'Power (0-100)' },
@@ -122,8 +122,8 @@ export default function OrgsPage() {
                 </div>
               ))}
               <div className="flex justify-end gap-3">
-                <button onClick={() => setModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Hủy</button>
-                <button onClick={save} className="px-4 py-2 text-sm bg-purple-700 rounded-lg">Lưu</button>
+                <button onClick={() => setModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Cancel</button>
+                <button onClick={save} className="px-4 py-2 text-sm bg-purple-700 rounded-lg">Save</button>
               </div>
             </div>
           )}

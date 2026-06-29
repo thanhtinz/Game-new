@@ -6,14 +6,14 @@ import Cookies from 'js-cookie'
 
 const NAV_GROUPS = [
   {
-    group: 'Tổng Quan',
+    group: 'Overview',
     items: [
       { href: '/dashboard',   label: 'Dashboard',       icon: '📊' },
       { href: '/events',      label: 'Events Log',      icon: '📋' },
     ]
   },
   {
-    group: 'Thế Giới',
+    group: 'World',
     items: [
       { href: '/worlds',      label: 'Worlds',          icon: '🌍' },
       { href: '/maps',        label: 'Maps & Tiles',    icon: '🗺️'  },
@@ -23,7 +23,7 @@ const NAV_GROUPS = [
     ]
   },
   {
-    group: 'Nhân Vật',
+    group: 'Characters',
     items: [
       { href: '/gods',        label: 'Gods',            icon: '⚡' },
       { href: '/god-note',    label: 'God Note',        icon: '📖' },
@@ -32,7 +32,7 @@ const NAV_GROUPS = [
     ]
   },
   {
-    group: 'Xã Hội',
+    group: 'Society',
     items: [
       { href: '/civs',        label: 'Civilizations',   icon: '🏰' },
       { href: '/religions',   label: 'Religions',       icon: '✝️'  },
@@ -40,14 +40,14 @@ const NAV_GROUPS = [
     ]
   },
   {
-    group: 'Người Chơi',
+    group: 'Players',
     items: [
       { href: '/players',     label: 'Players',         icon: '👥' },
       { href: '/leaderboard', label: 'Leaderboard',     icon: '🏆' },
     ]
   },
   {
-    group: 'Cấu Hình',
+    group: 'Config',
     items: [
       { href: '/config',      label: 'Balance Config',  icon: '⚙️'  },
     ]
@@ -119,7 +119,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-red-400 hover:bg-red-900/30 transition-colors"
           >
             <span>🚪</span>
-            {!collapsed && <span>Đăng xuất</span>}
+            {!collapsed && <span>Sign Out</span>}
           </button>
         </div>
       </aside>

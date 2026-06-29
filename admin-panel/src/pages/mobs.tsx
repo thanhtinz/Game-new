@@ -43,7 +43,7 @@ export default function MobsPage() {
 
   async function kill(id: string) {
     if (!confirm('Kill entity này?')) return
-    await mobsApi.kill(id); setMsg('Entity đã bị kill'); load()
+    await mobsApi.kill(id); setMsg('Entity has was kill'); load()
   }
 
   async function spawn() {
@@ -56,7 +56,7 @@ export default function MobsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Mobs / Evolution Entities</h2>
-            <p className="text-gray-400 text-sm mt-1">Quản lý sinh vật, tiến hóa, spawn</p>
+            <p className="text-gray-400 text-sm mt-1">Manage entities, evolution, spawning</p>
           </div>
           <div className="flex gap-3">
             <button onClick={() => setSpawnModal(true)}
@@ -86,14 +86,14 @@ export default function MobsPage() {
         </div>
 
         <Table loading={loading} onRowClick={e => { setSelected(e); setModal(true) }} data={entities} columns={[
-          { key: 'name', label: 'Tên' },
+          { key: 'name', label: 'Name' },
           { key: 'stage', label: 'Stage', render: r =>
             <Badge label={r.stage} color={stageColor(r.stage)} /> },
           { key: 'power', label: 'Power', render: r =>
             <span className="text-orange-400 font-mono font-bold">{r.power?.toFixed(0)}</span> },
           { key: 'evolutionPoints', label: 'Evo Pts', render: r =>
             <span className="text-yellow-400 font-mono">{r.evolutionPoints}</span> },
-          { key: 'pos', label: 'Vị Trí', render: r =>
+          { key: 'pos', label: 'Position', render: r =>
             <span className="text-xs text-gray-400 font-mono">({r.x}, {r.y})</span> },
           { key: 'godInfluenceId', label: 'God', render: r =>
             r.godInfluenceId ? <Badge label="Influenced" color="purple" /> : <span className="text-gray-600">—</span> },
@@ -134,7 +134,7 @@ export default function MobsPage() {
               ))}
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setSpawnModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Hủy</button>
+              <button onClick={() => setSpawnModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Cancel</button>
               <button onClick={spawn} className="px-4 py-2 text-sm bg-purple-700 rounded-lg">Spawn</button>
             </div>
           </div>

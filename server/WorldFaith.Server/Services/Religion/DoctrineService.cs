@@ -6,7 +6,7 @@ namespace WorldFaith.Server.Services.Religion;
 
 /// <summary>
 /// Doctrine System — GDD v1.0 Section 13.
-/// Mỗi religion có 5 doctrine axes, ảnh hưởng AI behavior.
+/// Each religion has 5 doctrine axes, ảnh hưởng AI behavior.
 /// Missionary behavior, crime response, race reactions, royal support.
 /// </summary>
 public interface IDoctrineService
@@ -157,7 +157,7 @@ public class DoctrineService : IDoctrineService
     public async Task<bool> ShouldExecuteHereticAsync(string religionId)
     {
         var doc = await GetDoctrineAsync(religionId);
-        // Punishment > 50 và Order > 30 → execute
+        // Punishment > 50 and Order > 30 → execute
         return doc.MercyVsPunishment > 50f && doc.FreedomVsOrder > 30f;
     }
 

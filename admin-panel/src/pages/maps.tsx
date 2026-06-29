@@ -45,18 +45,18 @@ export default function MapsPage() {
 
   async function saveTile() {
     await mapsApi.updateTile(worldId, selected.x, selected.y, editForm)
-    setMsg(`Tile (${selected.x},${selected.y}) đã cập nhật`); setModal(false); load()
+    setMsg(`Tile (${selected.x},${selected.y}) has cập nhật`); setModal(false); load()
   }
 
   async function placeSacred() {
     if (!selected) return
     await mapsApi.placeSacred(worldId, selected.x, selected.y)
-    setMsg('Sacred site đã đặt'); setModal(false); load()
+    setMsg('Sacred site has đặt'); setModal(false); load()
   }
 
   async function regen() {
-    if (!confirm('Tái sinh toàn bộ map? Tất cả tiles sẽ bị reset!')) return
-    await mapsApi.regen(worldId); setMsg('Map đã tái sinh'); load()
+    if (!confirm('Tái sinh toàn bộ map? All tiles sẽ was reset!')) return
+    await mapsApi.regen(worldId); setMsg('Map has tái sinh'); load()
   }
 
   const W = worldMeta?.width ?? 64
@@ -70,7 +70,7 @@ export default function MapsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Maps & Tiles</h2>
-            <p className="text-gray-400 text-sm mt-1">Click tile để chỉnh biome, fertility, temple</p>
+            <p className="text-gray-400 text-sm mt-1">Click tile to edit biome, fertility, temple</p>
           </div>
           <div className="flex gap-3 items-center">
             <label className="text-xs text-gray-500">Zoom</label>
@@ -99,7 +99,7 @@ export default function MapsPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-20 text-gray-500 animate-pulse">Đang tải map...</div>
+          <div className="text-center py-20 text-gray-500 animate-pulse">Loading map...</div>
         ) : (
           <div className="overflow-auto border border-gray-800 rounded-xl bg-gray-950 p-2">
             <div style={{ display: 'grid', gridTemplateColumns: `repeat(${W}, ${zoom}px)`, gap: '1px', width: 'fit-content' }}>
@@ -154,7 +154,7 @@ export default function MapsPage() {
               <div className="flex items-center gap-3">
                 <input type="checkbox" id="temple" checked={editForm.hasTemple ?? false}
                   onChange={e => setEditForm((p: any) => ({ ...p, hasTemple: e.target.checked }))} />
-                <label htmlFor="temple" className="text-sm text-gray-300">Có Temple</label>
+                <label htmlFor="temple" className="text-sm text-gray-300">Has Temple</label>
               </div>
               <div className="flex gap-3 pt-2">
                 <button onClick={placeSacred}
@@ -162,8 +162,8 @@ export default function MapsPage() {
                   ✨ Place Sacred
                 </button>
                 <div className="flex-1" />
-                <button onClick={() => setModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Hủy</button>
-                <button onClick={saveTile} className="px-4 py-2 text-sm bg-purple-700 rounded-lg">Lưu</button>
+                <button onClick={() => setModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Cancel</button>
+                <button onClick={saveTile} className="px-4 py-2 text-sm bg-purple-700 rounded-lg">Save</button>
               </div>
             </div>
           )}

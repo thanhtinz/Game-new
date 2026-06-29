@@ -53,7 +53,7 @@ public class ChatHub : Hub<IChatHubClient>
         await Clients.Caller.OnChatHistory(history);
 
         // Thông báo join
-        await _chatService.BroadcastSystemAsync(worldId, $"⚡ {god.Name} đã tham gia thế giới");
+        await _chatService.BroadcastSystemAsync(worldId, $"⚡ {god.Name} has tham gia thế giới");
         var sysMsg = await _chatService.GetHistoryAsync(worldId, 1);
         if (sysMsg.Any())
             await Clients.Group($"chat:{worldId}").OnChatMessage(sysMsg.Last());
@@ -90,10 +90,10 @@ public class ChatHub : Hub<IChatHubClient>
 
         if (error != null) { await Clients.Caller.OnChatError(error); return; }
 
-        // Gửi cho sender và receiver
+        // Gửi for sender and receiver
         await Clients.Caller.OnWhisper(msg!);
 
-        // Tìm connection của target god
+        // Tìm connection of target god
         var targetConn = ConnMap.FirstOrDefault(c => c.Value.godId == targetGodId).Key;
         if (targetConn != null)
             await Clients.Client(targetConn).OnWhisper(msg!);

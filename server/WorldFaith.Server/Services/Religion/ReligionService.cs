@@ -22,9 +22,9 @@ public class ReligionService : IReligionService
     private readonly ILogger<ReligionService> _logger;
     private readonly Random _rng = new();
 
-    // Tên schism / heresy ngẫu nhiên
-    private static readonly string[] SchismPrefixes = { "Tân", "Cải cách", "Chính thống", "Huyền bí", "Cấp tiến", "Bảo thủ" };
-    private static readonly string[] HeresyNames   = { "Dị giáo Bóng Tối", "Tà Đạo Nguyên Thủy", "Giáo Phái Bí Ẩn", "Hội Kín Tro Tàn" };
+    // Random schism / heresy names
+    private static readonly string[] SchismPrefixes = { "New", "Reformed", "Orthodox", "Mystic", "Cấp tiến", "Bảo thủ" };
+    private static readonly string[] HeresyNames   = { "Shadow Heresy", "Primordial Heresy", "Giáo Phái Bí Ẩn", "Hội Kín Tro Tàn" };
 
     public ReligionService(
         IReligionRepository religionRepo,
@@ -57,7 +57,7 @@ public class ReligionService : IReligionService
         };
         await _religionRepo.CreateAsync(religion);
 
-        _logger.LogInformation("Tôn giáo '{Name}' được sáng lập bởi god {GodId}", name, godId);
+        _logger.LogInformation("Religion '{Name}' was founded by god {GodId}", name, godId);
         return religion;
     }
 
@@ -73,7 +73,7 @@ public class ReligionService : IReligionService
         {
             bool changed = false;
 
-            // --- Spread mỗi 5 tick ---
+            // --- Spread every 5 ticks ---
             if (tick % 5 == 0)
             {
                 var spread = await SpreadReligionAsync(religion, civs);
@@ -83,7 +83,7 @@ public class ReligionService : IReligionService
             // --- Devotion decay / growth ---
             changed |= TickDevotion(religion, civs);
 
-            // --- Kiểm tra Schism (mỗi 50 tick, devotion thấp) ---
+            // --- Check Schism (every 50 ticks, low devotion) ---
             if (tick % 50 == 0 && religion.FollowerCount > 500 && religion.DevotionLevel < 0.35f)
             {
                 var schism = await TriggerSchismAsync(worldId, religion);
@@ -111,14 +111,14 @@ public class ReligionService : IReligionService
                 }
             }
 
-            // --- Kiểm tra Heresy (mỗi 80 tick) ---
+            // --- Check Heresy (every 80 ticks) ---
             if (tick % 80 == 0 && religion.FollowerCount > 200 && _rng.NextDouble() < 0.08)
             {
                 await TriggerHeresyAsync(worldId, religion);
                 changed = true;
             }
 
-            // --- Kiểm tra Crusade (mỗi 100 tick) ---
+            // --- Check Crusade (every 100 ticks) ---
             if (tick % 100 == 0)
             {
                 var crusadeTarget = await CheckCrusadeAsync(worldId, religion, religions, civs);
@@ -139,7 +139,7 @@ public class ReligionService : IReligionService
                 }
             }
 
-            // --- Kiểm tra bị xóa sổ ---
+            // --- Kiểm tra was erased ---
             if (religion.FollowerCount <= 0 && religion.TempleCount == 0)
             {
                 await _religionRepo.EraseAsync(religion.Id);
@@ -151,12 +151,12 @@ public class ReligionService : IReligionService
                     Erased = true
                 });
 
-                // Giảm follower count của god
+                // Decrease follower count of god
                 var god = await _godRepo.GetByIdAsync(religion.GodId);
                 if (god != null)
                     await _godRepo.UpdateFaithAsync(god.Id, god.Faith * 0.7f, god.Trust * 0.5f, god.Fear, 0);
 
-                _logger.LogInformation("Tôn giáo '{Name}' bị xóa sổ", religion.Name);
+                _logger.LogInformation("Religion '{Name}' was erased", religion.Name);
                 continue;
             }
 
@@ -191,24 +191,24 @@ public class ReligionService : IReligionService
 
         await _religionRepo.UpdateAsync(religion);
 
-        // Cập nhật faith cho god
+        // Update faith for god
         var god = await _godRepo.GetByIdAsync(religion.GodId);
         if (god != null)
             await _godRepo.UpdateFaithAsync(god.Id, god.Faith + 20f, god.Trust + 2f, god.Fear, god.FollowerCount);
 
-        _logger.LogInformation("Temple '{Religion}' xây tại {Civ}", religion.Name, civ.Name);
+        _logger.LogInformation("Temple '{Religion}' built at {Civ}", religion.Name, civ.Name);
     }
 
     // ─── Spread Logic ────────────────────────────────────────
 
     private async Task<bool> SpreadReligionAsync(ReligionDocument religion, List<CivilizationDocument> civs)
     {
-        // Tính xác suất spread dựa vào devotion, temple count, follower count
+        // Tính xác suất spread dựa ando devotion, temple count, follower count
         float spreadChance = religion.DevotionLevel * 0.3f
             + religion.TempleCount * 0.05f
             + MathF.Log10(MathF.Max(1, religion.FollowerCount)) * 0.02f;
 
-        // Các civ chưa theo tôn giáo này
+        // Các civ chưa theo religion này
         var targetCivs = civs
             .Where(c => !religion.CivilizationIds.Contains(c.Id) && c.State != CivilizationState.Fallen)
             .OrderBy(_ => _rng.Next())
@@ -220,7 +220,7 @@ public class ReligionService : IReligionService
         {
             // Fanatic civ dễ convert hơn
             float civBonus = civ.Personality == CivilizationPersonality.Fanatic ? 0.2f : 0f;
-            // Civ đã có tôn giáo khác thì khó hơn
+            // Civ has có religion khác thì khó hơn
             float resistance = civ.ReligionIds.Any() ? 0.3f : 0f;
 
             float chance = spreadChance + civBonus - resistance;
@@ -236,13 +236,13 @@ public class ReligionService : IReligionService
                 if (!civ.ReligionIds.Contains(religion.Id))
                 {
                     civ.ReligionIds.Add(religion.Id);
-                    // Nếu civ chưa có tôn giáo ruling, set luôn
+                    // If civ has no ruling religion, set it now
                     if (civ.RulingReligionId == null)
                         civ.RulingReligionId = religion.Id;
                     await _civRepo.UpdateAsync(civ);
                 }
 
-                // Cập nhật follower count cho god
+                // Update follower count for god
                 var god = await _godRepo.GetByIdAsync(religion.GodId);
                 if (god != null)
                     await _godRepo.UpdateFaithAsync(god.Id, god.Faith, god.Trust + 1f, god.Fear,
@@ -254,7 +254,7 @@ public class ReligionService : IReligionService
             }
         }
 
-        // Tăng follower từ civ đang theo (sinh sản / ảnh hưởng nội bộ)
+        // Increase follower từ civ đang theo (sinh sản / ảnh hưởng nội bộ)
         foreach (var civId in religion.CivilizationIds)
         {
             var civ = civs.FirstOrDefault(c => c.Id == civId);
@@ -281,7 +281,7 @@ public class ReligionService : IReligionService
         int fanaticCount = civs.Count(c => c.RulingReligionId == religion.Id
             && c.Personality == CivilizationPersonality.Fanatic);
         float fanaticBonus = fanaticCount * 0.005f;
-        // Tự nhiên decay nếu không có temple
+        // Tự nhiên decay nếu not có temple
         float decay = religion.TempleCount == 0 ? -0.003f : -0.001f;
 
         religion.DevotionLevel = Clamp01(religion.DevotionLevel + templeBonus + fanaticBonus + decay);
@@ -305,17 +305,17 @@ public class ReligionService : IReligionService
             GodId = parent.GodId, // Vẫn thuộc god gốc nhưng biến thể
             Name = schismName,
             FollowerCount = splitFollowers,
-            DevotionLevel = 0.5f, // Schism bắt đầu với devotion cao (nhiệt huyết)
+            DevotionLevel = 0.5f, // Schism bắt đầu with devotion cao (nhiệt huyết)
             TempleCount = 0,
             SchismIds = new List<string> { parent.Id }
         };
 
         await _religionRepo.CreateAsync(schism);
 
-        // Cập nhật parent
+        // Update parent
         parent.SchismIds.Add(schism.Id);
 
-        _logger.LogInformation("Schism: '{Parent}' tách ra '{Schism}'", parent.Name, schismName);
+        _logger.LogInformation("Schism: '{Parent}' split into '{Schism}'", parent.Name, schismName);
         return schism;
     }
 
@@ -323,7 +323,7 @@ public class ReligionService : IReligionService
 
     private async Task TriggerHeresyAsync(string worldId, ReligionDocument parent)
     {
-        // Heresy là cult ẩn - không gắn với bất kỳ god nào
+        // Heresy là cult ẩn - not gắn with bất kỳ god nào
         string heresyName = HeresyNames[_rng.Next(HeresyNames.Length)];
         int cultFollowers = (int)(parent.FollowerCount * 0.1f);
         parent.FollowerCount -= cultFollowers;
@@ -339,7 +339,7 @@ public class ReligionService : IReligionService
         };
 
         await _religionRepo.CreateAsync(heresy);
-        _logger.LogInformation("Heresy '{Name}' hình thành từ '{Parent}'", heresyName, parent.Name);
+        _logger.LogInformation("Heresy '{Name}' formed from '{Parent}'", heresyName, parent.Name);
     }
 
     // ─── Crusade ─────────────────────────────────────────────
@@ -360,7 +360,7 @@ public class ReligionService : IReligionService
 
         if (crusaderCiv == null) return null;
 
-        // Tìm civ theo tôn giáo đối địch
+        // Tìm civ theo religion đối địch
         var targetReligions = allReligions
             .Where(r => r.Id != religion.Id && r.GodId != religion.GodId)
             .ToList();
@@ -375,7 +375,7 @@ public class ReligionService : IReligionService
 
         if (targetCiv == null) return null;
 
-        // Bắt đầu chiến tranh
+        // Start chiến tranh
         crusaderCiv.IsAtWar = true;
         crusaderCiv.AiMemory.CurrentTarget = targetCiv.Id;
         await _civRepo.UpdateAsync(crusaderCiv);
@@ -383,7 +383,7 @@ public class ReligionService : IReligionService
         targetCiv.IsAtWar = true;
         await _civRepo.UpdateAsync(targetCiv);
 
-        _logger.LogInformation("Thánh chiến: '{Attacker}' tấn công '{Target}' vì tôn giáo '{Religion}'",
+        _logger.LogInformation("Holy War: '{Attacker}' attacks '{Target}' over religion '{Religion}'",
             crusaderCiv.Name, targetCiv.Name, religion.Name);
 
         return targetCiv;

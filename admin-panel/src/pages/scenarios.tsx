@@ -17,7 +17,7 @@ const SCENARIOS: ScenarioInfo[] = [
   {
     type: 'Standard',
     name: '⚖️ Tiêu Chuẩn',
-    description: 'Game thông thường. Nhiều điều kiện thắng. Phù hợp cho tất cả người chơi.',
+    description: 'Game thông thường. Nhiều điều kiện thắng. Phù hợp for tất cả người chơi.',
     maxCycles: 999,
     faithMultiplier: 1,
     entityPowerMultiplier: 1,
@@ -28,7 +28,7 @@ const SCENARIOS: ScenarioInfo[] = [
   {
     type: 'TheLastLight',
     name: '☀️ Ánh Sáng Cuối Cùng',
-    description: '1 god Light chống lại tất cả. Light thắng nếu sống sót qua 3 chu kỳ.',
+    description: '1 god Light chống lại tất cả. Light thắng nếu sống sót qua 3 cycles.',
     maxCycles: 3,
     faithMultiplier: 1,
     entityPowerMultiplier: 1,
@@ -39,7 +39,7 @@ const SCENARIOS: ScenarioInfo[] = [
   {
     type: 'ReligionWars',
     name: '✝️ Thánh Chiến',
-    description: 'Chỉ thắng khi tôn giáo của bạn chiếm >70% followers thế giới.',
+    description: 'Chỉ thắng when religion of bạn chiếm >70% followers thế giới.',
     maxCycles: 5,
     faithMultiplier: 1,
     entityPowerMultiplier: 1,
@@ -72,7 +72,7 @@ const SCENARIOS: ScenarioInfo[] = [
   {
     type: 'Apocalypse',
     name: '☄️ Ngày Tận Thế',
-    description: 'Monsters mạnh gấp 3x. Civilizations liên tục bị tấn công. Survive!',
+    description: 'Monsters mạnh gấp 3x. Civilizations liên tục was attacks. Survive!',
     maxCycles: 2,
     faithMultiplier: 1,
     entityPowerMultiplier: 3,
@@ -97,7 +97,7 @@ export default function ScenariosPage() {
         <div className="mb-6">
           <h2 className="text-2xl font-bold">Scenarios</h2>
           <p className="text-gray-400 text-sm mt-1">
-            6 kịch bản game — người chơi chọn khi tạo phòng. Các params được định nghĩa trong code,
+            6 kịch bản game — người chơi chọn when tạo room. Các params was định nghĩa trong code,
             điều chỉnh via Balance Config.
           </p>
         </div>
@@ -116,7 +116,7 @@ export default function ScenariosPage() {
 
               <div className="flex flex-wrap gap-2 mb-3">
                 {s.maxCycles < 999 && (
-                  <Badge text={`Max ${s.maxCycles} chu kỳ`} color="bg-blue-900 text-blue-300" />
+                  <Badge text={`Max ${s.maxCycles} cycles`} color="bg-blue-900 text-blue-300" />
                 )}
                 {s.faithMultiplier !== 1 && (
                   <Badge text={`Faith x${s.faithMultiplier}`} color="bg-yellow-900 text-yellow-300" />
@@ -143,8 +143,8 @@ export default function ScenariosPage() {
         <div className="mt-6 bg-gray-900 border border-gray-800 rounded-xl p-4">
           <h3 className="font-semibold mb-2">💡 Cách thêm Scenario mới</h3>
           <p className="text-gray-400 text-sm">
-            Thêm vào <code className="text-green-400">ScenarioConfigs.All</code> trong{' '}
-            <code className="text-green-400">ScenarioController.cs</code> và thêm vào{' '}
+            Thêm ando <code className="text-green-400">ScenarioConfigs.All</code> trong{' '}
+            <code className="text-green-400">ScenarioController.cs</code> and thêm ando{' '}
             <code className="text-green-400">scenarios[]</code> trong{' '}
             <code className="text-green-400">LobbyUI.cs</code>.
           </p>

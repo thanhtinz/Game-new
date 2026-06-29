@@ -28,25 +28,25 @@ export default function PlayersPage() {
 
   async function ban() {
     if (!banReason.trim()) return
-    await playersApi.ban(selected.id, banReason); setMsg('Đã ban'); setModal(false); load()
+    await playersApi.ban(selected.id, banReason); setMsg('Banned'); setModal(false); load()
   }
 
   async function unban() {
-    await playersApi.unban(selected.id); setMsg('Đã unban'); setModal(false); load()
+    await playersApi.unban(selected.id); setMsg('Unbanned'); setModal(false); load()
   }
 
   async function resetPass() {
     if (!newPass.trim()) return
-    await playersApi.resetPassword(selected.id, newPass); setMsg('Đã reset mật khẩu'); load()
+    await playersApi.resetPassword(selected.id, newPass); setMsg('Password reset'); load()
   }
 
   async function promote() {
-    await playersApi.promote(selected.id); setMsg('Đã promote thành Admin'); setModal(false); load()
+    await playersApi.promote(selected.id); setMsg('Promoted to Admin'); setModal(false); load()
   }
 
   async function demote() {
     if (!confirm('Bỏ quyền Admin?')) return
-    await playersApi.demote(selected.id); setMsg('Đã demote'); setModal(false); load()
+    await playersApi.demote(selected.id); setMsg('Demoted'); setModal(false); load()
   }
 
   return (
@@ -55,10 +55,10 @@ export default function PlayersPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Players</h2>
-            <p className="text-gray-400 text-sm mt-1">Quản lý tài khoản — ban, unban, reset password, phân quyền</p>
+            <p className="text-gray-400 text-sm mt-1">Manage accounts — ban, unban, reset password, permissions</p>
           </div>
           <input
-            type="text" placeholder="Tìm theo email / username..."
+            type="text" placeholder="Search by email / username..."
             value={search} onChange={e => { setSearch(e.target.value); setPage(1) }}
             className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm w-64 focus:border-purple-600 outline-none"
           />
@@ -77,17 +77,17 @@ export default function PlayersPage() {
             <span className="font-mono text-gray-400">{r.totalGames ?? 0}</span> },
           { key: 'wins', label: 'Wins', render: r =>
             <span className="font-mono text-yellow-400">{r.wins ?? 0}</span> },
-          { key: 'createdAt', label: 'Ngày đăng ký', render: r =>
+          { key: 'createdAt', label: 'Registered', render: r =>
             <span className="text-xs text-gray-500">{r.createdAt ? new Date(r.createdAt).toLocaleDateString('vi') : '—'}</span> },
         ]} />
 
         {/* Pagination */}
         <div className="flex items-center justify-between mt-4 text-sm text-gray-500">
-          <span>{total} tài khoản</span>
+          <span>{total} accounts</span>
           <div className="flex gap-2">
             <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
               className="px-3 py-1.5 bg-gray-800 rounded disabled:opacity-40 hover:bg-gray-700">←</button>
-            <span className="px-3 py-1.5">Trang {page}</span>
+            <span className="px-3 py-1.5">Page {page}</span>
             <button onClick={() => setPage(p => p + 1)} disabled={players.length < 20}
               className="px-3 py-1.5 bg-gray-800 rounded disabled:opacity-40 hover:bg-gray-700">→</button>
           </div>
@@ -112,7 +112,7 @@ export default function PlayersPage() {
                 {selected.isActive ? (
                   <>
                     <input value={banReason} onChange={e => setBanReason(e.target.value)}
-                      placeholder="Lý do ban..."
+                      placeholder="Reason for ban..."
                       className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm"
                     />
                     <button onClick={ban}
@@ -130,30 +130,30 @@ export default function PlayersPage() {
 
               {/* Reset Password */}
               <div className="border border-gray-800 rounded-lg p-3 space-y-2">
-                <p className="text-xs text-gray-400 font-semibold">Reset Mật Khẩu</p>
+                <p className="text-xs text-gray-400 font-semibold">Reset Password</p>
                 <input value={newPass} onChange={e => setNewPass(e.target.value)}
-                  placeholder="Mật khẩu mới..."
+                  placeholder="New password..."
                   type="password"
                   className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm"
                 />
                 <button onClick={resetPass}
                   className="w-full py-2 bg-blue-900/60 border border-blue-700 text-blue-300 rounded-lg text-sm hover:bg-blue-900">
-                  🔑 Reset Mật Khẩu
+                  🔑 Reset Password
                 </button>
               </div>
 
               {/* Promote/Demote */}
               <div className="border border-gray-800 rounded-lg p-3">
-                <p className="text-xs text-gray-400 font-semibold mb-2">Phân Quyền Admin</p>
+                <p className="text-xs text-gray-400 font-semibold mb-2">Admin Permissions</p>
                 {selected.isAdmin ? (
                   <button onClick={demote}
                     className="w-full py-2 bg-orange-900/60 border border-orange-700 text-orange-300 rounded-lg text-sm hover:bg-orange-900">
-                    ⬇ Bỏ quyền Admin
+                    ⬇ Remove Admin
                   </button>
                 ) : (
                   <button onClick={promote}
                     className="w-full py-2 bg-purple-900/60 border border-purple-700 text-purple-300 rounded-lg text-sm hover:bg-purple-900">
-                    ⬆ Promote thành Admin
+                    ⬆ Promote to Admin
                   </button>
                 )}
               </div>

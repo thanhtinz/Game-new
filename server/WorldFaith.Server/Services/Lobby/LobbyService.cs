@@ -62,10 +62,10 @@ public class LobbyService : ILobbyService
     public async Task<(RoomDto? room, string? error)> CreateRoomAsync(
         string playerId, string displayName, CreateRoomRequest request)
     {
-        // Player không được ở 2 phòng cùng lúc
+        // Player cannot be in 2 rooms at the same time
         var existing = await _roomRepo.GetByPlayerIdAsync(playerId);
         if (existing != null)
-            return (null, "Bạn đang ở trong phòng khác");
+            return (null, "You are already in another room");
 
         string? passwordHash = null;
         if (request.IsPrivate && !string.IsNullOrEmpty(request.Password))
@@ -93,10 +93,10 @@ public class LobbyService : ILobbyService
         await _roomRepo.CreateAsync(room);
 
         var dto = MapToDto(room);
-        // Broadcast danh sách phòng cập nhật cho lobby
+        // Broadcast updated room list to lobby
         await _lobbyHub.Clients.Group("lobby").OnRoomListUpdated(dto);
 
-        _logger.LogInformation("Room tạo: {RoomName} bởi {DisplayName}", room.Name, displayName);
+        _logger.LogInformation("Room created: {RoomName} by {DisplayName}", room.Name, displayName);
         return (dto, null);
     }
 
@@ -105,23 +105,23 @@ public class LobbyService : ILobbyService
     {
         var existing = await _roomRepo.GetByPlayerIdAsync(playerId);
         if (existing != null)
-            return (null, "Bạn đang ở trong phòng khác");
+            return (null, "You are already in another room");
 
         var room = await _roomRepo.GetByIdAsync(request.RoomId);
         if (room == null)
-            return (null, "Phòng không tồn tại");
+            return (null, "Room does not exist");
 
         if (room.Status != RoomStatus.Waiting)
-            return (null, "Phòng đã bắt đầu hoặc đã kết thúc");
+            return (null, "Room has already started or ended");
 
         if (room.Players.Count >= room.MaxPlayers)
-            return (null, "Phòng đã đầy");
+            return (null, "Room is full");
 
         if (room.IsPrivate && !string.IsNullOrEmpty(room.PasswordHash))
         {
             if (string.IsNullOrEmpty(request.Password) ||
                 !BCrypt.Net.BCrypt.Verify(request.Password, room.PasswordHash))
-                return (null, "Mật khẩu không đúng");
+                return (null, "Incorrect password");
         }
 
         var entry = new RoomPlayerEntry { PlayerId = playerId, DisplayName = displayName };
@@ -130,10 +130,10 @@ public class LobbyService : ILobbyService
         var updatedRoom = await _roomRepo.GetByIdAsync(room.Id);
         var dto = MapToDto(updatedRoom!);
 
-        // Notify tất cả player trong phòng
+        // Notify all players in the room
         await _lobbyHub.Clients.Group(room.Id).OnRoomUpdated(new RoomUpdatedEvent { Room = dto });
 
-        _logger.LogInformation("Player {DisplayName} vào phòng {RoomName}", displayName, room.Name);
+        _logger.LogInformation("Player {DisplayName} joined room {RoomName}", displayName, room.Name);
         return (dto, null);
     }
 
@@ -144,7 +144,7 @@ public class LobbyService : ILobbyService
 
         await _roomRepo.RemovePlayerAsync(room.Id, playerId);
 
-        // Nếu host rời thì chuyển host hoặc giải tán phòng
+        // If host leaves, transfer host or disband room
         if (room.HostPlayerId == playerId)
         {
             var remaining = room.Players.Where(p => p.PlayerId != playerId).ToList();
@@ -155,7 +155,7 @@ public class LobbyService : ILobbyService
             }
             else
             {
-                // Chuyển host cho player tiếp theo
+                // Transfer host to next player
                 var newHost = remaining.First();
                 room.HostPlayerId = newHost.PlayerId;
                 room.HostDisplayName = newHost.DisplayName;
@@ -200,17 +200,17 @@ public class LobbyService : ILobbyService
     public async Task<(bool success, string? error)> StartGameAsync(string playerId)
     {
         var room = await _roomRepo.GetByPlayerIdAsync(playerId);
-        if (room == null) return (false, "Không tìm thấy phòng");
+        if (room == null) return (false, "Room not found");
 
         if (room.HostPlayerId != playerId)
-            return (false, "Chỉ host mới có thể bắt đầu game");
+            return (false, "Only the host can start the game");
 
         if (room.Players.Count < 2)
-            return (false, "Cần ít nhất 2 người chơi");
+            return (false, "At least 2 players required");
 
         var notReady = room.Players.Where(p => !p.IsReady && !p.IsHost).ToList();
         if (notReady.Any())
-            return (false, $"{notReady.Count} người chơi chưa sẵn sàng");
+            return (false, $"{notReady.Count} player(s) not ready");
 
         // Countdown
         await _lobbyHub.Clients.Group(room.Id).OnGameStarting(new GameStartingEvent
@@ -220,7 +220,7 @@ public class LobbyService : ILobbyService
 
         await Task.Delay(3000);
 
-        // Tạo world
+        // Create world
         if (!Enum.TryParse<GameMode>(room.GameMode, out var mode)) mode = GameMode.Sandbox;
         if (!Enum.TryParse<VictoryCondition>(room.VictoryCondition, out var victory))
             victory = VictoryCondition.LastSurvivingGod;
@@ -240,7 +240,7 @@ public class LobbyService : ILobbyService
         // WorldGenerator sinh map procedural (tiles + civilizations)
         await _worldGen.GenerateAsync(world.Id, world.Width, world.Height);
 
-        // Spawn NPC Tier 2-5 cho mỗi civilization (v3)
+        // Spawn NPC Tier 2-5 for each civilization (v3)
         var npcSpawn = _serviceProvider?.GetService<INpcSpawnService>();
         if (npcSpawn != null)
         {
@@ -257,14 +257,14 @@ public class LobbyService : ILobbyService
 
         await _roomRepo.SetStatusAsync(room.Id, RoomStatus.InGame, world.Id);
 
-        // Notify world id để client switch scene
+        // Notify world id so client can switch scene
         await _lobbyHub.Clients.Group(room.Id).OnGameStarting(new GameStartingEvent
         {
             WorldId = world.Id,
             CountdownSeconds = 0
         });
 
-        _logger.LogInformation("Game bắt đầu: World {WorldId} từ Room {RoomId}", world.Id, room.Id);
+        _logger.LogInformation("Game started: World {WorldId} from Room {RoomId}", world.Id, room.Id);
         return (true, null);
     }
 
@@ -292,7 +292,7 @@ public class LobbyService : ILobbyService
         await _roomRepo.RemovePlayerAsync(room.Id, targetPlayerId);
         await _lobbyHub.Clients.User(targetPlayerId).OnKicked(new KickedFromRoomEvent
         {
-            Reason = "Bạn đã bị kick khỏi phòng"
+            Reason = "You have been kicked from the room"
         });
 
         var updatedRoom = await _roomRepo.GetByIdAsync(room.Id);

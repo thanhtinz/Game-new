@@ -177,7 +177,7 @@ public class WorldSimulationLoop : BackgroundService
                 await HandleRebirthAsync(scope, world.Id, cycle);
             }
 
-            // Kiểm tra win condition (nếu có scenario)
+            // Check win condition (nếu có scenario)
             var scenarioCtrl = scope.ServiceProvider.GetRequiredService<IScenarioController>();
             // Load scenario config từ world document
             if (!Enum.TryParse<ScenarioType>(world.ScenarioType, out var scenarioType))
@@ -219,8 +219,8 @@ public class WorldSimulationLoop : BackgroundService
                     Type = u.Collapsed ? WorldEventType.CivilizationCollapsed : WorldEventType.MiraclePerformed,
                     TargetId = u.CivilizationId,
                     Description = u.Collapsed
-                        ? $"{u.Name} đã sụp đổ"
-                        : $"{u.Name}: dân số {u.Population}"
+                        ? $"{u.Name} has collapsed"
+                        : $"{u.Name}: population {u.Population}"
                 }).ToList()
             };
 
@@ -269,10 +269,10 @@ public class WorldSimulationLoop : BackgroundService
             }
         }
 
-        // Xóa civilizations cũ, chuẩn bị world mới
+        // Delete civilizations cũ, chuẩn was world mới
         await civRepo.DeleteByWorldAsync(worldId);
 
-        // Xóa evolution entities cũ
+        // Delete evolution entities cũ
         var entityRepo = scope.ServiceProvider.GetRequiredService<IEvolutionEntityRepository>();
         await entityRepo.DeleteByWorldAsync(worldId);
 
@@ -304,7 +304,7 @@ public class WorldSimulationLoop : BackgroundService
         // Broadcast chat thông báo rebirth
         var chatService = scope.ServiceProvider.GetRequiredService<IChatService>();
         await chatService.BroadcastSystemAsync(worldId,
-            $"🌍 Thế giới bước sang chu kỳ {newCycle}. {fadedIds.Count} thần đã biến mất mãi mãi.");
+            $"🌍 Thế giới bước sang cycles {newCycle}. {fadedIds.Count} thần has biến mất mãi mãi.");
 
         // Spawn civilizations mới
         var civSim = scope.ServiceProvider.GetRequiredService<ICivilizationSimulationService>();

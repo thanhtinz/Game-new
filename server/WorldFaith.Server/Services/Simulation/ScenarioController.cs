@@ -36,14 +36,14 @@ public static class ScenarioConfigs
         {
             Type = ScenarioType.Standard,
             Name = "Tiêu Chuẩn",
-            Description = "Game thông thường. Nhiều điều kiện thắng.",
+            Description = "Standard game. Multiple win conditions.",
             MaxCycles = 999
         },
         [ScenarioType.TheLastLight] = new ScenarioConfig
         {
             Type = ScenarioType.TheLastLight,
             Name = "Ánh Sáng Cuối Cùng",
-            Description = "1 god Light chống lại tất cả. Light thắng nếu sống sót 3 cycles.",
+            Description = "1 Light god against all others. Light wins if they survive 3 cycles.",
             MaxCycles = 3,
             MinPlayersForScenario = 3
         },
@@ -51,7 +51,7 @@ public static class ScenarioConfigs
         {
             Type = ScenarioType.ReligionWars,
             Name = "Thánh Chiến",
-            Description = "Chỉ thắng khi tôn giáo của bạn chiếm > 70% followers thế giới.",
+            Description = "Win only when your religion holds > 70% of world followers.",
             MaxCycles = 5,
             ReligionWinOnly = true
         },
@@ -75,7 +75,7 @@ public static class ScenarioConfigs
         {
             Type = ScenarioType.Apocalypse,
             Name = "Ngày Tận Thế",
-            Description = "Monsters mạnh gấp 3x. Civilizations liên tục bị tấn công. Survive!",
+            Description = "Monsters mạnh gấp 3x. Civilizations liên tục was attacks. Survive!",
             MaxCycles = 2,
             EntityPowerMultiplier = 3f
         },
@@ -123,9 +123,9 @@ public class ScenarioController : IScenarioController
             return (true, aliveGods[0].PlayerId, "Thần cuối cùng còn lại!");
 
         if (aliveGods.Count == 0)
-            return (true, null, "Tất cả thần đã biến mất — không ai thắng!");
+            return (true, null, "Tất cả thần has biến mất — not ai thắng!");
 
-        // Kiểm tra max cycles
+        // Check max cycles
         if (config.MaxCycles != 999 && cycle >= config.MaxCycles)
         {
             // Sau max cycles: god nhiều followers nhất thắng
@@ -150,7 +150,7 @@ public class ScenarioController : IScenarioController
 
     public async Task ApplyScenarioEffectsAsync(string worldId, ScenarioConfig config, long tick)
     {
-        // Áp dụng entity power multiplier
+        // Apply entity power multiplier
         if (config.EntityPowerMultiplier != 1f && tick % 50 == 0)
         {
             var entities = await _entityRepo.GetByWorldAsync(worldId);
@@ -187,7 +187,7 @@ public class ScenarioController : IScenarioController
             float ratio = (float)godFollowers / total;
             if (ratio >= 0.70f)
                 return (true, god.PlayerId,
-                    $"Tôn giáo của {god.Name} chiếm {ratio:P0} tín đồ thế giới!");
+                    $"The religion of {god.Name} holds {ratio:P0} of world believers!");
         }
 
         return (false, null, "");
@@ -208,7 +208,7 @@ public class ScenarioController : IScenarioController
         if (winnerGod == null) return (false, null, "");
 
         return (true, winnerGod.PlayerId,
-            $"{winnerGod.Name} đã tiến hóa {apex.Name} lên {apex.Stage}!");
+            $"{winnerGod.Name} has evolved {apex.Name} lên {apex.Stage}!");
     }
 
     private static (bool, string?, string) CheckLastLightAsync(
@@ -218,11 +218,11 @@ public class ScenarioController : IScenarioController
             g.Archetype == Shared.Enums.GodArchetype.Light && g.IsAlive);
 
         if (lightGod == null)
-            return (true, null, "Ánh sáng đã bị dập tắt — Bóng Tối chiến thắng!");
+            return (true, null, "Ánh sáng has was dập tắt — Shadow chiến thắng!");
 
         if (cycle >= maxCycles)
             return (true, lightGod.PlayerId,
-                $"{lightGod.Name} đã giữ vững ánh sáng qua {cycle} chu kỳ!");
+                $"{lightGod.Name} has giữ vững ánh sáng qua {cycle} cycles!");
 
         return (false, null, "");
     }

@@ -6,9 +6,9 @@ namespace WorldFaith.Server.Services.Race;
 
 /// <summary>
 /// Race Faith Affinity System — GDD v1.0 Section 9.
-/// Quản lý affinity matrix giữa các race và god archetypes.
+/// Manage affinity matrix giữa các race and god archetypes.
 /// Affinity ảnh hưởng conversion speed, faith gain, trust, resistance to doubt.
-/// Affinity = probability, không phải destiny — traits cá nhân có thể override.
+/// Affinity = probability, not phải destiny — traits cá nhân có thể override.
 /// </summary>
 public interface IRaceAffinityService
 {
@@ -118,7 +118,7 @@ public class RaceAffinityService : IRaceAffinityService
         },
     };
 
-    // Trait overrides (bonus % thêm vào affinity)
+    // Trait overrides (bonus % thêm ando affinity)
     private static readonly Dictionary<RaceTrait, Dictionary<GodArchetype, float>> TraitBonuses = new()
     {
         [RaceTrait.Genius]       = new() { [GodArchetype.Knowledge] = 50f },
@@ -149,14 +149,14 @@ public class RaceAffinityService : IRaceAffinityService
             if (entry != null) return entry.Percentage;
         }
 
-        // Fallback về default matrix
+        // Fallback to default matrix
         if (DefaultMatrix.TryGetValue(race, out var matrix) && matrix.TryGetValue(domain, out var pct))
             return pct;
-        return 100f; // Neutral nếu không có data
+        return 100f; // Neutral nếu not có data
     }
 
     /// <summary>
-    /// Conversion modifier cho NPC cụ thể.
+    /// Conversion modifier for NPC cụ thể.
     /// Kết hợp racial affinity + personal traits + environmental memory.
     /// </summary>
     public async Task<float> GetConversionModifierAsync(
@@ -183,7 +183,7 @@ public class RaceAffinityService : IRaceAffinityService
     }
 
     /// <summary>
-    /// Faith gain multiplier cho region với racial composition.
+    /// Faith gain multiplier for region with racial composition.
     /// </summary>
     public async Task<float> GetFaithGainModifierAsync(string worldId, RaceType race, GodArchetype domain)
     {
@@ -219,8 +219,8 @@ public class RaceAffinityService : IRaceAffinityService
     // ─── Environmental Memory ─────────────────────────────────
 
     /// <summary>
-    /// Ghi nhớ sự kiện ảnh hưởng đến trust của race với god.
-    /// Ví dụ: God floods orc camp → orcs mất trust với god đó.
+    /// Ghi nhớ sự kiện ảnh hưởng đến trust of race with god.
+    /// Ví dụ: God floods orc camp → orcs mất trust with god đó.
     /// </summary>
     public async Task RecordEnvironmentalMemoryAsync(
         string worldId, RaceType race, string godId, float trustDelta, string reason)

@@ -66,7 +66,7 @@ public class PlayerRepository : IPlayerRepository
 
     public async Task AddRefreshTokenAsync(string playerId, RefreshTokenEntry token)
     {
-        // Xóa tokens hết hạn trước khi thêm mới
+        // Delete tokens hết hạn trước when thêm mới
         var pullExpired = Builders<PlayerDocument>.Update.PullFilter(
             p => p.RefreshTokens,
             t => t.ExpiresAt < DateTime.UtcNow || t.IsRevoked);

@@ -21,7 +21,7 @@ public class PlayerDocument
     public int TotalWins { get; set; }
     public int TotalGames { get; set; }
 
-    // Refresh tokens (hỗ trợ multi-device)
+    // Refresh tokens (multi-device support)
     public List<RefreshTokenEntry> RefreshTokens { get; set; } = new();
 
     public bool IsActive { get; set; } = true;

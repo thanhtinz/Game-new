@@ -31,7 +31,7 @@ export default function WorldsPage() {
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-6">Worlds</h2>
 
-        {isLoading && <p className="text-gray-500">Đang tải...</p>}
+        {isLoading && <p className="text-gray-500">Loading...</p>}
 
         <div className="space-y-3">
           {worlds?.map(w => (
@@ -80,7 +80,7 @@ export default function WorldsPage() {
                   ['Civs',      w.civCount,              '🏛'],
                   ['Religions', w.religionCount,         '✝'],
                   ['Entities',  w.entityCount,           '🐉'],
-                  ['Created',   new Date(w.createdAt).toLocaleDateString('vi-VN'), '📅'],
+                  ['Created',   new Date(w.createdAt).toLocaleDateString('en-US'), '📅'],
                 ].map(([label, val, icon]) => (
                   <div key={String(label)} className="bg-gray-800 rounded-lg p-2 text-center">
                     <div className="text-lg">{icon}</div>
@@ -102,21 +102,21 @@ export default function WorldsPage() {
               </h3>
               <p className="text-gray-400 text-sm mb-4">
                 {confirmAction.type === 'end'
-                  ? 'World sẽ bị kết thúc ngay lập tức. Tất cả players sẽ bị disconnect.'
-                  : 'World sẽ rebirth ngay. Toàn bộ civ và entity sẽ bị xóa.'}
+                  ? 'The world will end immediately. All players will be disconnected.'
+                  : 'The world will rebirth immediately. All civs and entities will be removed.'}
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => handleAction(confirmAction.type, confirmAction.worldId)}
                   className="flex-1 bg-red-700 hover:bg-red-600 py-2 rounded-lg text-sm font-semibold transition-colors"
                 >
-                  Xác nhận
+                  Confirm
                 </button>
                 <button
                   onClick={() => setConfirmAction(null)}
                   className="flex-1 bg-gray-800 hover:bg-gray-700 py-2 rounded-lg text-sm transition-colors"
                 >
-                  Hủy
+                  Cancel
                 </button>
               </div>
             </div>

@@ -51,14 +51,14 @@ public class AuthService : IAuthService
             return Fail("Password phải có ít nhất 6 ký tự");
 
         if (!request.Email.Contains('@'))
-            return Fail("Email không hợp lệ");
+            return Fail("Email not hợp lệ");
 
-        // Kiểm tra trùng
+        // Check trùng
         if (await _playerRepo.GetByEmailAsync(request.Email) != null)
-            return Fail("Email đã được sử dụng");
+            return Fail("Email has was sử dụng");
 
         if (await _playerRepo.GetByUsernameAsync(request.Username) != null)
-            return Fail("Username đã được sử dụng");
+            return Fail("Username has was sử dụng");
 
         var player = new PlayerDocument
         {
@@ -80,10 +80,10 @@ public class AuthService : IAuthService
         var player = await _playerRepo.GetByEmailAsync(request.Email);
 
         if (player == null || !VerifyPassword(request.Password, player.PasswordHash))
-            return Fail("Email hoặc password không đúng");
+            return Fail("Email hoặc password not đúng");
 
         if (!player.IsActive)
-            return Fail("Tài khoản đã bị khóa");
+            return Fail("Tài khoản has was khóa");
 
         await _playerRepo.UpdateLastLoginAsync(player.Id);
         _logger.LogInformation("Player đăng nhập: {Username}", player.Username);
@@ -95,7 +95,7 @@ public class AuthService : IAuthService
     {
         var player = await _playerRepo.GetByRefreshTokenAsync(refreshToken);
         if (player == null)
-            return Fail("Refresh token không hợp lệ hoặc đã hết hạn");
+            return Fail("Refresh token not hợp lệ hoặc has hết hạn");
 
         // Revoke token cũ (rotation)
         await _playerRepo.RevokeRefreshTokenAsync(player.Id, refreshToken);

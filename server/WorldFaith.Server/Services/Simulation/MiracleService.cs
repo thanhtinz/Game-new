@@ -53,10 +53,10 @@ public class MiracleService : IMiracleService
     {
         var god = await _godRepo.GetByIdAsync(godId);
         if (god == null || !god.IsAlive)
-            return FailEvent(godId, miracle, "God không tồn tại hoặc đã chết");
+            return FailEvent(godId, miracle, "God not tồn tại hoặc died");
 
         if (!god.UnlockedMiracles.Contains(miracle))
-            return FailEvent(godId, miracle, "Miracle chưa được mở khóa");
+            return FailEvent(godId, miracle, "Miracle chưa was mở khóa");
 
         if (!await _faithService.CanPerformMiracleAsync(godId, miracle))
             return FailEvent(godId, miracle, "Không đủ Faith");
@@ -83,7 +83,7 @@ public class MiracleService : IMiracleService
         if (god2?.PlayerId != null)
             await _leaderboard.RecordMiracleAsync(god2.PlayerId, wasCountered: false);
 
-        // Đưa vào pending để rival gods có thể counter (từ balance config)
+        // Đưa ando pending để rival gods có thể counter (từ balance config)
         int counterWindowSec = (int)await _balance.GetFloatAsync("miracle.counter_window_sec");
         _pendingMiracles[eventDoc.Id] = (eventDoc, DateTime.UtcNow.AddSeconds(counterWindowSec));
 
@@ -120,12 +120,12 @@ public class MiracleService : IMiracleService
         if (!await _faithService.CanPerformMiracleAsync(counteringGodId, counter))
             return null;
 
-        // Counter miracle giảm hiệu ứng của miracle gốc
+        // Counter miracle giảm hiệu ứng of miracle gốc
         var counterCost = await _faithService.ConsumeFaithAsync(counteringGodId, counter);
 
         _pendingMiracles.Remove(miracleEventId);
 
-        // Cập nhật event gốc
+        // Update event gốc
         pending.doc.WasCountered = true;
         pending.doc.CounteredByGodId = counteringGodId;
 
@@ -140,7 +140,7 @@ public class MiracleService : IMiracleService
             WasCountered = true,
             CounteredByGodId = counteringGodId,
             FaithCost = counterCost,
-            Description = $"{counterGod.Name} đã phản phép {pending.doc.Miracle}"
+            Description = $"{counterGod.Name} has phản phép {pending.doc.Miracle}"
         };
     }
 
@@ -154,19 +154,19 @@ public class MiracleService : IMiracleService
             MiracleType.Rain => await ApplyRain(worldId, x, y),
             MiracleType.Dream => await ApplyDream(worldId, godId, targetCivId),
             MiracleType.BlessHarvest => await ApplyBlessHarvest(worldId, targetCivId),
-            MiracleType.HealFollower => "Follower được chữa lành, Trust tăng",
+            MiracleType.HealFollower => "Follower was chữa lành, Trust tăng",
             MiracleType.Omen => await ApplyOmen(worldId, godId, targetCivId),
             MiracleType.Storm => await ApplyStorm(worldId, x, y),
             MiracleType.Earthquake => await ApplyEarthquake(worldId, x, y),
             MiracleType.Curse => await ApplyCurse(worldId, targetCivId),
-            MiracleType.Portal => "Portal được mở, thương mại liên vùng tăng",
+            MiracleType.Portal => "Portal was mở, thương mại liên vùng tăng",
             MiracleType.DivineVoice => await ApplyDivineVoice(worldId, godId, targetCivId),
             MiracleType.Volcano => await ApplyVolcano(worldId, x, y),
             MiracleType.DemonInvasion => await ApplyDemonInvasion(worldId, x, y),
             MiracleType.DivineBeastCreation => "Divine Beast xuất hiện",
             MiracleType.Revelation => await ApplyRevelation(worldId, godId),
             MiracleType.HolyWar => await ApplyHolyWar(worldId, godId),
-            _ => "Miracle được thực thi"
+            _ => "Miracle was thực thi"
         };
     }
 
@@ -177,18 +177,18 @@ public class MiracleService : IMiracleService
     {
         if (civId == null) return "Dream gửi đến toàn thế giới";
         var civ = await _civRepo.GetByIdAsync(civId);
-        if (civ == null) return "Civilization không tìm thấy";
+        if (civ == null) return "Civilization not tìm thấy";
         civ.AiMemory.GodTrustLevel += 5f;
         civ.AiMemory.LastGodInteraction = godId;
         await _civRepo.UpdateAsync(civ);
-        return $"{civ.Name} nhận được giấc mơ thần thánh, Trust tăng";
+        return $"{civ.Name} nhận was giấc mơ thần thánh, Trust tăng";
     }
 
     private async Task<string> ApplyBlessHarvest(string worldId, string? civId)
     {
-        if (civId == null) return "Harvest được ban phước";
+        if (civId == null) return "Harvest was ban phước";
         var civ = await _civRepo.GetByIdAsync(civId);
-        if (civ == null) return "Không tìm thấy civilization";
+        if (civ == null) return "Not found civilization";
         civ.Economy += 20f;
         civ.Population += (int)(civ.Population * 0.05f);
         await _civRepo.UpdateAsync(civ);
@@ -199,7 +199,7 @@ public class MiracleService : IMiracleService
     {
         if (civId == null) return "Điềm báo xuất hiện khắp thế giới";
         var civ = await _civRepo.GetByIdAsync(civId);
-        if (civ == null) return "Không tìm thấy civilization";
+        if (civ == null) return "Not found civilization";
         civ.AiMemory.GodTrustLevel += 2f;
         await _civRepo.UpdateAsync(civ);
         return $"Điềm báo thần thánh xuất hiện tại {civ.Name}";
@@ -209,24 +209,24 @@ public class MiracleService : IMiracleService
         => $"Cơn bão tàn phá vùng ({x},{y}), Military -10 các civ lân cận";
 
     private async Task<string> ApplyEarthquake(string worldId, int x, int y)
-        => $"Động đất tại ({x},{y}), hủy diệt công trình và giảm Population";
+        => $"Động đất tại ({x},{y}), hủy diệt công trình and giảm Population";
 
     private async Task<string> ApplyCurse(string worldId, string? civId)
     {
         if (civId == null) return "Lời nguyền phủ lên thế giới";
         var civ = await _civRepo.GetByIdAsync(civId);
-        if (civ == null) return "Không tìm thấy civilization";
+        if (civ == null) return "Not found civilization";
         civ.Economy -= 15f;
         civ.AiMemory.GodTrustLevel -= 10f;
         await _civRepo.UpdateAsync(civ);
-        return $"{civ.Name} bị nguyền: Economy -15, Trust -10";
+        return $"{civ.Name} was nguyền: Economy -15, Trust -10";
     }
 
     private async Task<string> ApplyDivineVoice(string worldId, string godId, string? civId)
     {
         if (civId == null) return "Tiếng nói thần thánh vang vọng";
         var civ = await _civRepo.GetByIdAsync(civId);
-        if (civ == null) return "Không tìm thấy civilization";
+        if (civ == null) return "Not found civilization";
         civ.AiMemory.GodTrustLevel += 15f;
         civ.AiMemory.LastGodInteraction = godId;
         await _civRepo.UpdateAsync(civ);
@@ -237,7 +237,7 @@ public class MiracleService : IMiracleService
         => Task.FromResult($"Núi lửa phun trào tại ({x},{y}), phá hủy toàn bộ khu vực");
 
     private async Task<string> ApplyDemonInvasion(string worldId, int x, int y)
-        => $"Quỷ dữ xâm nhập từ ({x},{y}), các civ lân cận bị tấn công";
+        => $"Quỷ dữ xâm nhập từ ({x},{y}), các civ lân cận was attacks";
 
     private async Task<string> ApplyRevelation(string worldId, string godId)
     {

@@ -114,7 +114,7 @@ public class ChatService : IChatService
     private const int RateLimitMs = 1000; // 1 tin/giây
     private readonly Dictionary<string, DateTime> _lastSent = new();
 
-    // Danh sách từ bị cấm (demo)
+    // Danh sách từ was cấm (demo)
     private static readonly HashSet<string> BannedWords = new(StringComparer.OrdinalIgnoreCase)
     { "hack", "cheat", "exploit" };
 
@@ -145,13 +145,13 @@ public class ChatService : IChatService
         // Filter từ cấm
         foreach (var word in BannedWords)
             if (message.Contains(word, StringComparison.OrdinalIgnoreCase))
-                return (null, "Tin nhắn chứa nội dung không phù hợp");
+                return (null, "Tin nhắn chứa nội dung not phù hợp");
 
         // Parse type
         if (!Enum.TryParse<ChatMessageType>(type, out var msgType))
             msgType = ChatMessageType.Normal;
 
-        // Xử lý /me emote
+        // Handle /me emote
         if (message.StartsWith("/me "))
         {
             message = message[4..];

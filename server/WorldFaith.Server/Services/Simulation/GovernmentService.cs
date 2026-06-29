@@ -7,7 +7,7 @@ namespace WorldFaith.Server.Services.Simulation;
 /// <summary>
 /// Government System — GDD v1.0 Section 11.
 /// Government type ảnh hưởng AI priority, faith spread speed,
-/// royal support modifier, và rebellion risk.
+/// royal support modifier, and rebellion risk.
 /// </summary>
 public interface IGovernmentService
 {

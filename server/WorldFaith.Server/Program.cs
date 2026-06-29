@@ -201,7 +201,7 @@ app.MapHub<ChatHub>("/hubs/chat");
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", time = DateTime.UtcNow }));
 
-Log.Information("WorldFaith Server khởi động");
+Log.Information("WorldFaith Server starting up");
 
 // Seed default balance config + admin account
 using (var scope = app.Services.CreateScope())
