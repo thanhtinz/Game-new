@@ -1,124 +1,115 @@
-# ⚡ WorldFaith — Hướng Dẫn Cài Đặt & Vận Hành
+# WorldFaith — Setup & Operation Guide
 
-> **WorldFaith** là game god simulation sandbox multiplayer.  
-> Bạn đóng vai một vị thần: thu phục tín đồ, thực hiện phép màu, sáng lập tôn giáo, tiến hóa sinh vật.  
+> A god simulation sandbox MMO. You play as a god: recruit followers, perform miracles, found religions, evolve creatures.  
 > *"Players do not control the world. They influence belief, and belief controls the world."*
 
 ---
 
-## 📋 Mục lục
+## Table of Contents
 
-1. [Yêu cầu — Cài gì trước?](#1-yêu-cầu--cài-gì-trước)
-2. [Lấy code về máy](#2-lấy-code-về-máy)
-3. [Cài và chạy Database](#3-cài-và-chạy-database)
-4. [Cấu hình Server](#4-cấu-hình-server)
-5. [Chạy Server](#5-chạy-server)
+1. [Requirements](#1-requirements)
+2. [Clone the Repository](#2-clone-the-repository)
+3. [Database Setup](#3-database-setup)
+4. [Server Configuration](#4-server-configuration)
+5. [Run the Server](#5-run-the-server)
 6. [Admin Panel](#6-admin-panel)
-7. [Cài đặt Unity Client](#7-cài-đặt-unity-client)
-8. [Chuẩn bị Asset](#8-chuẩn-bị-asset)
-9. [Build Game](#9-build-game)
-10. [Kiểm tra hoạt động](#10-kiểm-tra-hoạt-động)
-11. [Deploy Production](#11-deploy-production)
-12. [Tài khoản mặc định](#12-tài-khoản-mặc-định)
-13. [Hướng dẫn sử dụng Admin Panel](#13-hướng-dẫn-sử-dụng-admin-panel)
-14. [Hướng dẫn cơ chế game](#14-hướng-dẫn-cơ-chế-game)
-15. [Thông số kỹ thuật](#15-thông-số-kỹ-thuật)
-16. [Câu hỏi thường gặp](#16-câu-hỏi-thường-gặp)
+7. [Unity Client Setup](#7-unity-client-setup)
+8. [Build the Unity Client](#8-build-the-unity-client)
+9. [Asset Preparation](#9-asset-preparation)
+10. [Verify Everything Works](#10-verify-everything-works)
+11. [Production Deployment](#11-production-deployment)
+12. [Default Credentials](#12-default-credentials)
+13. [Admin Panel Guide](#13-admin-panel-guide)
+14. [Game Mechanics Guide](#14-game-mechanics-guide)
+15. [Technical Reference](#15-technical-reference)
+16. [FAQ](#16-faq)
 
 ---
 
-## 1. Yêu cầu — Cài gì trước?
+## 1. Requirements
 
-Cài **4 công cụ** theo đúng thứ tự:
+Install these four tools before anything else:
 
-### 🔵 .NET SDK 8
+### .NET SDK 8
 ```bash
-# Tải: https://dotnet.microsoft.com/download → chọn .NET 8.0 → cài bình thường
-dotnet --version   # Kiểm tra: phải thấy 8.x.x
+# Download from https://dotnet.microsoft.com/download → select .NET 8.0
+dotnet --version   # must show 8.x.x
 ```
 
-### 🐳 Docker Desktop
+### Docker Desktop
 ```bash
-# Tải: https://www.docker.com/products/docker-desktop → cài → MỞ LÊN và đợi icon cá voi hết loading
-docker --version   # Kiểm tra: phải thấy 24.x.x+
+# Download from https://www.docker.com/products/docker-desktop
+# Open Docker Desktop and wait for the whale icon to stop animating
+docker --version   # must show 24.x.x or higher
 ```
-> ⚠️ **Phải mở Docker Desktop trước** khi làm bất kỳ bước nào liên quan database.
 
-### 🟢 Node.js 20 LTS
+> Docker Desktop must be running before any database steps.
+
+### Node.js 20 LTS
 ```bash
-# Tải: https://nodejs.org → chọn bản LTS (bên trái) → cài bình thường
-node --version     # Kiểm tra: phải thấy v20.x.x+
+# Download from https://nodejs.org → choose LTS (left button)
+node --version     # must show v20.x.x or higher
 ```
 
-### 🎮 Unity 2022.3 LTS
+### Unity 2022.3 LTS
 ```
-1. Tải Unity Hub: https://unity.com/download
-2. Mở Unity Hub → đăng nhập → tab Installs → Install Editor
-3. Chọn Unity 2022.3 LTS
-4. Trong danh sách modules, tích thêm Android Build Support (nếu muốn build Android)
-5. Nhấn Install — mất 15-30 phút
+1. Download Unity Hub: https://unity.com/download
+2. Open Unity Hub → sign in → Installs tab → Install Editor
+3. Select Unity 2022.3 LTS
+4. Check Android Build Support module if you want Android builds
+5. Click Install — takes 15-30 minutes
 ```
 
 ---
 
-## 2. Lấy code về máy
+## 2. Clone the Repository
 
 ```bash
 git clone https://github.com/thanhtinz/Game-new.git
 cd Game-new
 ```
 
-Nếu chưa có Git: tải tại **https://git-scm.com** → cài → mở terminal mới → thử lại.
-
 ---
 
-## 3. Cài và chạy Database
+## 3. Database Setup
 
-WorldFaith dùng MongoDB (lưu dữ liệu game) và Redis (cache realtime). Docker xử lý cả hai.
+WorldFaith uses MongoDB for game data and Redis for realtime caching. Docker handles both.
 
 ```bash
-# Đảm bảo Docker Desktop đang chạy, sau đó:
+# Make sure Docker Desktop is open, then:
 docker-compose up worldfaith-mongo worldfaith-redis -d
 ```
 
-Lần đầu sẽ tải image (~3-5 phút). Kiểm tra:
+First run downloads images (~3-5 min). Verify both are up:
 ```bash
 docker ps
-```
-Phải thấy **2 dòng** trạng thái `Up`:
-```
-NAMES                 STATUS
-worldfaith-mongo      Up 2 minutes
-worldfaith-redis      Up 2 minutes
+# Expected output:
+# worldfaith-mongo    Up X minutes
+# worldfaith-redis    Up X minutes
 ```
 
-### Lệnh quản lý database hàng ngày
+**Daily database management:**
 ```bash
-# Dừng database (khi không dùng)
-docker-compose stop worldfaith-mongo worldfaith-redis
+docker-compose stop worldfaith-mongo worldfaith-redis   # stop
+docker-compose start worldfaith-mongo worldfaith-redis  # start again
+docker logs worldfaith-mongo --tail 20                  # view logs if issues
 
-# Khởi động lại
-docker-compose start worldfaith-mongo worldfaith-redis
-
-# Xem log nếu có lỗi
-docker logs worldfaith-mongo --tail 20
-
-# Backup dữ liệu
+# Backup
 docker exec worldfaith-mongo mongodump --db worldfaith --archive=/tmp/bk.gz --gzip
 docker cp worldfaith-mongo:/tmp/bk.gz ./backup-$(date +%Y%m%d).gz
 
-# Khôi phục từ backup
+# Restore
 docker cp my-backup.gz worldfaith-mongo:/tmp/restore.gz
 docker exec worldfaith-mongo mongorestore --archive=/tmp/restore.gz --gzip
 ```
 
-**Xem dữ liệu bằng giao diện (tùy chọn):** Tải MongoDB Compass tại https://www.mongodb.com/products/compass → kết nối `mongodb://localhost:27017`.
+**Optional GUI:** MongoDB Compass at https://www.mongodb.com/products/compass → connect to `mongodb://localhost:27017`
 
 ---
 
-## 4. Cấu hình Server
+## 4. Server Configuration
 
-Mở file `server/WorldFaith.Server/appsettings.json` và chỉnh các giá trị:
+Edit `server/WorldFaith.Server/appsettings.json`:
 
 ```json
 {
@@ -127,11 +118,11 @@ Mở file `server/WorldFaith.Server/appsettings.json` và chỉnh các giá tr�
     "Redis":   "localhost:6379"
   },
   "Jwt": {
-    "Secret":              "WorldFaith_SuperSecret_Key_MustBeAtLeast32Chars!",
-    "Issuer":              "WorldFaith",
-    "Audience":            "WorldFaithPlayers",
-    "AccessTokenMinutes":  "60",
-    "RefreshTokenDays":    "30"
+    "Secret":             "WorldFaith_SuperSecret_Key_MustBeAtLeast32Chars!",
+    "Issuer":             "WorldFaith",
+    "Audience":           "WorldFaithPlayers",
+    "AccessTokenMinutes": "60",
+    "RefreshTokenDays":   "30"
   },
   "Admin": {
     "Email":    "admin@worldfaith.game",
@@ -140,128 +131,130 @@ Mở file `server/WorldFaith.Server/appsettings.json` và chỉnh các giá tr�
 }
 ```
 
-| Trường | Mô tả | Cần đổi? |
-|--------|-------|---------|
-| `MongoDB` | Địa chỉ database | Không (Docker đã cấu hình) |
-| `Redis` | Địa chỉ cache | Không |
-| `Jwt.Secret` | Khóa bí mật token | **Bắt buộc đổi khi deploy** |
-| `Admin.Email` | Email tài khoản admin | Tùy chọn |
-| `Admin.Password` | Mật khẩu admin | **Bắt buộc đổi khi deploy** |
-
-> Tạo Jwt.Secret ngẫu nhiên ví dụ: `Xy7#mK9$pQ2@nL5&vR8^wJ3!cF6*hD4`
+| Field | Notes |
+|---|---|
+| `MongoDB` / `Redis` | Leave as-is for local Docker setup |
+| `Jwt.Secret` | **Change before deploying** — use any random 32+ character string |
+| `Admin.Password` | **Change before deploying** |
 
 ---
 
-## 5. Chạy Server
+## 5. Run the Server
 
 ```bash
 cd Game-new/server/WorldFaith.Server
 dotnet run
 ```
 
-Compile lần đầu mất 30-60 giây. Khi thấy các dòng này là server đang chạy:
+First compile takes 30-60 seconds. You'll see:
 ```
-[INF] WorldFaith Server khởi động
+[INF] WorldFaith Server starting up
 [INF] Balance config seeded (90 params)
 [INF] Admin account seeded: admin@worldfaith.game
 [INF] Now listening on: http://localhost:5000
 ```
 
-**Kiểm tra:** Mở trình duyệt → `http://localhost:5000/health` → thấy `{"status":"ok"}`
+**Verify:** Open `http://localhost:5000/health` in a browser → should show `{"status":"ok"}`
 
-**Dừng server:** Nhấn `Ctrl + C`
+**Stop:** Press `Ctrl + C`
 
-**Chạy ngầm bằng Docker:**
+**Run all services at once with Docker:**
 ```bash
-docker-compose up -d        # Khởi động DB + Server tất cả
-docker-compose logs -f      # Xem log realtime
-docker-compose down         # Dừng tất cả
+docker-compose up -d        # start DB + server in background
+docker-compose logs -f      # follow logs
+docker-compose down         # stop everything
 ```
 
 ---
 
 ## 6. Admin Panel
 
-### Cài đặt lần đầu
+### Install
 ```bash
 cd Game-new/admin-panel
 npm install
 ```
 
-Tạo file `.env.local` trong thư mục `admin-panel/`:
-
-**Mac/Linux:**
+Create `admin-panel/.env.local`:
 ```bash
+# Mac/Linux
 echo "NEXT_PUBLIC_API_URL=http://localhost:5000" > .env.local
+
+# Windows — create the file manually with Notepad and save as .env.local
 ```
 
-**Windows (Notepad):** Mở Notepad → gõ `NEXT_PUBLIC_API_URL=http://localhost:5000` → Lưu với tên `.env.local` vào thư mục `admin-panel/`
-
-### Chạy
+### Run
 ```bash
 cd Game-new/admin-panel
 npm run dev
 ```
 
-Mở trình duyệt: **http://localhost:3001**
-
-Đăng nhập: `admin@worldfaith.game` / `Admin@WorldFaith2024!`
+Open **http://localhost:3001** → sign in with `admin@worldfaith.game` / `Admin@WorldFaith2024!`
 
 ---
 
-## 7. Cài đặt Unity Client
+## 7. Unity Client Setup
 
-### Bước 1 — Mở project trong Unity
+### Step 1 — Open the project
 ```
-1. Mở Unity Hub
-2. Nhấn Open → Add project from disk
-3. Chọn thư mục: Game-new/client-unity/
-4. Chọn Unity 2022.3 LTS → Open
-5. Đợi Unity import (lần đầu 5-10 phút — lỗi đỏ ban đầu là bình thường)
+1. Open Unity Hub
+2. Click Open → Add project from disk
+3. Select the folder: Game-new/client-unity/
+4. Choose Unity 2022.3 LTS when prompted
+5. Wait for initial import (5-10 minutes — red errors at first are normal)
 ```
 
-### Bước 2 — Cài Packages
-Vào **Window → Package Manager → Unity Registry**, cài lần lượt:
+### Step 2 — Install required packages
 
-**TextMeshPro:**
-1. Tìm "TextMeshPro" → Install
-2. Sau khi xong: **Window → TextMeshPro → Import TMP Essential Resources** → Import
+Go to **Window → Package Manager → Unity Registry** and install:
 
-**Newtonsoft JSON:**
-1. Nhấn dấu `+` góc trên trái → **Add package by name**
-2. Nhập `com.unity.nuget.newtonsoft-json` → Add
+**TextMeshPro**
+1. Search for "TextMeshPro" → Install
+2. After install: **Window → TextMeshPro → Import TMP Essential Resources** → Import All
 
-**Mobile Notifications** (cho Android/iOS):
-1. Nhấn dấu `+` → **Add package by name**
-2. Nhập `com.unity.mobile.notifications` → Add
+**Newtonsoft JSON**
+1. Click `+` (top left) → **Add package by name**
+2. Type: `com.unity.nuget.newtonsoft-json` → Add
 
-### Bước 3 — Cài SignalR (kết nối realtime với server)
+**Mobile Notifications** (for Android/iOS push)
+1. Click `+` → **Add package by name**
+2. Type: `com.unity.mobile.notifications` → Add
 
-**Mac/Linux — chạy script tự động:**
+### Step 3 — Install SignalR DLLs
+
+SignalR handles realtime connection to the server.
+
+**Mac / Linux:**
 ```bash
 cd Game-new
 DST="client-unity/Assets/Plugins/SignalR"
 mkdir -p "$DST"
 cd /tmp && mkdir signalr_tmp && cd signalr_tmp
-dotnet new console -n sr --no-restore -o sr && cd sr
+dotnet new console -n sr -o sr
+cd sr
 dotnet add package Microsoft.AspNetCore.SignalR.Client --version 8.0.0
-dotnet publish -c Release -o pub --no-restore
-cp pub/Microsoft.AspNetCore.SignalR.*.dll     "$(cd - && pwd)/$DST/"
-cp pub/Microsoft.AspNetCore.Http.Connections*.dll "$(cd - && pwd)/$DST/"
+dotnet publish -c Release -o pub
+ROOT=$(cd - && pwd)
+cp pub/Microsoft.AspNetCore.SignalR.*.dll       "$ROOT/$DST/"
+cp pub/Microsoft.AspNetCore.Http.Connections*.dll "$ROOT/$DST/"
 cd /tmp && rm -rf signalr_tmp
-echo "SignalR installed!"
+echo "SignalR installed"
 ```
 
-**Windows — thủ công:**
-1. Vào: `https://www.nuget.org/packages/Microsoft.AspNetCore.SignalR.Client/8.0.0`
-2. Nhấn **Download package** → tải về file `.nupkg`
-3. Đổi đuôi `.nupkg` thành `.zip` → giải nén
-4. Vào thư mục `lib/netstandard2.1/` bên trong
-5. Copy toàn bộ file `.dll` vào `Game-new/client-unity/Assets/Plugins/SignalR/` (tạo thư mục nếu chưa có)
+**Windows:**
+1. Go to: `https://www.nuget.org/packages/Microsoft.AspNetCore.SignalR.Client/8.0.0`
+2. Click **Download package** → save the `.nupkg` file
+3. Rename `.nupkg` → `.zip` → extract it
+4. Navigate inside to `lib/netstandard2.1/`
+5. Copy all `.dll` files → paste into `Game-new/client-unity/Assets/Plugins/SignalR/` (create the folder if needed)
 
-### Bước 4 — Link Shared Library (code dùng chung server và Unity)
+Wait for Unity to finish importing (progress bar in the bottom-right).
 
-**Mac/Linux:**
+### Step 4 — Link the Shared Library
+
+The shared library contains enums and contracts used by both server and Unity client.
+
+**Mac / Linux:**
 ```bash
 cd Game-new
 SRC="shared/WorldFaith.Shared"
@@ -278,199 +271,267 @@ New-Item -ItemType Directory -Force -Path $dst
 Copy-Item "$src\Enums","$src\Models","$src\Contracts" $dst -Recurse -Force
 ```
 
-Đợi Unity import xong (thanh loading ở góc dưới phải hết).
+Wait for Unity to import the new files (bottom-right progress bar).
 
-### Bước 5 — Tạo Scenes
+### Step 5 — Create the three scenes
+
+Each scene must be saved in `Assets/Scenes/` and set up with the WorldFaith tools:
+
+**LoginScene:**
 ```
-File → New Scene → Basic (Built-in)
-  → Lưu với tên LoginScene vào Assets/Scenes/
-  → Menu WorldFaith → Setup → Create Login Scene Objects
-
-File → New Scene → Basic (Built-in)
-  → Lưu với tên LobbyScene vào Assets/Scenes/
-  → Menu WorldFaith → Setup → Create Lobby Scene Objects
-
-File → New Scene → Basic (Built-in)
-  → Lưu với tên GameScene vào Assets/Scenes/
-  → Menu WorldFaith → Setup → Create Game Scene Objects
+File → New Scene → Basic (Built-in) → Save As "LoginScene" in Assets/Scenes/
+Menu: WorldFaith → Setup → Create Login Scene Objects
 ```
 
-> Menu WorldFaith xuất hiện sau khi Shared Library import thành công.
+**LobbyScene:**
+```
+File → New Scene → Basic (Built-in) → Save As "LobbyScene" in Assets/Scenes/
+Menu: WorldFaith → Setup → Create Lobby Scene Objects
+```
 
-### Bước 6 — Cấu hình địa chỉ server
+**GameScene:**
+```
+File → New Scene → Basic (Built-in) → Save As "GameScene" in Assets/Scenes/
+Menu: WorldFaith → Setup → Create Game Scene Objects
+```
 
-Trong mỗi Scene, tìm GameObjects và điền địa chỉ server:
+> The **WorldFaith** menu appears in Unity's top menu bar after the Shared Library finishes importing. If it doesn't appear, press **Assets → Refresh** (`Ctrl+R` / `Cmd+R`).
 
-| GameObject | Field | Giá trị (development) |
-|------------|-------|----------------------|
+### Step 6 — Configure server URLs
+
+In each scene, find these GameObjects in the Hierarchy and set their `Server Url` field in the Inspector:
+
+| GameObject | Field | Value (local) |
+|---|---|---|
 | `WorldFaithClient` | Server Url | `http://localhost:5000/hubs/world` |
 | `LobbyClient` | Server Url | `http://localhost:5000/hubs/lobby` |
 | `ChatClient` | Server Url | `http://localhost:5000/hubs/chat` |
+| `AuthManager` | Server Url | `http://localhost:5000` |
 
-Khi deploy lên server thật, đổi `localhost:5000` thành domain của bạn.
+These fields appear under the `[Header("Server Config")]` section in the Inspector.
 
-### Bước 7 — Kiểm tra setup
+### Step 7 — Validate the setup
 ```
-Menu WorldFaith → Validate → Check All Managers
+Menu: WorldFaith → Validate → Check All Managers
 ```
-Tất cả ✅ là đúng. Nếu có ⚠️, đọc Console để biết thiếu gì.
+
+All entries must show a green checkmark. If anything shows a warning, check the Console window for the specific error.
 
 ---
 
-## 8. Chuẩn bị Asset
+## 8. Build the Unity Client
 
-Xem danh sách đầy đủ tại **[ASSETS.md](./ASSETS.md)** (~204 files).
+### Build Settings
 
-### 🔴 Bắt buộc — game không render được nếu thiếu
+Go to **File → Build Settings** and configure:
 
-**8 Tile Textures** — đặt vào `Assets/WorldFaith/World/Tiles/` (64×64 px PNG):
+1. Drag your three scenes into **Scenes In Build** in this exact order:
+   ```
+   0  Assets/Scenes/LoginScene
+   1  Assets/Scenes/LobbyScene
+   2  Assets/Scenes/GameScene
+   ```
+2. Select your target platform
+3. Click **Build** (or **Build And Run** to install directly)
+
+### PC (Windows / Mac / Linux)
+
+```
+Platform: PC, Mac & Linux Standalone
+Target Platform: Windows (or Mac / Linux)
+Architecture: x86_64
+Click Build → choose output folder → wait
+```
+
+The output folder will contain the `.exe` (Windows) or `.app` (Mac) file you can distribute.
+
+### Android
+
+**One-time setup on your phone:**
+```
+Settings → About Phone → tap "Build Number" 7 times to unlock Developer Mode
+Settings → Developer Options → enable "USB Debugging"
+Connect phone to computer via USB cable
+Allow USB debugging when prompted on phone
+```
+
+**Build in Unity:**
+```
+Platform: Android
+Minimum API Level: Android 8.0 (API 26) — in Player Settings
+Package Name: com.yourname.worldfaith — in Player Settings → Other Settings
+```
+
+```
+Build And Run → select output folder → Unity installs directly to phone
+```
+
+Or choose **Build** only to get an `.apk` file you can sideload later.
+
+**For Google Play submission:** Use **Build App Bundle (.aab)** instead of APK.
+
+### iOS (Mac only)
+
+```
+Platform: iOS
+Bundle Identifier: com.yourname.worldfaith — in Player Settings → Other Settings
+Signing Team: your Apple Developer Team ID
+```
+
+```
+Build → Unity creates an Xcode project folder
+Open the .xcodeproj in Xcode
+Select your device or simulator
+Product → Run (⌘R)
+```
+
+For App Store submission: in Xcode, **Product → Archive → Distribute App**.
+
+### WebGL (browser)
+
+```
+Platform: WebGL
+Compression Format: Gzip (in Player Settings → Publishing Settings)
+```
+
+```
+Build → generates a folder with index.html
+Host the folder on any static file server (Nginx, Apache, GitHub Pages, Netlify)
+```
+
+> WebGL does not support SignalR TCP by default. Ensure your server supports WebSocket fallback (it does by default with ASP.NET Core SignalR).
+
+### Common Build Issues
+
+| Error | Fix |
+|---|---|
+| `HubConnection not found` | SignalR DLLs not in `Assets/Plugins/SignalR/`. Redo Step 3. |
+| `WorldFaith namespace not found` | Shared Library not linked. Redo Step 4. |
+| Missing scenes in build | Add scenes to Build Settings in order (Step 8). |
+| Android `INSTALL_FAILED_VERSION_DOWNGRADE` | Uninstall old version from phone first. |
+| iOS code signing error | Set your Apple Developer Team in Player Settings → Other Settings. |
+| WebGL `Content Security Policy` error | Server must have CORS enabled for your WebGL domain. |
+| `Failed to connect to server` | Wrong URL in Inspector. Check Step 6. For Android/iOS use your LAN IP, not `localhost`. |
+
+---
+
+## 9. Asset Preparation
+
+See the full list at **[ASSETS.md](./ASSETS.md)** (~204 files).
+
+### Required — game won't render without these
+
+**8 Tile Textures** — save to `Assets/WorldFaith/World/Tiles/` (64×64 px PNG):
 ```
 tile_grassland.png   tile_forest.png   tile_mountain.png   tile_desert.png
 tile_tundra.png      tile_water.png    tile_volcano.png    tile_sacred.png
 ```
-Màu tham khảo: Grassland `#4a9c2f`, Forest `#1a5c1a`, Mountain `#7a7a7a`, Desert `#c8b44a`, Tundra `#b0c8e0`, Water `#2a64c8`, Volcano `#c83210`, Sacred `#c8a832`
 
-**47 SFX** — đặt vào `Assets/WorldFaith/Audio/SFX/`  
-Sau khi copy vào, gán vào `AudioManager.sfxClips[]` **theo đúng thứ tự SfxId enum** (xem Inspector → AudioManager → Custom Editor).
+Suggested colors: Grassland `#4a9c2f` · Forest `#1a5c1a` · Mountain `#7a7a7a` · Desert `#c8b44a` · Tundra `#b0c8e0` · Water `#2a64c8` · Volcano `#c83210` · Sacred `#c8a832`
 
-**5 Music layers** — đặt vào `Assets/WorldFaith/Audio/Music/`:
+**47 Sound Effects** — save to `Assets/WorldFaith/Audio/SFX/`  
+After copying files, assign them in the Inspector: find `AudioManager` in your GameScene → expand `Sfx Clips[]` → assign each file in `SfxId` enum order.
+
+**5 Music tracks** — save to `Assets/WorldFaith/Audio/Music/`:
 ```
-music_base.mp3        → gán vào AudioManager.musicBase
-music_religion.mp3    → gán vào AudioManager.musicReligion
-music_war.mp3         → gán vào AudioManager.musicWar
-music_apocalypse.mp3  → gán vào AudioManager.musicApocalypse
-music_victory.mp3     → gán vào AudioManager.musicVictory
+music_base.mp3       → AudioManager → Music Base
+music_religion.mp3   → AudioManager → Music Religion
+music_war.mp3        → AudioManager → Music War
+music_apocalypse.mp3 → AudioManager → Music Apocalypse
+music_victory.mp3    → AudioManager → Music Victory
 ```
 
-### 🟡 Khuyến nghị — game trông đẹp hơn
-- **28 VFX Prefabs** → `Assets/WorldFaith/VFX/Prefabs/` — gán vào `VfxManager.catalog[]`
+### Recommended
+- **28 VFX Prefabs** → `Assets/WorldFaith/VFX/Prefabs/` → assign to `VfxManager → Catalog[]`
 - **8 Archetype Icons** (128×128 px) → `Assets/WorldFaith/UI/Sprites/`
 - **15 Miracle Icons** (64×64 px) → `Assets/WorldFaith/UI/Sprites/`
-- **4 Fonts** — tải từ fonts.google.com (Cinzel, Nunito, Rajdhani) → copy `.ttf` → tạo Font Asset qua Window → TextMeshPro → Font Asset Creator
+- **Fonts** (Cinzel, Nunito, Rajdhani) — download from fonts.google.com → copy `.ttf` files → **Window → TextMeshPro → Font Asset Creator** → generate and save
 
-### Nguồn tải miễn phí
-| Loại | Nguồn |
-|------|-------|
-| SFX | freesound.org, kenney.nl, zapsplat.com |
-| Music | incompetech.com, freemusicarchive.org |
-| Sprites & Icons | kenney.nl, game-icons.net |
+### Free sources
+| Type | Source |
+|---|---|
+| SFX | freesound.org · kenney.nl · zapsplat.com |
+| Music | incompetech.com · freemusicarchive.org |
+| Sprites | kenney.nl · game-icons.net |
 | Fonts | fonts.google.com |
 
 ---
 
-## 9. Build Game
+## 10. Verify Everything Works
 
-### PC (Windows / Mac / Linux)
-```
-1. File → Build Settings
-2. Kéo 3 scenes vào ô Scenes In Build theo đúng thứ tự:
-     0: Assets/Scenes/LoginScene
-     1: Assets/Scenes/LobbyScene
-     2: Assets/Scenes/GameScene
-3. Platform: chọn PC, Mac & Linux Standalone
-4. Nhấn Build → chọn thư mục xuất → đợi build xong
-```
+Run these checks in order:
 
-### Android
-```
-1. File → Build Settings → chọn Android → Switch Platform (đợi vài phút)
-2. Nhấn Player Settings, điền:
-     Company Name: tên của bạn
-     Product Name: WorldFaith
-     Package Name: com.tenban.worldfaith
-     Minimum API Level: Android 8.0 (API 26)
-3. Cắm điện thoại Android vào máy tính
-4. Settings điện thoại → About Phone → nhấn Build Number 7 lần → bật Developer Mode
-5. Settings → Developer Options → bật USB Debugging
-6. Unity: nhấn Build And Run → chọn thư mục → cài trực tiếp lên điện thoại
-```
-
-### iOS (chỉ trên Mac)
-```
-1. File → Build Settings → iOS → Switch Platform
-2. Nhấn Build → Unity tạo Xcode project
-3. Mở project trong Xcode → chọn Apple Developer Team → Build & Run
-```
-
----
-
-## 10. Kiểm tra hoạt động
-
-Thực hiện theo thứ tự:
-
-**① Database:**
+**① Database running:**
 ```bash
-docker ps   # Phải thấy worldfaith-mongo và worldfaith-redis đều Up
+docker ps   # both worldfaith-mongo and worldfaith-redis must show "Up"
 ```
 
-**② Server:**
+**② Server responding:**
 ```bash
-curl http://localhost:5000/health   # Phải thấy: {"status":"ok"}
+curl http://localhost:5000/health   # must return {"status":"ok"}
 ```
 
 **③ Admin Panel:**
 ```
-Mở http://localhost:3001 → phải thấy màn hình đăng nhập → đăng nhập thành công
+Open http://localhost:3001 → sign in → Dashboard must load with server stats
 ```
 
-**④ Unity:**
+**④ Unity client:**
 ```
-1. Nhấn Play (▶️) trong Unity Editor
-2. Màn hình Login xuất hiện → đăng ký tài khoản mới → đăng nhập
-3. Vào Lobby → tạo phòng → Start game
-4. World khởi động → kiểm tra Admin Panel: Dashboard phải thấy Active Worlds = 1
+1. Press Play (▶) in the Unity Editor
+2. Login screen appears → register a new account → sign in
+3. Lobby screen appears → Create Room → Start game
+4. Check Admin Panel → Dashboard → Active Worlds should show 1
+```
+
+**⑤ Multiplayer (two players):**
+```
+Run two Unity Editor instances (or build and run alongside Editor)
+Both players join the same room → verify both see each other on the lobby list
+Start game → verify both clients receive world ticks in Console
 ```
 
 ---
 
-## 11. Deploy Production
+## 11. Production Deployment
 
-### Yêu cầu VPS
+### Server requirements
 
-| Số người chơi | CPU | RAM | Băng thông |
-|--------------|-----|-----|-----------|
-| 2-10 | 2 core | 4 GB | 10 Mbps |
-| 10-30 | 4 core | 8 GB | 20 Mbps |
-| 30+ | 8 core | 16 GB | 50 Mbps |
+| Players | CPU | RAM | Bandwidth |
+|---|---|---|---|
+| 2-10 | 2 cores | 4 GB | 10 Mbps |
+| 10-30 | 4 cores | 8 GB | 20 Mbps |
+| 30+ | 8 cores | 16 GB | 50 Mbps |
 
-OS khuyến nghị: Ubuntu 22.04 LTS
+Recommended OS: Ubuntu 22.04 LTS
 
-### Bước 1 — Cài Docker trên VPS
+### Step 1 — Install Docker on VPS
 ```bash
 ssh user@YOUR_VPS_IP
 sudo apt update && sudo apt install -y docker.io docker-compose-v2
 sudo usermod -aG docker $USER
-# Đăng xuất và đăng nhập lại để áp dụng group
-exit
-ssh user@YOUR_VPS_IP
-docker --version   # Kiểm tra
+exit && ssh user@YOUR_VPS_IP   # re-login to apply group
+docker --version
 ```
 
-### Bước 2 — Upload code
+### Step 2 — Upload and configure
 ```bash
-# Từ máy local
 scp -r Game-new/ user@YOUR_VPS_IP:/opt/worldfaith/
 ssh user@YOUR_VPS_IP
 cd /opt/worldfaith
-```
 
-### Bước 3 — Tạo file biến môi trường production
-```bash
 cat > .env << 'EOF'
-JWT_SECRET=Thay_Bang_Chuoi_Ngau_Nhien_32_Ky_Tu_Tro_Len_Khong_Dung_Cai_Nay
+JWT_SECRET=Replace_This_With_A_Random_32_Char_String_Now
 ADMIN_EMAIL=admin@yourdomain.com
-ADMIN_PASSWORD=MatKhauManh@2024!
+ADMIN_PASSWORD=StrongPassword@2024!
 EOF
-```
 
-### Bước 4 — Khởi động
-```bash
 docker-compose up -d
-docker-compose logs -f   # Theo dõi log, đợi thấy "Now listening on"
-curl http://localhost:5000/health   # Kiểm tra
+docker-compose logs -f   # wait for "Now listening on"
+curl http://localhost:5000/health
 ```
 
-### Bước 5 — Cài Nginx làm reverse proxy (để WebSocket hoạt động)
+### Step 3 — Nginx reverse proxy
 ```bash
 sudo apt install -y nginx
 
@@ -478,7 +539,6 @@ sudo tee /etc/nginx/sites-available/worldfaith << 'EOF'
 server {
     listen 80;
     server_name api.yourdomain.com;
-
     location / {
         proxy_pass http://localhost:5000;
         proxy_http_version 1.1;
@@ -492,374 +552,328 @@ server {
 EOF
 
 sudo ln -s /etc/nginx/sites-available/worldfaith /etc/nginx/sites-enabled/
-sudo nginx -t          # Kiểm tra config không lỗi
-sudo systemctl reload nginx
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
-### Bước 6 — Cài HTTPS miễn phí (Let's Encrypt)
+### Step 4 — HTTPS (free with Let's Encrypt)
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
 sudo certbot --nginx -d api.yourdomain.com
-# Làm theo hướng dẫn, nhập email, chọn Yes để redirect HTTP→HTTPS
+# Follow prompts, select "redirect HTTP to HTTPS"
 ```
 
-### Bước 7 — Cập nhật Unity
-```
-Mở Unity → tìm 3 GameObjects WorldFaithClient, LobbyClient, ChatClient
-Đổi Server Url từ:
-  http://localhost:5000/hubs/world
-Thành:
-  https://api.yourdomain.com/hubs/world
-(tương tự cho lobby và chat)
-Build lại game → phát hành
-```
+### Step 5 — Update Unity server URLs
+
+In each scene (LoginScene, LobbyScene, GameScene), find the four network GameObjects and change `Server Url`:
+
+| Before (local) | After (production) |
+|---|---|
+| `http://localhost:5000/hubs/world` | `https://api.yourdomain.com/hubs/world` |
+| `http://localhost:5000/hubs/lobby` | `https://api.yourdomain.com/hubs/lobby` |
+| `http://localhost:5000/hubs/chat`  | `https://api.yourdomain.com/hubs/chat` |
+| `http://localhost:5000`            | `https://api.yourdomain.com` |
+
+Then rebuild the client for your target platform.
 
 ---
 
-## 12. Tài khoản mặc định
-
-Server tự tạo khi khởi động lần đầu:
+## 12. Default Credentials
 
 | | |
-|--|--|
+|---|---|
 | **Email** | `admin@worldfaith.game` |
-| **Mật khẩu** | `Admin@WorldFaith2024!` |
-| **Quyền** | Admin (toàn quyền Admin Panel) |
+| **Password** | `Admin@WorldFaith2024!` |
+| **Role** | Admin (full Admin Panel access) |
 
-> ⚠️ **Đổi ngay trước khi deploy** — sửa `Admin.Password` trong `appsettings.json` → restart server.
+> Change the password in `appsettings.json → Admin.Password` before deploying to production.
 
 ---
 
-## 13. Hướng dẫn sử dụng Admin Panel
+## 13. Admin Panel Guide
 
 ### Dashboard
-Trang chủ. Hiển thị:
-- **Server health** — đèn xanh nhấp nháy = online, đèn đỏ = down
-- **8 stat cards** — Worlds, Gods, Players, Civs, Entities, Religions, NPCs, Orgs (cập nhật mỗi 5 giây)
-- **Active Worlds** — mỗi world hiện tick/cycle/số god đang chơi
+Real-time server overview (auto-refreshes every 5 seconds):
+- **Server status** — green pulse = online, red = down
+- **8 stat cards** — Active Worlds, Gods, Online Players, Civs, Entities, Religions, NPCs, Organizations
+- **Active Worlds list** — shows each world's tick, cycle, and god count
 
 ### Events Log
-Feed realtime tất cả sự kiện trong game (cập nhật mỗi 3 giây).
-
-Cách dùng:
-1. Chọn World ở góc phải
-2. Chọn filter tab: All / Crime / Accidents / Social / Political / Miracle / Evolution
-3. Bật/tắt **Auto refresh** để theo dõi live hoặc đóng băng để đọc kỹ
-4. Mỗi event hiển thị: loại event (badge màu), mô tả, tác động faith/economy, tick xảy ra
+Live feed of all in-game events (refreshes every 3 seconds). Use the filter tabs to show only Crime / Accidents / Social / Political / Miracle / Evolution events. Toggle Auto Refresh off to pause and read carefully.
 
 ### Worlds
-Quản lý các world đang chạy.
-
-- **Force End** — kết thúc world ngay, tính điểm và cập nhật leaderboard
-- **Force Rebirth** — reset world về tick 0 nhưng giữ nguyên god với rank hiện tại
+- **Force End** — ends the world immediately, calculates final scores
+- **Force Rebirth** — resets world to tick 0, gods keep their current rank
 
 ### Maps & Tiles
-Visual editor bản đồ game.
+Visual map editor (64×64 grid). Click any tile to edit its biome, fertility level, and whether it has a temple. Use **Place Sacred** to turn a tile into a Sacred Site (increases evolution points for entities nearby). **Regen Map** rebuilds the entire map with Perlin Noise (requires confirmation).
 
-Cách dùng:
-1. Chọn World → bản đồ 64×64 tile hiện ra (có thể zoom 3-16px/tile bằng slider)
-2. **Click vào tile** → popup chỉnh sửa
-3. Trong popup: đổi Tile Type (Grassland/Forest/Mountain...), chỉnh Fertility (0-1), bật/tắt Temple
-4. Nhấn **Place Sacred** để biến tile thành Sacred Site (tăng evolution points cho entities ở đó)
-5. Nhấn **Regen Map** (có confirm) để tái tạo toàn bộ bản đồ bằng Perlin Noise
-
-**Chú thích màu:** Grassland=xanh lá, Forest=xanh đậm, Mountain=xám, Desert=vàng, Tundra=xanh nhạt, Water=xanh dương, Volcano=đỏ, Sacred=vàng gold
+Tile color guide: Grassland=green · Forest=dark green · Mountain=gray · Desert=yellow · Tundra=light blue · Water=blue · Volcano=red · Sacred=gold
 
 ### Dungeons
-Quản lý dungeons — hang động nguy hiểm mà Adventure Guild nhận quest.
+Manage dungeons where Adventure Guild runs missions.
 
-**Các trạng thái dungeon:**
-- **Active** — đang tồn tại, Guild có thể nhận quest
-- **Infested** — bị nhiễm sau 200 ticks không ai clear, nguy hiểm hơn (danger ×1.3)
-- **Sealed** — admin đã phong ấn, không ai vào được
-- **Cleared** — Guild đã clear thành công
+**States:** Active (open), Infested (dangerous after 200 ticks), Sealed (admin locked), Cleared (mission complete)
 
-**Cách spawn dungeon mới:**
-1. Nhấn **+ Spawn Dungeon**
-2. Chọn loại:
-   - `AncientRuins` — an toàn nhất, thích hợp để cho Guild luyện tập
-   - `LostTemple` — xác suất có relic cao, liên quan forgotten gods
-   - `MonstersLair` — danger cao, reward tốt
-   - `ForbiddenSanctum` — nguy hiểm nhất, relic mạnh nhất
-   - `DarkPortal` — nguy hiểm liên tục, spawn monsters nếu không bị seal ngay
-3. Điền tọa độ X, Y (0-63)
-4. Nhập God ID nếu muốn dungeon liên kết với god cụ thể (god đó có thể có relic bên trong)
-5. Nhấn Spawn
+**Spawn a dungeon:**
+1. Click **+ Spawn Dungeon**
+2. Choose type:
+   - `AncientRuins` — safest, good for new guilds to practice
+   - `LostTemple` — high relic chance, often linked to forgotten gods
+   - `MonstersLair` — high danger, high reward
+   - `ForbiddenSanctum` — most dangerous, strongest relics
+   - `DarkPortal` — continuously spawns monsters if not sealed quickly
+3. Enter X, Y tile coordinates (0-63)
+4. Optionally enter a God ID to link a relic to that god (40% relic spawn chance)
 
-**Quản lý dungeon đang tồn tại:**
-- Nhấn **Seal** để phong ấn (ngăn DarkPortal tiếp tục leak energy)
-- Nhấn **Clear** để coi như đã clear (guild nhận reward ảo)
+Use **Seal** to lock a DarkPortal. Use **Clear** to mark a dungeon as completed.
 
 ### Relics
-Quản lý di vật — nguồn sống còn của Forgotten Gods.
+Divine artifacts that generate passive faith for their origin god.
 
-**Cơ chế quan trọng cần hiểu:**
-- Mỗi relic phát **Faith passive** về origin god mỗi 10 ticks (2-12 faith/tick)
-- God với **0 followers** nhưng còn relic → trạng thái **Forgotten** (tồn tại ở dạng yếu, không bị eliminate)
-- God với **0 followers + không relic** → **Eliminated vĩnh viễn**
-- Civ giữ relic mà ruling religion = origin god → faith bonus **+50%**
-- Relic bỏ hoang (không ai giữ) → decay dần (-0.5 FaithBonus mỗi 200 ticks)
+**Key mechanics:**
+- Each active relic generates 2-12 faith per 10 ticks for its origin god
+- A god with 0 followers but active relics becomes **Forgotten** (survives weakly) instead of eliminated
+- A god with 0 followers AND no relics/cults is **permanently eliminated**
+- A civ holding a relic whose ruling religion matches the origin god gets **+50% faith bonus**
+- Abandoned relics (no owner, no civ, not in dungeon) decay over time
 
-**Cách transfer relic:**
-1. Click vào relic trong bảng
-2. Điền NPC ID (nếu muốn NPC giữ) hoặc Civ ID (nếu muốn cả civilization giữ)
-3. Để trống cả hai = relic bị bỏ hoang, sẽ decay
-4. Nhấn Lưu
+**Transfer a relic:**
+1. Click any relic to open the transfer modal
+2. Enter NPC ID to give it to a specific NPC, or Civ ID to give it to a civilization
+3. Leave both blank = relic goes abandoned and starts decaying
 
-**Khi nào cần dùng trang này:**
-- Muốn giúp Forgotten God thoát khỏi tình trạng cô lập → transfer relic về civ có cùng religion
-- Muốn test cơ chế god survival → destroy hết relics và xem god có bị eliminate không
-- Muốn cân bằng game → chuyển relic mạnh sang god yếu hơn
+Use **Destroy** to permanently remove a relic (warning: the linked Forgotten god may be eliminated).
+
+### God Note
+Lists notable followers organized into 8 tabs based on their spiritual profile.
+
+**Tabs:** Top Faithful · Rising Talents · Potential Priests · Saint Candidates · Prophet Candidates · Champions · Dangerous Followers · Hidden Assets
+
+Each card shows the NPC's name, tier, faith level, talents, achievements, potential label, and risk assessment. Click any card to open the **Divine Action modal** with 9 actions:
+
+| Action | Effect |
+|---|---|
+| Bless | +10% devotion, -10 corruption risk, 20% chance awakens a talent |
+| Send Dream | +dreams received, +trust (Dream Sensitive NPCs get double effect) |
+| Test | 70% → earn achievement + integrity gain; 30% → moderate doctrine violation |
+| Promote | Advance church rank if conditions are met |
+| Mark as Chosen | +30 Destiny Modifier, +20 reputation, attracts rival gods |
+| Protect | -15 corruption risk, reduces assassination/kidnap vulnerability |
+| Ignore | No action (saves faith) |
+| Punish | Slight corruption reduction, slight loyalty decrease |
+| Corrupt | (Dark Gods) Triggers severe doctrine violation, pushes NPC to dark path |
 
 ### Gods
-Quản lý trực tiếp các god đang trong game.
+View and edit each active god. Click to open the edit modal — adjust Faith, Trust, Fear, FollowerCount directly. Unlock specific miracles from the list. **Eliminate** removes the god from the game (irreversible).
 
-- **Bảng chính** — hiển thị Faith (số vàng), Trust bar, Fear, Followers, Archetype badge, Status
-- **Click vào god** → modal chỉnh sửa:
-  - Điều chỉnh Faith, Trust, Fear, FollowerCount trực tiếp
-  - Unlock miracles — ô xanh = đã có, ô xám = nhấn để unlock ngay
-- **Eliminate** — loại god khỏi game ngay lập tức (không hoàn tác)
-
-**Khi nào dùng:**
-- Debug: god bị bug faith âm → set lại Faith = 100
-- Test: unlock toàn bộ miracles để test counter system
-- Balance: god một phía quá mạnh → giảm Faith xuống
+When to use:
+- God has negative Faith due to a bug → set Faith to 100
+- Testing the counter-miracle system → unlock all miracles at once
+- Balancing: one god is too dominant → reduce their Faith
 
 ### NPCs
-Quản lý NPC theo 5 tầng xã hội.
+Manage NPCs by tier. Use the tier filter to narrow down results.
 
-- **Filter** — chọn World + chọn Tier để lọc (All/Tier 1-5)
-- **Bảng** — hiển thị Tier badge (màu theo tier), Personality, các stat bars (Loyalty/Ambition/Piety), Champion badge
-- **Click vào NPC** → chỉnh Loyalty, Ambition, Piety, Wealth, GodTrustLevel (0-100)
-- **Exile** — đuổi NPC ra khỏi kingdom, state = Exiled
-- **Kill** — NPC chết, state = Dead
+Click any NPC to edit stats (Loyalty, Ambition, Piety, GodTrustLevel). Use **Exile** to remove them from the kingdom or **Kill** to end their life.
 
-**Khi nào dùng:**
-- Tạo kịch bản betrayal: set Noble Ambition = 90, Loyalty = 20 → Noble sẽ phản bội sớm
-- Tạo Champion: tìm Adventurer, set GodTrustLevel = 75 → đợi NpcSpawnService promote, hoặc dùng nút Promote Champion
-- Test event: set Servant Loyalty = 10 → servant sẽ tìm cách extort Noble
+Scenarios you can create:
+- **Betrayal:** set Noble Ambition = 90, Loyalty = 20 → Noble will betray the court soon
+- **Force Champion:** find an Adventurer, set GodTrustLevel = 75, EvolutionPoints = 160 → next champion check promotes them
+- **Test heresy:** set a Priest's Loyalty = 10 → they become a heresy risk
 
 ### Mobs / Entities
-Quản lý sinh vật tiến hóa.
+View and manage evolved creatures. The **Evolve** dropdown instantly moves an entity to the selected stage without waiting for EXP. **Spawn** creates a new entity at specific coordinates.
 
-- **4 stat cards** — đếm theo stage WildAnimal/DivineBeast/ApocalypticEntity/CelestialGuardian
-- **Evolve dropdown** — chọn target stage ngay trong bảng, áp dụng ngay
-- **Spawn** — tạo entity mới tại tọa độ X,Y với stage tùy chọn
-- **Kill** — xóa entity
-
-**Khi nào dùng:**
-- Test Apex entity: spawn ApocalypticEntity ở giữa map → xem civs phản ứng
-- Test Champion path: evolve HumanHero → Saint nhanh thay vì chờ EXP tích lũy
-- Clear laggy entities: kill bớt WildAnimals nếu map quá đông
+Use cases:
+- Testing Apex entity world events → spawn an ApocalypticEntity at the map center
+- Testing the Champion path → evolve a HumanHero to Saint directly
 
 ### Civilizations
-Quản lý toàn bộ AI civilizations.
+Each civ shows Race, Government type, State, Economy/Military/Food/Stability bars, Population, and War status.
 
-- **Bảng** — Race (cyan), Government badge (màu theo loại), State badge, Economy/Military/Food/Stability bars, Population, War indicator
-- **Quick boost buttons** (trong bảng): `+E` (+30 Economy), `+M` (+30 Military), `+F` (+30 Food) — click ngay không cần mở modal
-- **Collapse** — đẩy civ vào state Collapsing ngay
-- **Click vào civ** → modal chỉnh đầy đủ 8 stats + Government dropdown + Personality + State + War toggle
+**Quick boost buttons** (in the table, no modal needed):
+- `+E` → Economy +30
+- `+M` → Military +30
+- `+F` → Food +30
+- `✕` → Collapse the civ immediately
 
-**Khi nào dùng:**
-- Civ đang chết đói → nhấn `+F` (Food) vài lần
-- Muốn test Theocracy behavior → đổi Government = Theocracy trong modal
-- Test Collapse Age events → đẩy một civ về Stability = 5, Collapse ngay
+Click a civ to open the full edit modal with all 8 stats plus Government dropdown, Personality, State, and War toggle.
 
 ### Religions
-Quản lý tôn giáo và doctrine.
+Manage religions including their Doctrine Axes.
 
-- **Bảng** — Loại (Public/Secret Cult), Followers, Temples, Devotion bar, 5 giá trị Doctrine (M/I/H/F/S), Believer type breakdown (C/D/F/Cu/H)
-- **Schism** — kích hoạt schism ngay (1/3 followers tách ra thành sect mới)
-- **Erase** — xóa tôn giáo (có confirm)
-- **Click vào religion** → modal 2 tab:
+Click a religion and switch to the **Doctrine Axes** tab to adjust all 5 sliders:
 
-**Tab Thông tin:** Chỉnh Name, FollowerCount, TempleCount, DevotionLevel (0-1), toggle Secret Cult. Xem breakdown Believer types.
+| Axis | Low end (-100) | High end (+100) |
+|---|---|---|
+| Mercy / Punishment | Forgive everything | Execute heretics |
+| Isolation / Expansion | Protect existing flock | Aggressive missionary spread |
+| Harmony / Dominion | Nature harmony (Elves love this) | Conquest (Orcs prefer this) |
+| Freedom / Order | Individual liberty | Strict hierarchy (Nobles/Royals prefer this) |
+| Sacrifice / Prosperity | Suffering has meaning | Prosperity proves faith |
 
-**Tab Doctrine Axes:** 5 sliders từ -100 đến +100:
-  - *Mercy ↔ Punishment*: -100 = tha thứ tất cả, +100 = xử tử heretics ngay
-  - *Isolation ↔ Expansion*: -100 = bảo vệ tín đồ cũ, +100 = truyền đạo mạnh mẽ (missionary speed 0.5x→2.0x)
-  - *Harmony ↔ Dominion*: -100 = hòa hợp thiên nhiên/Elves thích, +100 = chinh phục/Orcs thích
-  - *Freedom ↔ Order*: -100 = cá nhân tự do/Commoners thích, +100 = trật tự nghiêm ngặt/Nobles/Royals thích
-  - *Sacrifice ↔ Prosperity*: -100 = đau khổ có giá trị/Undead thích, +100 = thịnh vượng chứng minh đức tin
-
-**Doctrine tự động thay đổi theo events** — FailedMiracle → shift Mercy, HolyWarWon → shift Punishment.
+Doctrine axes shift automatically from events. Admin can override manually. Use **Schism** to instantly split the religion (1/3 followers split off). Use **Delete** to remove it entirely.
 
 ### Organizations
-Quản lý 6 loại tổ chức.
+Manage the six organization types. For **Underground** orgs, watch the **Heat Level** — the higher it is, the more likely they get exposed. Use **Expose** to force discovery. Use **Disband** to remove the organization.
 
-- **Type badges** — mỗi loại màu riêng: Kingdom=xanh, RoyalCourt=vàng, NobleHouse=cam, Guild=xanh lá, Religious=tím, Underground=đỏ
-- **Power/Wealth/Loyalty bars**
-- **Heat Level** (chỉ Underground) — càng cao càng dễ bị phát hiện
-- **Expose** (Underground org) — lộ tổ chức ngầm, kingdom trấn áp ngay
-- **Disband** — giải tán tổ chức
-
-**Khi nào dùng:**
-- Test betrayal chain: tìm NobleHouse, set Loyalty = 10, Power = 80 → Noble sẽ phản bội sớm
-- Control underground: nếu một god đang dùng UndergroundOrg để tích Fear quá nhiều → Expose
-- Test Court deadlock: check RoyalCourt xem members có GodInfluenceId khác nhau không → nếu có = deadlock đang xảy ra
+To detect a **Court Deadlock**: check if Royal Court members have different `GodInfluenceId` values — if so, a deadlock is occurring and the kingdom is weakening.
 
 ### Players
-Quản lý tài khoản người dùng.
-
-- **Search** — tìm theo email hoặc username (realtime)
-- **Click vào player** → modal với 3 section:
-  - **Ban/Unban** — ban cần điền lý do, unban ngay
-  - **Reset Mật Khẩu** — điền mật khẩu mới, áp dụng ngay
-  - **Phân Quyền** — Promote thành Admin hoặc Demote xuống Player
-
-### Leaderboard
-Xem top players, reset leaderboard (có confirm).
+Search by email or username (real-time). Click any player to:
+- **Ban** (requires a reason) / **Unban**
+- **Reset Password** (enter new password directly)
+- **Promote to Admin** / **Remove Admin**
 
 ### Balance Config
-Chỉnh 90 tham số game mà **không cần restart server**.
+Tune 90 game parameters without restarting the server.
 
-Cách dùng:
-1. Chọn category tab để lọc (faith/miracle/religion/evolution/civ/npc/org/gov/age/rank/dungeon/director)
-2. Hoặc dùng ô **Tìm tham số** để search theo tên
-3. Click vào ô giá trị → sửa trực tiếp → nhấn Enter hoặc nút **Lưu**
-4. Ô viền vàng = có thay đổi chưa lưu, ô viền xanh nhấp nháy = đã lưu thành công
-5. Thay đổi có hiệu lực sau tối đa 60 giây (cache TTL)
-6. Nhấn **↺ Reset Default** (có confirm) để đặt lại tất cả về giá trị ban đầu
+1. Use the category tabs to filter, or type in the search box
+2. Click any value field and edit it
+3. Press **Enter** or click **Save** — the field turns green to confirm
+4. Changes take effect within 60 seconds (cache TTL)
+5. **Reset Default** restores everything to initial values
 
-**Các params quan trọng hay cần chỉnh:**
+**Most important parameters:**
 
-| Param | Mô tả | Default |
-|-------|-------|---------|
-| `faith.tick_interval` | Tốc độ tick (ms) — thấp = nhanh hơn | 500 |
-| `miracle.cost_rain` | Faith cost của Rain miracle | 10 |
-| `civ.famine_threshold` | Food level gây nạn đói | 10 |
-| `npc.champion_trust_required` | Trust cần để Adventurer → Champion | 70 |
-| `rank.awakened_threshold` | Cumulative Faith để đạt Awakened | 5000 |
-| `dungeon.relic_drop_chance` | Xác suất dungeon có relic | 0.4 |
-| `director.stagnation_disaster_chance` | Xác suất AI Director inject disaster | 0.15 |
+| Parameter | Description | Default |
+|---|---|---|
+| `faith.tick_interval` | Simulation tick speed in ms | 500 |
+| `civ.famine_threshold` | Food level that triggers famine | 10 |
+| `npc.champion_trust_required` | Trust needed for Adventurer → Champion | 70 |
+| `rank.awakened_threshold` | Cumulative faith to reach Awakened rank | 5000 |
+| `dungeon.relic_drop_chance` | Probability a dungeon contains a relic | 0.4 |
+| `director.stagnation_disaster_chance` | Chance AI Director injects a crisis | 0.15 |
 
 ---
 
-## 14. Hướng dẫn cơ chế game
+## 14. Game Mechanics Guide
 
-### Cách Faith hoạt động
-
-Faith là tài nguyên chính để thực hiện miracles. Tăng mỗi tick (500ms mặc định) theo công thức:
+### Faith Generation Formula
 
 ```
 Faith/tick = (Followers × Devotion × RaceAffinity × Trust × Institution × Event)
            × ArchetypeBonus × GodRankMultiplier
 ```
 
-**Giải thích từng yếu tố:**
-- **Followers** — tổng số NPC đang theo đạo. Tier cao hơn = faith nhiều hơn (Royalty = 0.5/tick, Commoner = 0.01/tick)
-- **Devotion** — độ sâu đức tin: Casual 0.5x, Devout 1.0x, Fanatic 2.0x, Cultist 1.5x
-- **RaceAffinity** — race phù hợp với archetype của god → bonus lên đến 1.6x (Elf theo Nature god 160%)
-- **Trust** — god đã làm gì cho civ này: miracle thành công → tăng, miracle thất bại/gây hại → giảm
-- **ArchetypeBonus** — bonus riêng theo archetype (War god +10% khi civ đang chiến, Light god HealFollower miễn phí...)
-- **GodRankMultiplier** — rank cao faith nhiều hơn: Nascent 1.0x → Ancient 3.0x
+- **Followers** — NPC tier determines faith contribution: Royalty 0.50/tick, Noble 0.15, Adventurer 0.05, Servant 0.02, Commoner 0.01
+- **Devotion (BelieverType)** — Casual 0.5× · Devout 1.0× · Fanatic 2.0× · Cultist 1.5× · Heretic 0.3×
+- **RaceAffinity** — race × archetype compatibility: Elf + Nature god = 1.6×; Demon + Light god = 0.2×
+- **GodRankMultiplier** — Nascent 1.0× → Ancient 3.0×
 
-**Cách tăng Faith nhanh:**
-1. Convert NPC tier cao (Noble, Royalty) — 1 Royalty = 50 Commoners về faith
-2. Xây temples — mỗi temple +0.5 faith/tick bất kể followers
-3. Giữ Trust cao — miracle thành công → trust tăng → faith multiplier tăng
-4. Target race phù hợp với archetype của bạn
+**To increase faith quickly:**
+1. Convert high-tier NPCs (one Royalty = 50 Commoners in faith output)
+2. Build temples (+0.5 faith/tick each, regardless of follower count)
+3. Keep Trust high — successful miracles raise trust → higher faith multiplier
+4. Target races that match your archetype
 
-### Cách Race Affinity ảnh hưởng Conversion
+### God Rank System
 
-Conversion chance mỗi lần tương tác:
-```
-Chance = Openness × RaceAffinity × SocialPressure × TrustDiff × RecentEvents × DoctrineMatch
-```
+| Rank | Cumulative Faith | Power Multiplier | Unlocked Miracles |
+|---|---|---|---|
+| Forgotten | 0 followers | 0.1× | Survive via relics/cults |
+| Nascent | 0 | 1.0× | Dream, Rain, BlessHarvest |
+| Awakened | 5,000 | 1.2× | +Omen, HealFollower, Storm |
+| Established | 25,000 | 1.5× | +Curse, DivineVoice, Earthquake, Portal |
+| Revered | 100,000 | 1.8× | +Volcano, Revelation, DemonInvasion |
+| Exalted | 400,000 | 2.2× | +DivineBeastCreation, HolyWar |
+| Ancient | 1,000,000 | 3.0× | Full power |
 
-- NPC tier thấp chuyển đạo dễ hơn (Commoner openness 0.8, Royalty 0.15)
-- Elf trong civilization theo Nature god → RaceAffinity 1.6x → convert rất dễ
-- Demon theo Light god → RaceAffinity 0.2x → gần như không thể convert bình thường (cần extraordinary event)
-- Ruling religion của civ = religion của bạn → SocialPressure 1.5x bonus
+**Forgotten God survival:** If your followers hit 0, you survive as long as you have at least one active relic or hidden cult. Without both, you are permanently eliminated. Always maintain at least one relic before losing your last followers.
 
-**Để convert được những race khó:**
-- Gửi Dream nhiều lần để tăng GodTrustLevel từ từ
-- Chờ disaster (Crop Failure, Disease) → devout surge → cơ hội conversion tăng +25%
-- Thực hiện miracle thành công ngay trước khi NPC gặp biến cố
+### Doctrine Integrity (v1.2)
 
-### Cách God Rank hoạt động
+NPCs with divine power must live according to their god's doctrine. Their **Doctrine Integrity** score determines their power multiplier:
 
-Rank tăng theo **tổng cumulative Faith** đã kiếm (không phải Faith hiện tại). Rank cao hơn:
-- Mở khóa thêm miracles
-- Tăng faith gen multiplier
-- Mở rộng tầm ảnh hưởng của Divine Voice
+| Score | Status | Power Modifier |
+|---|---|---|
+| 90-100 | Exalted | ×1.30 |
+| 70-89 | Faithful | ×1.05 |
+| 50-69 | Shaken | ×0.83 |
+| 25-49 | Compromised | ×0.55 |
+| 0-24 | Broken → **Fall Event** | ×0.15 |
 
-**Nếu god về 0 followers:**
-- Còn relic hoặc hidden cult → trạng thái **Forgotten** (vẫn sống, faith gen yếu 10%)
-- Không còn gì → **Eliminated vĩnh viễn**
+**Violation severity:**
+- Minor contradiction → -2 to -5 (priest speaks in anger)
+- Moderate violation → -8 to -15 (purity follower gives in to temptation)
+- Major violation → -20 to -35 (saintess abandons innocents)
+- Severe betrayal → -40 to -70 (chosen one secretly serves rival god)
+- Doctrine inversion → -80 to -100 → **NPC falls** (Saintess becomes BloodSaint)
 
-→ Để tránh bị eliminate: cố giữ ít nhất 1 relic hoặc 1 hidden cult trước khi followers về 0.
+**Redemption:** NPC can restore integrity through pilgrimage/trial progress (0-100). Admin can trigger this or it progresses automatically.
 
-### Cách Doctrine ảnh hưởng Religion
+### Escort System (v1.2)
 
-5 doctrine axes thay đổi hành vi AI của religion:
+Important religious figures attract escorts based on their rank:
 
-| Axis | -100 (Low) | +100 (High) | Gameplay |
-|------|-----------|------------|---------|
-| Mercy/Punishment | Tha thứ tất cả | Xử tử heretics ngay | Crime response, heresy trial |
-| Isolation/Expansion | Bảo vệ tín đồ cũ | Truyền đạo tích cực | Missionary speed ×0.5→×2.0 |
-| Harmony/Dominion | Hài hòa thiên nhiên | Chinh phục thế giới | Elves thích -100, Orcs thích +100 |
-| Freedom/Order | Cá nhân tự do | Trật tự nghiêm | Nobles/Royals support +60% khi Order cao |
-| Sacrifice/Prosperity | Đau khổ có ý nghĩa | Thịnh vượng = đức tin | Disaster interpretation |
+| Church Rank | Escort Size | Primary Roles |
+|---|---|---|
+| Priest | 1-3 | Guard Knights |
+| High Priest | 3-8 | Knights + Scribes + Disciples |
+| Prophet | 5-20 | Knights + Pilgrims + Disciples |
+| Saint / Saintess | 8-30 | Knights + Healers + Disciples + Fanatics |
+| Divine Avatar | 20-50 | Elite full set |
 
-**Doctrine tự động thay đổi** qua events — admin có thể chỉnh thủ công qua trang Religions → Doctrine Axes tab.
+- 3% chance an escort member is secretly corrupted by a rival god
+- Fanatics will sacrifice themselves to protect a saint
+- Escorts defend against kidnap attempts (Escort Strength vs Org Power)
+- Successful protection → god faith +20, trust +5; kidnap success → god faith -50, trust -15
 
-### Cách AI Director hoạt động
-
-AiDirectorService chạy mỗi 20 ticks để kiểm soát pacing:
-
-**Age Transitions** (tự động theo tick):
-- Tick 100 → **Kingdom Age** — dungeons AncientRuins spawn quanh civs
-- Tick 300 → **Conflict Age** — ForbiddenSanctum xuất hiện, holy wars có thể xảy ra
-- Tick 600 → **Collapse Age** — DarkPortals xuất hiện, civs yếu nhất bắt đầu Collapsing
-- Tick 850 → **Rebirth Age** — thế giới tái sinh, civs mới nảy sinh từ đống đổ nát
-
-**Anti-stagnation** (mỗi 80 ticks): Nếu không có war nào → 15% chance inject disaster vào civ yếu nhất.
-
-**Anti-snowball** (mỗi 150 ticks): Nếu một god có >60% tổng followers → gods yếu hơn nhận faith boost +50.
-
-### Cách Dungeon & Relic kết nối với nhau
+### Conversion Formula
 
 ```
-God thực hiện miracle "Create Dungeon"
-         ↓
-DungeonService spawn dungeon tại tọa độ (có thể có Relic bên trong 40%)
-         ↓
-Adventure Guild nhận quest → party vào dungeon
-         ↓
-Success: relic được phát hiện, adventurers nhận EXP
-         ↓
-Adventurer đủ 150 EXP + GodTrust ≥ 70 → promote thành Champion
-         ↓
-Champion spread faith khắp world, có thể trở thành Saint hoặc FallenDemonLord
+ConversionChance = Openness × RaceAffinity × SocialPressure × TrustDiff × RecentEvents × DoctrineMatch
 ```
+
+- **Openness by tier:** Commoner 0.8 → Royalty 0.15
+- **Government spread bonus:** Theocracy 1.4× · Monarchy 1.2× · MerchantState 0.8×
+- **Ruling religion bonus:** +50% social pressure if your religion rules the civ
+
+To convert a difficult race (e.g., Demon following Light god, RaceAffinity 0.2×):
+1. Send Dream repeatedly to raise GodTrustLevel slowly
+2. Wait for a disaster (Crop Failure, Disease) — devotion surges create a conversion window
+3. Perform a successful miracle right before the NPC faces hardship
+
+### AI Director
+
+The AI Director (every 20 ticks) controls world pacing:
+
+**Age transitions (automatic):**
+- Tick 100 → Kingdom Age — AncientRuins dungeons spawn near civs
+- Tick 300 → Conflict Age — ForbiddenSanctum appears, holy wars possible
+- Tick 600 → Collapse Age — DarkPortals open, weakest civs start collapsing
+- Tick 850 → Rebirth Age — new civs grow from the ruins
+
+**Anti-stagnation** (every 80 ticks): if no wars exist → 15% chance a natural disaster is injected into the weakest civ.
+
+**Anti-snowball** (every 150 ticks): if one god holds >60% of all followers → weaker gods receive a faith boost of +50.
 
 ---
 
-## 15. Thông số kỹ thuật
+## 15. Technical Reference
 
 | | |
-|--|--|
+|---|---|
 | **Server** | ASP.NET Core 8, C#, SignalR WebSocket |
 | **Database** | MongoDB 7.0 + Redis 7.2 |
-| **Client** | Unity 2022.3 LTS (C#) |
-| **Admin Panel** | Next.js 14, TypeScript, Tailwind CSS |
+| **Client** | Unity 2022.3 LTS (C#), 27 scripts |
+| **Admin Panel** | Next.js 14, TypeScript, Tailwind CSS, SVG Icons |
 | **Auth** | JWT Bearer + Refresh Token Rotation |
-| **Tick Rate** | 500ms/tick (configurable) |
+| **Tick Rate** | 500ms/tick (configurable via `faith.tick_interval`) |
 | **Max players/world** | 8 gods |
 | **Map size** | 64×64 tiles (configurable) |
-| **Server .cs files** | 42 files, 28 service interfaces |
-| **Unity scripts** | 27 .cs files |
-| **Admin pages** | 18 trang, 65+ API endpoints |
-| **Unit tests** | 75 test cases |
+| **Server .cs files** | 45 files, 31 service interfaces |
+| **Admin pages** | 19 pages (excluding `_app`, `_document`) |
+| **Unit tests** | 95 test cases (xUnit + Moq + FluentAssertions) |
 | **CI/CD** | 4 GitHub Actions workflows |
-| **Balance params** | 90 params runtime-tunable |
+| **Balance params** | 90 params, all runtime-tunable |
 | **God archetypes** | 8 |
 | **God ranks** | 7 (Forgotten → Ancient) |
-| **Race types** | 8 với affinity matrix 8×8 |
+| **Race types** | 8 with 8×8 affinity matrix |
 | **NPC tiers** | 5 (Commoner → Royalty) |
-| **Organization types** | 6 |
+| **Church ranks** | 14 (8 holy + 6 dark) |
 | **Government types** | 6 |
+| **Organization types** | 6 |
 | **Miracles** | 15 (3 tiers) |
 | **Doctrine axes** | 5 |
 | **Believer types** | 5 |
@@ -867,71 +881,93 @@ Champion spread faith khắp world, có thể trở thành Saint hoặc FallenDe
 | **Dungeon types** | 5 |
 | **Relic types** | 8 |
 | **World Ages** | 5 (Early → Rebirth) |
-| **Asset cần thiết** | ~204 files (xem ASSETS.md) |
+| **Assets needed** | ~204 files (see ASSETS.md) |
 
 ### Simulation Loop Ticks
-| Service | Tần suất | Chức năng |
-|---------|---------|----------|
-| FaithService | Mỗi tick | Faith gen, archetype × race × rank multiplier |
-| CivilizationSimulationService | Mỗi tick | AI personalities, food cycle, government, rebellion |
-| ReligionService | Mỗi 5 ticks | Spread, schism, heresy, crusade |
-| EvolutionService | Mỗi 3 ticks | EXP tích lũy, stage transition, apex effects |
-| NPCInteractionService | Mỗi 10 ticks | Crime, marriage, betrayal, luck events |
-| MemoryService | Mỗi 10 ticks | Relic faith gen, forgotten god survival |
-| OrganizationService | Mỗi 20 ticks | Noble Houses, Guild missions, Court intrigue, Underground |
-| AiDirectorService | Mỗi 20 ticks | Age transitions, anti-stagnation, anti-snowball |
-| DungeonService | Mỗi 50 ticks | Natural spawn, infest check, DarkPortal warning |
-| GodRankService | Mỗi 100 ticks | Rank update, forgotten state check |
+
+| Service | Frequency | Function |
+|---|---|---|
+| FaithService | Every tick | Faith gen with race affinity × rank multiplier |
+| CivilizationSimulationService | Every tick | AI personalities, food cycle, government, rebellion |
+| ReligionService | Every 5 ticks | Spread, schism, heresy, crusade |
+| EvolutionService | Every 3 ticks | EXP accumulation, stage transitions |
+| NPCInteractionService | Every 10 ticks | Crime, marriage, betrayal, luck, temptation events |
+| MemoryService | Every 10 ticks | Relic faith gen, Forgotten god survival |
+| OrganizationService | Every 20 ticks | Noble Houses, Guild missions, Court, Underground |
+| AiDirectorService | Every 20 ticks | Age transitions, anti-stagnation, anti-snowball |
+| AchievementService + EscortService | Every 30 ticks | Passive achievements, escort ticks, kidnap attempts |
+| DungeonService | Every 50 ticks | Natural spawn, infestation check, DarkPortal warnings |
+| GodRankService | Every 100 ticks | Rank updates, Forgotten state check |
+
+### Unity Scripts Reference
+
+| Script | Location | Purpose |
+|---|---|---|
+| `WorldFaithClient.cs` | `Network/` | SignalR hub connection, server events |
+| `LobbyClient.cs` | `Network/` | Lobby hub (room management) |
+| `ChatClient.cs` | `Network/` | Chat hub (in-game messages) |
+| `MainThreadDispatcher.cs` | `Network/` | Dispatch SignalR callbacks to Unity main thread |
+| `AuthManager.cs` | `Managers/` | Login, register, token refresh |
+| `GameManager.cs` | `Managers/` | World state, event routing to UI |
+| `AudioManager.cs` | `Audio/` | SFX and music layer management |
+| `VfxManager.cs` | `VFX/` | Particle effect catalogue |
+| `WorldRenderer.cs` | Root | Tile map rendering, entity positions |
+| `CameraController.cs` | Root | Pan, zoom, world navigation |
+| `GameHUD.cs` | `UI/Game/` | Main HUD (faith bar, tick, cycle, chat) |
+| `WorldMapUI.cs` | `UI/Game/` | Minimap and full map view |
+| `MiracleCounterUI.cs` | `UI/Game/` | Miracle counter-window UI |
+| `GodSelectionScreen.cs` | `UI/Game/` | Archetype and name selection before game |
+| `LobbyUI.cs` | `UI/Lobby/` | Room list, create/join room |
+| `LoginUI.cs` | `UI/Lobby/` | Login and registration screens |
 
 ---
 
-## 16. Câu hỏi thường gặp
+## 16. FAQ
 
-**Q: Lỗi "Cannot connect to Docker daemon"?**  
-A: Mở Docker Desktop lên, đợi icon cá voi ở taskbar hết loading (thường 30-60 giây), thử lại.
+**Q: "Cannot connect to Docker daemon" error?**  
+A: Open Docker Desktop. Wait for the whale icon in the system tray to stop animating (can take 30-60 seconds), then retry.
 
-**Q: Server báo "Unable to connect to MongoDB"?**  
-A: Database chưa chạy. Chạy: `docker-compose up worldfaith-mongo worldfaith-redis -d`
+**Q: Server says "Unable to connect to MongoDB"?**  
+A: Database is not running. Run: `docker-compose up worldfaith-mongo worldfaith-redis -d`
 
-**Q: Unity báo lỗi "The type or namespace HubConnection could not be found"?**  
-A: Chưa cài SignalR DLLs. Làm lại Bước 3 cài đặt Unity. Nếu đã copy DLL rồi thì nhấn Assets → Refresh (`Ctrl+R`).
+**Q: Unity error "HubConnection could not be found"?**  
+A: SignalR DLLs are missing. Repeat Step 3 (Install SignalR DLLs). After copying, press `Ctrl+R` in Unity to refresh assets.
 
-**Q: Menu WorldFaith không xuất hiện trong Unity?**  
-A: Đợi Unity compile xong (thanh loading ở góc dưới phải phải hết). Nếu vẫn không: Assets → Refresh. Nếu vẫn không: kiểm tra Console xem có lỗi compile không.
+**Q: The WorldFaith menu doesn't appear in Unity?**  
+A: Wait for the compile progress bar (bottom-right) to finish. If still missing: **Assets → Refresh**. If there are red errors in the Console, fix those first.
 
-**Q: Admin Panel báo 401 Unauthorized?**  
-A: Token đăng nhập hết hạn (60 phút). Đăng xuất và đăng nhập lại. Hoặc kiểm tra file `.env.local` có đúng API URL không.
+**Q: Admin Panel shows 401 Unauthorized?**  
+A: Session expired (60-minute token lifetime). Sign out and sign in again. Also verify `.env.local` has the correct `NEXT_PUBLIC_API_URL`.
 
-**Q: Chỉnh Balance Config nhưng không thấy thay đổi?**  
-A: Chờ tối đa 60 giây (cache TTL). Nếu vẫn không có hiệu lực, thử restart server.
+**Q: Balance Config changes have no effect?**  
+A: Wait up to 60 seconds for the cache to expire. If still not working, restart the server.
 
-**Q: Chơi nhiều người trên mạng LAN?**  
-A: Tìm IP máy chủ — Windows: `ipconfig`, Mac: `ifconfig | grep inet`. Đổi Server URL trong Unity thành `http://192.168.x.x:5000/hubs/world` (thay bằng IP tìm được).
+**Q: Playing on a LAN — how do other people connect?**  
+A: Find your machine's LAN IP: `ipconfig` (Windows) or `ifconfig | grep inet` (Mac/Linux). Change the Unity Server URL from `http://localhost:5000/...` to `http://192.168.x.x:5000/...` (your actual IP). Rebuild and share the build.
 
-**Q: Reset toàn bộ dữ liệu để chạy lại từ đầu?**
+**Q: Android build installs but crashes immediately?**  
+A: Check the `logcat` output in Android Studio or `adb logcat | grep WorldFaith`. Most common causes: missing SignalR DLLs, or Minimum API Level set below Android 8.0.
+
+**Q: WebGL build can't connect to the server?**  
+A: Ensure your server has CORS enabled for the WebGL domain. Also check the browser console for Content Security Policy errors. The server URL in the build must match the domain you're serving the WebGL app from.
+
+**Q: How do I reset all game data?**
 ```bash
-docker-compose down -v    # ⚠️ XÓA SẠCH database — không hoàn tác được!
+docker-compose down -v   # WARNING: permanently deletes all data
 docker-compose up worldfaith-mongo worldfaith-redis -d
-# Sau đó restart server để seed lại admin account
+# Then restart the server to re-seed the admin account
 ```
 
-**Q: Forgotten God là gì và khi nào god bị eliminate?**  
-A: Khi god về 0 followers:
-- Còn ít nhất 1 relic đang active **hoặc** 1 hidden cult → trạng thái **Forgotten** (sống sót ở dạng yếu)
-- Không còn gì → **Eliminated vĩnh viễn** (không thể hồi phục)
+**Q: What is a Forgotten God?**  
+A: A god whose followers dropped to 0. If they still have active relics or hidden cults, they survive in "Forgotten" state (faith gen ×0.1, capped at 500 Faith). If they have neither, they are permanently eliminated. Check Admin → Relics and Admin → Religions (filter IsHidden) to see what's keeping a god alive.
 
-Để kiểm tra: vào Admin → Relics → xem god đó còn relic không. Vào Admin → Religions → lọc IsHidden để xem còn cult không.
+**Q: What is Doctrine Integrity?**  
+A: A stat (0-100) that measures how closely an NPC lives according to their god's doctrine. High integrity = stronger divine power. Violating the doctrine reduces integrity. At 0-24 (Broken), the NPC may Fall — a Saint becomes a BloodSaint, a Prophet becomes a False Prophet. Admins can track this via the God Note → Warning Tags.
 
-**Q: Doctrine tự động thay đổi, có cách nào khóa lại không?**  
-A: Hiện tại chưa có khóa — doctrine được thiết kế để evolve theo events (đây là feature). Nếu muốn giữ nguyên, admin có thể chỉnh lại thủ công qua trang Religions → Doctrine Axes sau mỗi event.
-
-**Q: Tại sao Conversion chance của một NPC quá thấp dù god đang mạnh?**  
-A: Kiểm tra 3 yếu tố chính:
-1. Race của NPC có thấp affinity với archetype của god không? (vd: Demon theo Light god → 20% = rất khó)
-2. NPC tier cao (Noble/Royalty) → openness thấp (0.15-0.3)
-3. Doctrine của religion có phù hợp với personality của NPC không?
+**Q: Why is my Saint's conversion chance so low even with high faith?**  
+A: Three common causes: (1) The NPC's race has low affinity with your god's archetype. (2) The NPC is Tier 4/5 (Noble/Royalty) with inherently low openness (0.15-0.30). (3) Your religion's Doctrine doesn't match the NPC's personality. Check all three via Admin Panel → NPCs and → Religions.
 
 ---
 
-*Cần hỗ trợ? Mở issue tại: https://github.com/thanhtinz/Game-new/issues*  
-*WorldFaith v1.0 — "Players do not control the world. They influence belief, and belief controls the world."*
+*Need help? Open an issue at: https://github.com/thanhtinz/Game-new/issues*  
+*WorldFaith v1.2 — "Players do not control the world. They influence belief, and belief controls the world."*
