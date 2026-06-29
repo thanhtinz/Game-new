@@ -85,7 +85,7 @@ export default function OrgsPage() {
           { key: 'isHidden', label: 'Status', render: r => (
             <div className="flex flex-col gap-1">
               {r.isHidden && <Badge label="Hidden" color="red" />}
-              {r.heatLevel > 0 && <span className="text-xs text-orange-400">🔥 Heat {r.heatLevel?.toFixed(0)}</span>}
+              {r.heatLevel > 0 && <span className="text-xs text-orange-400">Heat {r.heatLevel?.toFixed(0)}</span>}
               {r.godInfluenceId && <Badge label="God-aligned" color="purple" />}
             </div>
           )},

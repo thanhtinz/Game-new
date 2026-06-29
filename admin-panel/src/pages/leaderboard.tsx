@@ -15,7 +15,7 @@ interface LeaderboardEntry {
   totalFollowers: number
 }
 
-const RANK_ICONS: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
+const RANK_ICONS: Record<number, string> = { 1: '1st', 2: '2nd', 3: '3rd' }
 const ARCHETYPE_COLORS: Record<string, string> = {
   Order: 'text-blue-300', Chaos: 'text-pink-400', Light: 'text-yellow-300',
   Darkness: 'text-purple-400', Nature: 'text-green-400', Death: 'text-gray-400',
@@ -50,7 +50,7 @@ export default function LeaderboardAdminPage() {
                   stat === s ? 'bg-purple-700 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
                 }`}
               >
-                {s === 'rating' ? '⭐ Rating' : s === 'wins' ? '🏆 Wins' : '👥 Followers'}
+                {s === 'rating' ? 'Rating' : s === 'wins' ? 'Wins' : 'Followers'}
               </button>
             ))}
           </div>

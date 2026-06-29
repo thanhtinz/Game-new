@@ -117,13 +117,13 @@ export default function PlayersPage() {
                     />
                     <button onClick={ban}
                       className="w-full py-2 bg-red-900/60 border border-red-700 text-red-300 rounded-lg text-sm hover:bg-red-900">
-                      🚫 Ban Player
+                      Ban Player
                     </button>
                   </>
                 ) : (
                   <button onClick={unban}
                     className="w-full py-2 bg-green-900/60 border border-green-700 text-green-300 rounded-lg text-sm hover:bg-green-900">
-                    ✅ Unban Player
+                    Unban Player
                   </button>
                 )}
               </div>
@@ -138,7 +138,7 @@ export default function PlayersPage() {
                 />
                 <button onClick={resetPass}
                   className="w-full py-2 bg-blue-900/60 border border-blue-700 text-blue-300 rounded-lg text-sm hover:bg-blue-900">
-                  🔑 Reset Password
+                  Reset Password
                 </button>
               </div>
 

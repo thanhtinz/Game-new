@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import AdminLayout from '@/components/layout/AdminLayout'
+import Icon from '@/components/ui/Icon'
 import Badge from '@/components/ui/Badge'
 import { eventsApi, worldsApi } from '@/services/api'
 
@@ -143,7 +144,7 @@ export default function EventsPage() {
                         Econ {e.economyImpact > 0 ? '+' : ''}{e.economyImpact}
                       </span>
                     )}
-                    {e.godResponded && <span className="text-purple-400">⚡ God responded</span>}
+                    {e.godResponded && <span className="text-purple-400"><span className="flex items-center gap-1"><Icon name="lightning" className="w-3 h-3" /> God responded</span></span>}
                     <span className="text-gray-600">Tick {e.tick}</span>
                   </div>
                 </div>

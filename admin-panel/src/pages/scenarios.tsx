@@ -1,5 +1,6 @@
 'use client'
 import AdminLayout from '@/components/layout/AdminLayout'
+import Icon from '@/components/ui/Icon'
 
 interface ScenarioInfo {
   type: string
@@ -16,7 +17,7 @@ interface ScenarioInfo {
 const SCENARIOS: ScenarioInfo[] = [
   {
     type: 'Standard',
-    name: '⚖️ Tiêu Chuẩn',
+    name: 'Standard',
     description: 'Game thông thường. Nhiều điều kiện thắng. Phù hợp for tất cả người chơi.',
     maxCycles: 999,
     faithMultiplier: 1,
@@ -27,7 +28,7 @@ const SCENARIOS: ScenarioInfo[] = [
   },
   {
     type: 'TheLastLight',
-    name: '☀️ Ánh Sáng Cuối Cùng',
+    name: 'The Last Light',
     description: '1 god Light chống lại tất cả. Light thắng nếu sống sót qua 3 cycles.',
     maxCycles: 3,
     faithMultiplier: 1,
@@ -38,7 +39,7 @@ const SCENARIOS: ScenarioInfo[] = [
   },
   {
     type: 'ReligionWars',
-    name: '✝️ Thánh Chiến',
+    name: 'Holy Wars',
     description: 'Chỉ thắng when religion of bạn chiếm >70% followers thế giới.',
     maxCycles: 5,
     faithMultiplier: 1,
@@ -49,7 +50,7 @@ const SCENARIOS: ScenarioInfo[] = [
   },
   {
     type: 'EvolutionRace',
-    name: '🐉 Đua Tiến Hóa',
+    name: 'Evolution Race',
     description: 'God đầu tiên evolve entity lên Apex stage thắng ngay lập tức.',
     maxCycles: 999,
     faithMultiplier: 1,
@@ -60,7 +61,7 @@ const SCENARIOS: ScenarioInfo[] = [
   },
   {
     type: 'FaithCrisis',
-    name: '⚡ Khủng Hoảng Niềm Tin',
+    name: 'Faith Crisis',
     description: 'Faith tạo ra chậm hơn 5x. Mỗi miracle phải cân nhắc kỹ lưỡng.',
     maxCycles: 3,
     faithMultiplier: 0.2,
@@ -71,7 +72,7 @@ const SCENARIOS: ScenarioInfo[] = [
   },
   {
     type: 'Apocalypse',
-    name: '☄️ Ngày Tận Thế',
+    name: 'Apocalypse',
     description: 'Monsters mạnh gấp 3x. Civilizations liên tục was attacks. Survive!',
     maxCycles: 2,
     faithMultiplier: 1,
@@ -141,7 +142,7 @@ export default function ScenariosPage() {
         </div>
 
         <div className="mt-6 bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <h3 className="font-semibold mb-2">💡 Cách thêm Scenario mới</h3>
+          <h3 className="font-semibold mb-2"><span className="flex items-center gap-1.5"><Icon name="tip" className="w-4 h-4" /> How to add a Scenario</span></h3>
           <p className="text-gray-400 text-sm">
             Thêm ando <code className="text-green-400">ScenarioConfigs.All</code> trong{' '}
             <code className="text-green-400">ScenarioController.cs</code> and thêm ando{' '}

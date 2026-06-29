@@ -4,6 +4,7 @@ import Table from '@/components/ui/Table'
 import Badge from '@/components/ui/Badge'
 import Modal from '@/components/ui/Modal'
 import StatCard from '@/components/ui/StatCard'
+import Icon from '@/components/ui/Icon'
 import { civsApi, worldsApi } from '@/services/api'
 
 const STATE_COLOR: Record<string, any> = {
@@ -100,10 +101,10 @@ export default function CivsPage() {
         {msg && <div className="mb-4 p-3 bg-green-900/40 border border-green-700 rounded-lg text-green-300 text-sm">{msg}</div>}
 
         <div className="grid grid-cols-4 gap-3 mb-6">
-          <StatCard icon="🏰" label="Total"        value={civs.length} />
-          <StatCard icon="✅" label="Alive"     value={alive.length}            color="text-green-400" />
-          <StatCard icon="⚔️"  label="At War"  value={atWar.length}            color="text-red-400" />
-          <StatCard icon="🌾" label="Famine"      value={famines.length}           color="text-yellow-400" />
+          <StatCard icon="castle" label="Total"        value={civs.length} />
+          <StatCard icon="alive" label="Alive"     value={alive.length}            color="text-green-400" />
+          <StatCard icon="war"  label="At War"  value={atWar.length}            color="text-red-400" />
+          <StatCard icon="famine" label="Famine"      value={famines.length}           color="text-yellow-400" />
         </div>
 
         <Table loading={loading} onRowClick={openEdit} data={civs} columns={[
@@ -133,7 +134,7 @@ export default function CivsPage() {
               <button onClick={e => { e.stopPropagation(); boost(r.id, 'Food') }}
                 className="text-xs px-1.5 py-1 bg-yellow-900/50 text-yellow-300 rounded">+F</button>
               <button onClick={e => { e.stopPropagation(); collapse(r.id) }}
-                className="text-xs px-1.5 py-1 bg-red-900/50 text-red-300 rounded">✕</button>
+                className="text-xs px-1.5 py-1 bg-red-900/50 text-red-300 rounded"><Icon name="x" className="w-3 h-3" /></button>
             </div>
           )},
         ]} />

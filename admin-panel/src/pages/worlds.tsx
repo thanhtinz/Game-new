@@ -74,13 +74,13 @@ export default function WorldsPage() {
 
               <div className="grid grid-cols-4 lg:grid-cols-7 gap-3 mt-3">
                 {[
-                  ['Tick',      w.tick.toLocaleString(), '⏱'],
-                  ['Cycle',     w.cycle,                 '🔄'],
-                  ['Gods',      w.godCount,              '⚡'],
-                  ['Civs',      w.civCount,              '🏛'],
-                  ['Religions', w.religionCount,         '✝'],
-                  ['Entities',  w.entityCount,           '🐉'],
-                  ['Created',   new Date(w.createdAt).toLocaleDateString('en-US'), '📅'],
+                  ['Tick',      w.tick.toLocaleString(), 'clock'],
+                  ['Cycle',     w.cycle,                 'cycle'],
+                  ['Gods',      w.godCount,              'lightning'],
+                  ['Civs',      w.civCount,              'pillar'],
+                  ['Religions', w.religionCount,         'church'],
+                  ['Entities',  w.entityCount,           'dragon'],
+                  ['Created',   new Date(w.createdAt).toLocaleDateString('en-US'), 'calendar'],
                 ].map(([label, val, icon]) => (
                   <div key={String(label)} className="bg-gray-800 rounded-lg p-2 text-center">
                     <div className="text-lg">{icon}</div>
@@ -98,7 +98,7 @@ export default function WorldsPage() {
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
             <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-96">
               <h3 className="font-bold text-lg mb-2">
-                {confirmAction.type === 'end' ? '⚠️ Force End World' : '🔄 Force Rebirth'}
+                {confirmAction.type === 'end' ? 'Force End World' : 'Force Rebirth'}
               </h3>
               <p className="text-gray-400 text-sm mb-4">
                 {confirmAction.type === 'end'

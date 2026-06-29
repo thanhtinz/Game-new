@@ -5,6 +5,7 @@ import Badge from '@/components/ui/Badge'
 import Modal from '@/components/ui/Modal'
 import StatCard from '@/components/ui/StatCard'
 import { relicsApi, worldsApi } from '@/services/api'
+import Icon from '@/components/ui/Icon'
 
 const RELIC_TYPE_COLOR: Record<string, any> = {
   FaithCrystal:'yellow', AncientScripture:'blue', DivineShard:'purple',
@@ -69,16 +70,16 @@ export default function RelicsPage() {
         {msg && <div className="mb-4 p-3 bg-green-900/40 border border-green-700 rounded-lg text-green-300 text-sm">{msg}</div>}
 
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <StatCard icon="💎" label="Total Relics" value={relics.length} color="text-yellow-400" />
-          <StatCard icon="⚡" label="Total Faith/tick" value={totalFaith.toFixed(1)} color="text-purple-400"
+          <StatCard icon="gem" label="Total Relics" value={relics.length} color="text-yellow-400" />
+          <StatCard icon="lightning" label="Total Faith/tick" value={totalFaith.toFixed(1)} color="text-purple-400"
             sub="Total faith gen từ tất cả relics mỗi tick" />
-          <StatCard icon="👻" label="Forgotten God Support" value={forgottenSupport} color="text-blue-400"
+          <StatCard icon="ghost" label="Forgotten God Support" value={forgottenSupport} color="text-blue-400"
             sub="Relics keeping gods from being eliminated" />
         </div>
 
         {/* Giải thích cơ chế */}
         <div className="mb-5 p-4 bg-gray-900 border border-gray-800 rounded-xl text-sm text-gray-400 space-y-1">
-          <p className="text-gray-200 font-medium mb-2">📖 Relic Mechanics</p>
+          <p className="text-gray-200 font-medium mb-2"><span className="flex items-center gap-1.5"><Icon name="book" className="w-4 h-4" /> Relic Mechanics</span></p>
           <p>• Each relic generates <span className="text-yellow-400">Faith passive</span> (2-12/tick) về origin god — kể cả when god has mất hết followers.</p>
           <p>• God with 0 followers + còn relic → state <span className="text-blue-400">Forgotten</span> (not was eliminate, faith gen × 0.1, tối đa 500 Faith).</p>
           <p>• God with 0 followers + not còn relic/cult → <span className="text-red-400">Eliminated</span> vĩnh viễn.</p>
@@ -146,7 +147,7 @@ export default function RelicsPage() {
               </div>
 
               <div className="bg-yellow-900/20 border border-yellow-800/50 rounded-lg p-3 text-xs text-yellow-400">
-                ⚠️ Nếu bỏ trống cả hai ô → relic was bỏ hoang and bắt đầu decay (FaithBonus giảm 0.5/200 ticks)
+                If both fields are empty → relic is abandoned and starts decaying (FaithBonus −0.5 per 200 ticks)
               </div>
 
               <div className="flex justify-end gap-3">

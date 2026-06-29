@@ -5,6 +5,7 @@ import Badge from '@/components/ui/Badge'
 import Modal from '@/components/ui/Modal'
 import StatCard from '@/components/ui/StatCard'
 import { dungeonsApi, worldsApi } from '@/services/api'
+import Icon from '@/components/ui/Icon'
 
 const DUNGEON_TYPES = ['AncientRuins','MonstersLair','ForbiddenSanctum','LostTemple','DarkPortal']
 
@@ -76,7 +77,7 @@ export default function DungeonsPage() {
 
         <div className="grid grid-cols-5 gap-3 mb-6">
           {['Active','Cleared','Sealed','Infested','Awakening'].map(s => (
-            <StatCard key={s} icon={s === 'Active' ? '⚔️' : s === 'Infested' ? '☠️' : s === 'Sealed' ? '🔒' : '✓'}
+            <StatCard key={s} icon={s === 'Active' ? 'war' : s === 'Infested' ? 'skull' : s === 'Sealed' ? 'lock' : 'check'}
               label={s} value={byState(s)}
               color={s === 'Infested' ? 'text-red-400' : s === 'Active' ? 'text-green-400' : 'text-gray-400'} />
           ))}
@@ -117,7 +118,7 @@ export default function DungeonsPage() {
               )}
               {r.state === 'Infested' && (
                 <button onClick={() => seal(r.id)}
-                  className="text-xs px-2 py-1 bg-red-900/50 text-red-300 rounded hover:bg-red-900">⚠ Seal</button>
+                  className="text-xs px-2 py-1 bg-red-900/50 text-red-300 rounded hover:bg-red-900"><span className="flex items-center gap-1"><Icon name="warning" className="w-3 h-3" /> Seal</span></button>
               )}
             </div>
           )},
@@ -133,7 +134,7 @@ export default function DungeonsPage() {
                 {DUNGEON_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
               <p className="text-xs text-gray-600 mt-1">
-                {spawnForm.type === 'DarkPortal' && '⚠️ DarkPortal is very dangerous — continuously spawns monsters if not sealed'}
+                {spawnForm.type === 'DarkPortal' && 'DarkPortal is very dangerous — continuously spawns monsters if not sealed'}
                 {spawnForm.type === 'ForbiddenSanctum' && 'Contains powerful relic, danger level 60-90'}
                 {spawnForm.type === 'LostTemple' && 'High relic chance, linked to forgotten gods'}
               </p>

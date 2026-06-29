@@ -57,14 +57,14 @@ export default function DashboardPage() {
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <StatCard icon="🌍" label="Active Worlds"   value={stats?.activeWorlds ?? 0}    color="text-blue-400" />
-              <StatCard icon="⚡" label="Active Gods"     value={stats?.activeGods ?? 0}      color="text-yellow-400" />
-              <StatCard icon="👥" label="Online Players"  value={stats?.onlinePlayers ?? 0}   color="text-green-400" />
-              <StatCard icon="🏰" label="Total Civs"      value={stats?.totalCivs ?? 0}       color="text-purple-400" />
-              <StatCard icon="🐉" label="Entities"        value={stats?.totalEntities ?? 0}   color="text-orange-400" />
-              <StatCard icon="✝️"  label="Religions"       value={stats?.totalReligions ?? 0}  color="text-pink-400" />
-              <StatCard icon="🧑" label="NPCs (Tier 3-5)" value={stats?.namedNpcs ?? 0}       color="text-cyan-400" />
-              <StatCard icon="🏛️"  label="Organizations"   value={stats?.totalOrgs ?? 0}       color="text-indigo-400" />
+              <StatCard icon="globe" label="Active Worlds"   value={stats?.activeWorlds ?? 0}    color="text-blue-400" />
+              <StatCard icon="lightning" label="Active Gods"     value={stats?.activeGods ?? 0}      color="text-yellow-400" />
+              <StatCard icon="users" label="Online Players"  value={stats?.onlinePlayers ?? 0}   color="text-green-400" />
+              <StatCard icon="castle" label="Total Civs"      value={stats?.totalCivs ?? 0}       color="text-purple-400" />
+              <StatCard icon="dragon" label="Entities"        value={stats?.totalEntities ?? 0}   color="text-orange-400" />
+              <StatCard icon="church"  label="Religions"       value={stats?.totalReligions ?? 0}  color="text-pink-400" />
+              <StatCard icon="npc" label="NPCs (Tier 3-5)" value={stats?.namedNpcs ?? 0}       color="text-cyan-400" />
+              <StatCard icon="pillar"  label="Organizations"   value={stats?.totalOrgs ?? 0}       color="text-indigo-400" />
             </div>
 
             {/* Tick info */}

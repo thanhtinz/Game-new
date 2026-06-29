@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import AdminLayout from '@/components/layout/AdminLayout'
+import Icon from '@/components/ui/Icon'
 import Table from '@/components/ui/Table'
 import Badge from '@/components/ui/Badge'
 import Modal from '@/components/ui/Modal'
@@ -145,7 +146,7 @@ export default function GodsPage() {
                             : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-yellow-600 hover:text-yellow-300'
                         }`}
                       >
-                        {unlocked ? '✓ ' : '+ '}{m}
+                        {unlocked ? <><Icon name="check" className="w-3 h-3 text-green-400" /> </> : '+ '}{m}
                       </button>
                     )
                   })}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import AdminLayout from '@/components/layout/AdminLayout'
+import Icon from '@/components/ui/Icon'
 import Modal from '@/components/ui/Modal'
 import { mapsApi, worldsApi } from '@/services/api'
 
@@ -77,7 +78,7 @@ export default function MapsPage() {
             <input type="range" min={3} max={16} value={zoom} onChange={e => setZoom(+e.target.value)} className="w-24" />
             <span className="text-xs text-gray-400">{zoom}px</span>
             <button onClick={regen} className="px-3 py-2 bg-red-900/50 text-red-300 rounded-lg text-sm border border-red-800 hover:bg-red-900">
-              ♻ Regen Map
+              <><Icon name="refresh" className="w-4 h-4" /> Regen Map</>
             </button>
             <select value={worldId} onChange={e => setWorldId(e.target.value)}
               className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm">
@@ -159,7 +160,7 @@ export default function MapsPage() {
               <div className="flex gap-3 pt-2">
                 <button onClick={placeSacred}
                   className="px-3 py-2 text-sm bg-yellow-900/50 border border-yellow-700 text-yellow-300 rounded-lg hover:bg-yellow-900">
-                  ✨ Place Sacred
+                  <><Icon name="sparkle" className="w-4 h-4" /> Place Sacred</>
                 </button>
                 <div className="flex-1" />
                 <button onClick={() => setModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Cancel</button>

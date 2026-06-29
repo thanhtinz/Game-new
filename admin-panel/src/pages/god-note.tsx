@@ -3,16 +3,17 @@ import AdminLayout from '@/components/layout/AdminLayout'
 import Badge from '@/components/ui/Badge'
 import Modal from '@/components/ui/Modal'
 import { godNoteApi, godsApi, worldsApi } from '@/services/api'
+import Icon from '@/components/ui/Icon'
 
 const TABS = [
   { key: 'TopFaithful',       label: '⭐ Top Faithful',        color: 'text-yellow-400' },
-  { key: 'RisingTalents',     label: '🌱 Rising Talents',      color: 'text-green-400' },
-  { key: 'PotentialPriests',  label: '✝️ Potential Priests',    color: 'text-blue-400' },
-  { key: 'SaintCandidates',   label: '😇 Saint Candidates',    color: 'text-purple-400' },
-  { key: 'ProphetCandidates', label: '🔮 Prophet Candidates',  color: 'text-indigo-400' },
-  { key: 'Champions',         label: '⚔️ Champions',           color: 'text-orange-400' },
-  { key: 'DangerousFollowers',label: '⚠️ Dangerous',          color: 'text-red-400' },
-  { key: 'HiddenCultAssets',  label: '🕵️ Hidden Assets',      color: 'text-gray-400' },
+  { key: 'RisingTalents',     label: 'Rising Talents',      color: 'text-green-400' },
+  { key: 'PotentialPriests',  label: 'Potential Priests',    color: 'text-blue-400' },
+  { key: 'SaintCandidates',   label: 'Saint Candidates',    color: 'text-purple-400' },
+  { key: 'ProphetCandidates', label: 'Prophet Candidates',  color: 'text-indigo-400' },
+  { key: 'Champions',         label: 'Champions',           color: 'text-orange-400' },
+  { key: 'DangerousFollowers',label: 'Dangerous',          color: 'text-red-400' },
+  { key: 'HiddenCultAssets',  label: 'Hidden Assets',      color: 'text-gray-400' },
 ]
 
 const DIVINE_ACTIONS = [
@@ -24,7 +25,7 @@ const DIVINE_ACTIONS = [
   { key: 'Protect',      label: 'Protect',        desc: 'Giảm corruption risk -15, bảo vệ khỏi assassination/accident' },
   { key: 'Ignore',       label: 'Ignore',         desc: 'Không làm gì — tiết kiệm Faith nhưng NPC có thể biến mất' },
   { key: 'Punish',       label: 'Punish',         desc: 'Phạt — giảm corruption nhưng cũng giảm loyalty' },
-  { key: 'Corrupt',      label: 'Corrupt 🌑',     desc: '(Dark Gods) Đẩy NPC ando Dark Path — awaken cursed_blood talent' },
+  { key: 'Corrupt',      label: 'Corrupt',     desc: '(Dark Gods) Đẩy NPC ando Dark Path — awaken cursed_blood talent' },
 ]
 
 const POTENTIAL_COLOR: Record<string, any> = {
@@ -123,7 +124,7 @@ export default function GodNotePage() {
           <div className="text-center py-16 text-gray-500 animate-pulse">Loading God Note...</div>
         ) : entries.length === 0 ? (
           <div className="text-center py-16 text-gray-600">
-            <p className="text-4xl mb-3">📖</p>
+            <Icon name="book" className="w-10 h-10 mx-auto text-gray-600" />
             <p>No NPCs in the God Note yet</p>
             <p className="text-xs text-gray-700 mt-2">NPCs need achievements or talents to appear here</p>
           </div>
@@ -167,7 +168,7 @@ export default function GodNotePage() {
                   <div className="flex flex-wrap gap-1 mb-2">
                     {entry.talentNames.map((t: string, j: number) => (
                       <span key={j} className="text-xs px-1.5 py-0.5 bg-indigo-900/40 border border-indigo-800 text-indigo-300 rounded">
-                        ✨ {t}
+                        <span className="flex items-center gap-1"><Icon name="sparkle" className="w-3 h-3 text-indigo-400" /> {t}</span>
                       </span>
                     ))}
                   </div>
@@ -177,14 +178,14 @@ export default function GodNotePage() {
                 {entry.achievementNames?.length > 0 && (
                   <div className="space-y-0.5 mb-2">
                     {entry.achievementNames.map((a: string, j: number) => (
-                      <p key={j} className="text-xs text-gray-500">🏆 {a}</p>
+                      <p key={j} className="text-xs text-gray-500"><span className="flex items-center gap-1"><Icon name="achievement" className="w-3 h-3" /> {a}</span></p>
                     ))}
                   </div>
                 )}
 
                 {/* Risk */}
                 {entry.risk !== 'Low risk' && (
-                  <p className="text-xs text-red-400 mt-1">⚠️ {entry.risk}</p>
+                  <p className="text-xs text-red-400 mt-1"><span className="flex items-center gap-1 text-red-400"><Icon name="warning" className="w-3 h-3" /> {entry.risk}</span></p>
                 )}
 
                 {/* Actions hint */}
@@ -237,7 +238,7 @@ export default function GodNotePage() {
               {/* Recommended Actions */}
               {selected.recommendedActions?.length > 0 && (
                 <div>
-                  <p className="text-xs text-gray-500 mb-2">💡 Suggested:</p>
+                  <p className="text-xs text-gray-500 mb-2"><span className="flex items-center gap-1"><Icon name="tip" className="w-3 h-3" /> Suggested:</span></p>
                   <div className="flex flex-wrap gap-2">
                     {selected.recommendedActions.map((a: string, i: number) => (
                       <span key={i} className="text-xs px-2 py-1 bg-purple-900/30 border border-purple-800 text-purple-300 rounded">

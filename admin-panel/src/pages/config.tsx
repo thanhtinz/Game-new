@@ -1,10 +1,24 @@
 import { useEffect, useState } from 'react'
 import AdminLayout from '@/components/layout/AdminLayout'
+import Icon from '@/components/ui/Icon'
 import { serverApi } from '@/services/api'
 
-const CATEGORY_ICON: Record<string, string> = {
-  faith: '⚡', miracle: '✨', religion: '✝️', evolution: '🐉',
-  civ: '🏰', world: '🌍', npc: '🧑', org: '🏛️'
+type IconName = Parameters<typeof Icon>[0]['name']
+
+const CATEGORY_ICON: Record<string, IconName> = {
+  faith:     'lightning',
+  miracle:   'sparkle',
+  religion:  'church',
+  evolution: 'dragon',
+  civ:       'castle',
+  world:     'globe',
+  npc:       'npc',
+  org:       'pillar',
+  gov:       'crown',
+  age:       'clock',
+  rank:      'star',
+  dungeon:   'dungeons',
+  director:  'gear',
 }
 
 export default function ConfigPage() {
@@ -22,7 +36,6 @@ export default function ConfigPage() {
       setConfigs(Array.isArray(d) ? d : Object.entries(d).map(([key, val]: any) => ({ key, ...val })))
     }).catch(() => {}).finally(() => setLoading(false))
   }
-
   useEffect(load, [category])
 
   async function save(key: string) {
@@ -31,7 +44,7 @@ export default function ConfigPage() {
     await serverApi.updateConfig(key, val)
     setSaved(p => ({ ...p, [key]: true }))
     setTimeout(() => setSaved(p => ({ ...p, [key]: false })), 2000)
-    setMsg(`✓ Saved: ${key}`)
+    setMsg(`Saved: ${key}`)
     setTimeout(() => setMsg(''), 3000)
   }
 
@@ -41,13 +54,11 @@ export default function ConfigPage() {
   }
 
   const categories = [...new Set(configs.map(c => c.category))].filter(Boolean)
-
   const filtered = configs.filter(c => {
     const matchCat = !category || c.category === category
     const matchSearch = !search || c.key?.includes(search) || c.description?.includes(search)
     return matchCat && matchSearch
   })
-
   const grouped = filtered.reduce((acc: Record<string, any[]>, c) => {
     const cat = c.category ?? 'other'
     if (!acc[cat]) acc[cat] = []
@@ -69,8 +80,8 @@ export default function ConfigPage() {
               className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm w-48 focus:border-purple-600 outline-none"
             />
             <button onClick={seedDefaults}
-              className="px-4 py-2 bg-red-900/50 border border-red-800 text-red-300 rounded-lg text-sm hover:bg-red-900">
-              ↺ Reset Default
+              className="px-4 py-2 bg-red-900/50 border border-red-800 text-red-300 rounded-lg text-sm hover:bg-red-900 flex items-center gap-1.5">
+              <Icon name="refresh" className="w-3.5 h-3.5" /> Reset Default
             </button>
           </div>
         </div>
@@ -81,14 +92,18 @@ export default function ConfigPage() {
             className={`px-3 py-1.5 rounded-lg text-xs ${!category ? 'bg-purple-700 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>
             All ({configs.length})
           </button>
-          {categories.map(c => (
-            <button key={c} onClick={() => setCategory(category === c ? '' : c)}
-              className={`px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 ${
-                category === c ? 'bg-purple-700 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-              }`}>
-              {CATEGORY_ICON[c] ?? '⚙️'} {c} ({configs.filter(x => x.category === c).length})
-            </button>
-          ))}
+          {categories.map(c => {
+            const iconName = CATEGORY_ICON[c] ?? 'gear'
+            return (
+              <button key={c} onClick={() => setCategory(category === c ? '' : c)}
+                className={`px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 ${
+                  category === c ? 'bg-purple-700 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}>
+                <Icon name={iconName} className="w-3 h-3" />
+                {c} ({configs.filter(x => x.category === c).length})
+              </button>
+            )
+          })}
         </div>
 
         {msg && <div className="mb-4 p-3 bg-green-900/40 border border-green-700 rounded-lg text-green-300 text-sm">{msg}</div>}
@@ -100,7 +115,7 @@ export default function ConfigPage() {
             {Object.entries(grouped).map(([cat, items]) => (
               <div key={cat}>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-base">{CATEGORY_ICON[cat] ?? '⚙️'}</span>
+                  <Icon name={CATEGORY_ICON[cat] ?? 'gear'} className="w-4 h-4 text-gray-400" />
                   <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">{cat}</h3>
                   <span className="text-xs text-gray-600">({(items as any[]).length})</span>
                 </div>
@@ -128,13 +143,15 @@ export default function ConfigPage() {
                           <button
                             onClick={() => save(c.key)}
                             disabled={!isDirty}
-                            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center gap-1 ${
                               saved[c.key] ? 'bg-green-700 text-white' :
                               isDirty ? 'bg-purple-700 hover:bg-purple-600 text-white' :
                               'bg-gray-800 text-gray-600 cursor-default'
                             }`}
                           >
-                            {saved[c.key] ? '✓' : 'Save'}
+                            {saved[c.key]
+                              ? <><Icon name="check" className="w-3 h-3" /> Saved</>
+                              : 'Save'}
                           </button>
                         </div>
                       </div>

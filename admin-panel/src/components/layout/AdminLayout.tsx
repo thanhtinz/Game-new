@@ -3,53 +3,54 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ReactNode, useState } from 'react'
 import Cookies from 'js-cookie'
+import Icon from '@/components/ui/Icon'
 
 const NAV_GROUPS = [
   {
     group: 'Overview',
     items: [
-      { href: '/dashboard',   label: 'Dashboard',       icon: '📊' },
-      { href: '/events',      label: 'Events Log',      icon: '📋' },
+      { href: '/dashboard',     label: 'Dashboard',        icon: 'dashboard'     as const },
+      { href: '/events',        label: 'Events Log',       icon: 'events'        as const },
     ]
   },
   {
     group: 'World',
     items: [
-      { href: '/worlds',      label: 'Worlds',          icon: '🌍' },
-      { href: '/maps',        label: 'Maps & Tiles',    icon: '🗺️'  },
-      { href: '/scenarios',   label: 'Scenarios',       icon: '🎭' },
-      { href: '/dungeons',    label: 'Dungeons',        icon: '⚔️'  },
-      { href: '/relics',      label: 'Relics',          icon: '💎' },
+      { href: '/worlds',        label: 'Worlds',           icon: 'worlds'        as const },
+      { href: '/maps',          label: 'Maps & Tiles',     icon: 'maps'          as const },
+      { href: '/scenarios',     label: 'Scenarios',        icon: 'scenarios'     as const },
+      { href: '/dungeons',      label: 'Dungeons',         icon: 'dungeons'      as const },
+      { href: '/relics',        label: 'Relics',           icon: 'relics'        as const },
     ]
   },
   {
     group: 'Characters',
     items: [
-      { href: '/gods',        label: 'Gods',            icon: '⚡' },
-      { href: '/god-note',    label: 'God Note',        icon: '📖' },
-      { href: '/npcs',        label: 'NPCs',            icon: '🧑‍🤝‍🧑' },
-      { href: '/mobs',        label: 'Mobs / Entities', icon: '🐉' },
+      { href: '/gods',          label: 'Gods',             icon: 'gods'          as const },
+      { href: '/god-note',      label: 'God Note',         icon: 'god-note'      as const },
+      { href: '/npcs',          label: 'NPCs',             icon: 'npcs'          as const },
+      { href: '/mobs',          label: 'Mobs / Entities',  icon: 'mobs'          as const },
     ]
   },
   {
     group: 'Society',
     items: [
-      { href: '/civs',        label: 'Civilizations',   icon: '🏰' },
-      { href: '/religions',   label: 'Religions',       icon: '✝️'  },
-      { href: '/organizations', label: 'Organizations', icon: '🏛️'  },
+      { href: '/civs',          label: 'Civilizations',    icon: 'civs'          as const },
+      { href: '/religions',     label: 'Religions',        icon: 'religions'     as const },
+      { href: '/organizations', label: 'Organizations',    icon: 'organizations' as const },
     ]
   },
   {
     group: 'Players',
     items: [
-      { href: '/players',     label: 'Players',         icon: '👥' },
-      { href: '/leaderboard', label: 'Leaderboard',     icon: '🏆' },
+      { href: '/players',       label: 'Players',          icon: 'players'       as const },
+      { href: '/leaderboard',   label: 'Leaderboard',      icon: 'leaderboard'   as const },
     ]
   },
   {
     group: 'Config',
     items: [
-      { href: '/config',      label: 'Balance Config',  icon: '⚙️'  },
+      { href: '/config',        label: 'Balance Config',   icon: 'config'        as const },
     ]
   },
 ]
@@ -66,20 +67,21 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-screen bg-gray-950 text-gray-100">
-      {/* Sidebar */}
       <aside className={`${collapsed ? 'w-14' : 'w-60'} bg-gray-900 border-r border-gray-800 flex flex-col transition-all duration-200`}>
         <div className="p-3 border-b border-gray-800 flex items-center justify-between">
           {!collapsed && (
             <div>
-              <h1 className="text-base font-bold text-purple-400">⚡ WorldFaith</h1>
+              <h1 className="text-base font-bold text-purple-400 flex items-center gap-1.5">
+                <Icon name="lightning" className="w-4 h-4" /> WorldFaith
+              </h1>
               <p className="text-xs text-gray-500">Admin Panel</p>
             </div>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="text-gray-500 hover:text-gray-300 ml-auto text-lg leading-none"
+            className="text-gray-500 hover:text-gray-300 ml-auto"
           >
-            {collapsed ? '»' : '«'}
+            <Icon name={collapsed ? 'promote' : 'demote'} className="w-4 h-4 rotate-90" />
           </button>
         </div>
 
@@ -103,7 +105,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                           : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'
                       }`}
                     >
-                      <span className="text-base shrink-0">{icon}</span>
+                      <Icon name={icon} className="w-4 h-4 shrink-0" />
                       {!collapsed && <span className="truncate">{label}</span>}
                     </Link>
                   )
@@ -118,13 +120,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             onClick={logout}
             className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-red-400 hover:bg-red-900/30 transition-colors"
           >
-            <span>🚪</span>
+            <Icon name="sign-out" className="w-4 h-4" />
             {!collapsed && <span>Sign Out</span>}
           </button>
         </div>
       </aside>
 
-      {/* Main */}
       <main className="flex-1 overflow-auto">
         {children}
       </main>
