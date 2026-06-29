@@ -126,6 +126,7 @@ public interface ICivilizationRepository
 {
     Task<List<CivilizationDocument>> GetByWorldAsync(string worldId);
     Task<CivilizationDocument?> GetByIdAsync(string id);
+    Task<CivilizationDocument?> GetByCivilizationByIdAsync(string id);
     Task<CivilizationDocument> CreateAsync(CivilizationDocument civ);
     Task UpdateAsync(CivilizationDocument civ);
     Task DeleteByWorldAsync(string worldId);
@@ -139,6 +140,10 @@ public class CivilizationRepository : MongoRepository<CivilizationDocument>, ICi
         => await Collection.Find(c => c.WorldId == worldId).ToListAsync();
 
     public async Task<CivilizationDocument?> GetByIdAsync(string id)
+        => await Collection.Find(c => c.Id == id).FirstOrDefaultAsync();
+
+    // Alias for OrganizationService / NpcInteractionService
+    public async Task<CivilizationDocument?> GetByCivilizationByIdAsync(string id)
         => await Collection.Find(c => c.Id == id).FirstOrDefaultAsync();
 
     public async Task<CivilizationDocument> CreateAsync(CivilizationDocument civ)
@@ -159,6 +164,7 @@ public interface IReligionRepository
 {
     Task<List<ReligionDocument>> GetByWorldAsync(string worldId);
     Task<List<ReligionDocument>> GetByGodAsync(string godId);
+    Task<ReligionDocument?> GetByGodAsync(string worldId, string godId);
     Task<ReligionDocument?> GetByIdAsync(string id);
     Task<ReligionDocument> CreateAsync(ReligionDocument religion);
     Task UpdateAsync(ReligionDocument religion);
@@ -174,6 +180,9 @@ public class ReligionRepository : MongoRepository<ReligionDocument>, IReligionRe
 
     public async Task<List<ReligionDocument>> GetByGodAsync(string godId)
         => await Collection.Find(r => r.GodId == godId).ToListAsync();
+
+    public async Task<ReligionDocument?> GetByGodAsync(string worldId, string godId)
+        => await Collection.Find(r => r.WorldId == worldId && r.GodId == godId).FirstOrDefaultAsync();
 
     public async Task<ReligionDocument?> GetByIdAsync(string id)
         => await Collection.Find(r => r.Id == id).FirstOrDefaultAsync();
@@ -213,4 +222,101 @@ public class MiracleEventRepository : MongoRepository<MiracleEventDocument>, IMi
             .SortByDescending(e => e.OccurredAt)
             .Limit(limit)
             .ToListAsync();
+}
+
+// ─── NPC Repository (v3) ─────────────────────────────────
+public interface INpcRepository
+{
+    Task<NpcDocument> CreateAsync(NpcDocument npc);
+    Task<List<NpcDocument>> GetByWorldAsync(string worldId);
+    Task<List<NpcDocument>> GetByCivilizationAsync(string civId);
+    Task<List<NpcDocument>> GetByTierAsync(string worldId, NpcTier tier);
+    Task<NpcDocument?> GetByIdAsync(string npcId);
+    Task UpdateAsync(NpcDocument npc);
+    Task<List<NpcDocument>> GetChampionsAsync(string worldId);
+    Task DeleteByWorldAsync(string worldId);
+}
+
+public class NpcRepository : MongoRepository<NpcDocument>, INpcRepository
+{
+    public NpcRepository(IMongoDatabase db) : base(db, "npcs") { }
+
+    public async Task<List<NpcDocument>> GetByWorldAsync(string worldId)
+        => await Collection.Find(n => n.WorldId == worldId && n.State == NpcState.Alive).ToListAsync();
+
+    public async Task<List<NpcDocument>> GetByCivilizationAsync(string civId)
+        => await Collection.Find(n => n.CivilizationId == civId && n.State == NpcState.Alive).ToListAsync();
+
+    public async Task<List<NpcDocument>> GetByTierAsync(string worldId, NpcTier tier)
+        => await Collection.Find(n => n.WorldId == worldId && n.Tier == tier && n.State == NpcState.Alive).ToListAsync();
+
+    public async Task<NpcDocument?> GetByIdAsync(string npcId)
+        => await Collection.Find(n => n.Id == npcId).FirstOrDefaultAsync();
+
+    public async Task UpdateAsync(NpcDocument npc)
+        => await Collection.ReplaceOneAsync(n => n.Id == npc.Id, npc);
+
+    public async Task<List<NpcDocument>> GetChampionsAsync(string worldId)
+        => await Collection.Find(n => n.WorldId == worldId && n.IsChampion).ToListAsync();
+
+    public async Task DeleteByWorldAsync(string worldId)
+        => await Collection.DeleteManyAsync(n => n.WorldId == worldId);
+}
+
+// ─── Organization Repository (v3) ────────────────────────
+public interface IOrganizationRepository
+{
+    Task<OrganizationDocument> CreateAsync(OrganizationDocument org);
+    Task<List<OrganizationDocument>> GetByWorldAsync(string worldId);
+    Task<List<OrganizationDocument>> GetByCivilizationAsync(string civId);
+    Task<List<OrganizationDocument>> GetByTypeAsync(string worldId, OrganizationType type);
+    Task<OrganizationDocument?> GetByIdAsync(string orgId);
+    Task UpdateAsync(OrganizationDocument org);
+}
+
+public class OrganizationRepository : MongoRepository<OrganizationDocument>, IOrganizationRepository
+{
+    public OrganizationRepository(IMongoDatabase db) : base(db, "organizations") { }
+
+    public async Task<List<OrganizationDocument>> GetByWorldAsync(string worldId)
+        => await Collection.Find(o => o.WorldId == worldId).ToListAsync();
+
+    public async Task<List<OrganizationDocument>> GetByCivilizationAsync(string civId)
+        => await Collection.Find(o => o.CivilizationId == civId).ToListAsync();
+
+    public async Task<List<OrganizationDocument>> GetByTypeAsync(string worldId, OrganizationType type)
+        => await Collection.Find(o => o.WorldId == worldId && o.Type == type).ToListAsync();
+
+    public async Task<OrganizationDocument?> GetByIdAsync(string orgId)
+        => await Collection.Find(o => o.Id == orgId).FirstOrDefaultAsync();
+
+    public async Task UpdateAsync(OrganizationDocument org)
+        => await Collection.ReplaceOneAsync(o => o.Id == org.Id, org);
+}
+
+// ─── NPC Event Repository (v3) ───────────────────────────
+public interface INpcEventRepository
+{
+    Task<NpcEventDocument> LogAsync(NpcEventDocument evt);
+    Task<List<NpcEventDocument>> GetRecentAsync(string worldId, int limit = 50);
+    Task<List<NpcEventDocument>> GetByCivilizationAsync(string civId, int limit = 20);
+}
+
+public class NpcEventRepository : MongoRepository<NpcEventDocument>, INpcEventRepository
+{
+    public NpcEventRepository(IMongoDatabase db) : base(db, "npc_events") { }
+
+    public async Task<NpcEventDocument> LogAsync(NpcEventDocument evt)
+    {
+        await Collection.InsertOneAsync(evt);
+        return evt;
+    }
+
+    public async Task<List<NpcEventDocument>> GetRecentAsync(string worldId, int limit = 50)
+        => await Collection.Find(e => e.WorldId == worldId)
+            .SortByDescending(e => e.OccurredAt).Limit(limit).ToListAsync();
+
+    public async Task<List<NpcEventDocument>> GetByCivilizationAsync(string civId, int limit = 20)
+        => await Collection.Find(e => e.CivilizationId == civId)
+            .SortByDescending(e => e.OccurredAt).Limit(limit).ToListAsync();
 }

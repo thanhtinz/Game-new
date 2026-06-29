@@ -122,3 +122,9 @@ public enum TileType
     Volcano,
     Sacred
 }
+
+// NPC v3
+public enum NpcEventResult { Ignored, GodIntervened, NaturalResolution }
+public enum CrimeType { Theft, Corruption, Assassination, Extortion, TaxEvasion, Heresy }
+public enum PoliticalEventType { Election, Rebellion, Coronation, Alliance, Embargo }
+public enum MarriageType { Political, Royal, Forbidden, Religious, Arranged }

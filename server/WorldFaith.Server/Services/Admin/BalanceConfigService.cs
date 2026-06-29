@@ -87,6 +87,26 @@ public static class BalanceDefaults
         ["world.initial_entity_land"]      = ("12",    "world",     "WildAnimals spawned on land tiles",             "int"),
         ["world.initial_entity_harsh"]     = ("6",     "world",     "Monsters spawned on harsh tiles",               "int"),
         ["world.initial_entity_sacred"]    = ("4",     "world",     "HumanHeroes spawned on sacred tiles",           "int"),
+
+        // NPC v3
+        ["npc.noble_house_count_min"]      = ("3",     "npc",       "Min Noble Houses per Kingdom",                  "int"),
+        ["npc.noble_house_count_max"]      = ("7",     "npc",       "Max Noble Houses per Kingdom",                  "int"),
+        ["npc.champion_trust_required"]    = ("70",    "npc",       "Trust level needed for Adventurer → Champion",  "float"),
+        ["npc.betrayal_ambition_threshold"]= ("75",    "npc",       "Ambition threshold for Noble betrayal risk",    "float"),
+        ["npc.betrayal_loyalty_threshold"] = ("40",    "npc",       "Loyalty below which betrayal may occur",        "float"),
+        ["npc.crime_chance_theft"]         = ("0.08",  "npc",       "Chance of theft when economy < 20",             "float"),
+        ["npc.crime_chance_corruption"]    = ("0.05",  "npc",       "Chance of Noble corruption scandal",            "float"),
+        ["npc.marriage_chance"]            = ("0.15",  "npc",       "Chance of Noble marriage per social tick",      "float"),
+        ["npc.disease_chance"]             = ("0.03",  "npc",       "Chance of disease outbreak per 50 ticks",       "float"),
+        ["npc.lucky_threshold"]            = ("88",    "npc",       "Luck roll >= this = lucky event",               "float"),
+        ["npc.unlucky_threshold"]          = ("12",    "npc",       "Luck roll <= this = unlucky event",             "float"),
+
+        // Organization v3
+        ["org.guild_quest_chance"]         = ("0.08",  "org",       "Chance of Adventure Guild quest per tick",      "float"),
+        ["org.guild_survival_chance"]      = ("0.7",   "org",       "Adventurer survival rate in monster quest",     "float"),
+        ["org.underground_heat_gain"]      = ("0.5",   "org",       "Heat gained per tick for underground orgs",     "float"),
+        ["org.court_deadlock_economy_dmg"] = ("3",     "org",       "Economy/Military lost per tick in court deadlock","float"),
+        ["org.religious_corruption_chance"]= ("0.04",  "org",       "Chance High Priest corruption per tick",        "float"),
     };
 }
 

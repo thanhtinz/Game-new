@@ -5,6 +5,8 @@ using WorldFaith.Server.Services.Chat;
 using WorldFaith.Server.Services.Evolution;
 using WorldFaith.Server.Services.Faith;
 using WorldFaith.Server.Services.Leaderboard;
+using WorldFaith.Server.Services.NPC;
+using WorldFaith.Server.Services.Organization;
 using WorldFaith.Server.Services.Religion;
 using WorldFaith.Shared.Contracts;
 using WorldFaith.Shared.Enums;
@@ -89,6 +91,34 @@ public class WorldSimulationLoop : BackgroundService
                 if (evoDeltas.Any())
                     await _hubContext.Clients.Group(world.Id).OnWorldTick(
                         new WorldTickEvent { Tick = newTick, Cycle = cycle, Deltas = evoDeltas });
+            }
+
+            // NPCInteractionService: crime, accidents, social events (every 10 ticks)
+            if (newTick % 10 == 0)
+            {
+                var npcService = scope.ServiceProvider.GetRequiredService<INpcInteractionService>();
+                var npcEvents = await npcService.TickAsync(world.Id, newTick);
+                if (npcEvents.Any())
+                {
+                    var npcDeltas = npcEvents.Select(e => new DeltaEvent
+                    {
+                        Type = WorldEventType.DivineConflict,
+                        TargetId = e.CivilizationId,
+                        Description = e.Description
+                    }).ToList();
+                    await _hubContext.Clients.Group(world.Id).OnWorldTick(
+                        new WorldTickEvent { Tick = newTick, Cycle = cycle, Deltas = npcDeltas });
+                }
+            }
+
+            // OrganizationService: Noble Houses, Court, Guild, Underground (every 20 ticks)
+            if (newTick % 20 == 0)
+            {
+                var orgService = scope.ServiceProvider.GetRequiredService<IOrganizationService>();
+                var orgDeltas = await orgService.TickAsync(world.Id, newTick);
+                if (orgDeltas.Any())
+                    await _hubContext.Clients.Group(world.Id).OnWorldTick(
+                        new WorldTickEvent { Tick = newTick, Cycle = cycle, Deltas = orgDeltas });
             }
 
             bool isRebirth = newTick % rebirthInterval == 0;

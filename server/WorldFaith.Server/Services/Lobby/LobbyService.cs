@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Models.Auth;
 using WorldFaith.Server.Repositories;
+using WorldFaith.Server.Services.NPC;
 using WorldFaith.Server.Services.Simulation;
 using WorldFaith.Server.Services.WorldGen;
 using WorldFaith.Shared.Contracts.Auth;
@@ -27,27 +28,33 @@ public class LobbyService : ILobbyService
 {
     private readonly IRoomRepository _roomRepo;
     private readonly IWorldRepository _worldRepo;
+    private readonly ICivilizationRepository _civRepo;
     private readonly ICivilizationSimulationService _civSim;
     private readonly IWorldGeneratorService _worldGen;
     private readonly IHubContext<LobbyHub, ILobbyHubClient> _lobbyHub;
     private readonly IHubContext<WorldHub, IWorldHubClient> _worldHub;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<LobbyService> _logger;
 
     public LobbyService(
         IRoomRepository roomRepo,
         IWorldRepository worldRepo,
+        ICivilizationRepository civRepo,
         ICivilizationSimulationService civSim,
         IWorldGeneratorService worldGen,
         IHubContext<LobbyHub, ILobbyHubClient> lobbyHub,
         IHubContext<WorldHub, IWorldHubClient> worldHub,
+        IServiceProvider serviceProvider,
         ILogger<LobbyService> logger)
     {
         _roomRepo = roomRepo;
         _worldRepo = worldRepo;
+        _civRepo = civRepo;
         _civSim = civSim;
         _worldGen = worldGen;
         _lobbyHub = lobbyHub;
         _worldHub = worldHub;
+        _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
@@ -231,6 +238,16 @@ public class LobbyService : ILobbyService
         await _worldRepo.CreateAsync(world);
         // WorldGenerator sinh map procedural (tiles + civilizations)
         await _worldGen.GenerateAsync(world.Id, world.Width, world.Height);
+
+        // Spawn NPC Tier 2-5 cho mỗi civilization (v3)
+        var npcSpawn = _serviceProvider?.GetService<INpcSpawnService>();
+        if (npcSpawn != null)
+        {
+            var civs = await _civRepo.GetByWorldAsync(world.Id);
+            foreach (var civ in civs)
+                await npcSpawn.SpawnForCivilizationAsync(world.Id, civ);
+            _logger.LogInformation("Spawned NPCs for {Count} civilizations in world {WorldId}", civs.Count, world.Id);
+        }
 
         await _roomRepo.SetStatusAsync(room.Id, RoomStatus.InGame, world.Id);
 

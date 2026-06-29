@@ -8,6 +8,8 @@ using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Middleware;
 using WorldFaith.Server.Services.Auth;
+using WorldFaith.Server.Services.NPC;
+using WorldFaith.Server.Services.Organization;
 using WorldFaith.Server.Services.Chat;
 using WorldFaith.Server.Services.Leaderboard;
 using WorldFaith.Server.Services.Evolution;
@@ -95,6 +97,10 @@ builder.Services.AddSingleton<IMiracleEventRepository, MiracleEventRepository>()
 builder.Services.AddSingleton<IPlayerRepository, PlayerRepository>();
 builder.Services.AddSingleton<IRoomRepository, RoomRepository>();
 builder.Services.AddSingleton<IEvolutionEntityRepository, EvolutionEntityRepository>();
+// v3 Repositories
+builder.Services.AddSingleton<INpcRepository, NpcRepository>();
+builder.Services.AddSingleton<IOrganizationRepository, OrganizationRepository>();
+builder.Services.AddSingleton<INpcEventRepository, NpcEventRepository>();
 
 // ─── Services ────────────────────────────────────────────
 builder.Services.AddSingleton<IBalanceConfigService, BalanceConfigService>();
@@ -107,6 +113,10 @@ builder.Services.AddSingleton<IReligionService, ReligionService>();
 builder.Services.AddSingleton<IEvolutionService, EvolutionService>();
 builder.Services.AddSingleton<IScenarioController, ScenarioController>();
 builder.Services.AddSingleton<IWorldGeneratorService, WorldGeneratorService>();
+// v3 NPC & Organization Services
+builder.Services.AddSingleton<INpcSpawnService, NpcSpawnService>();
+builder.Services.AddSingleton<INpcInteractionService, NpcInteractionService>();
+builder.Services.AddSingleton<IOrganizationService, OrganizationService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();
