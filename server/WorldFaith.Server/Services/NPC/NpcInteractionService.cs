@@ -22,6 +22,7 @@ public class NpcInteractionService : INpcInteractionService
     private readonly IOrganizationRepository _orgRepo;
     private readonly IBalanceConfigService _balance;
     private readonly IAchievementService _achievementService;
+    private readonly IDoctrineIntegrityService _doctrineIntegrity;
     private readonly ILogger<NpcInteractionService> _logger;
     private readonly Random _rng = new();
 
@@ -34,6 +35,7 @@ public class NpcInteractionService : INpcInteractionService
         IOrganizationRepository orgRepo,
         IBalanceConfigService balance,
         IAchievementService achievementService,
+        IDoctrineIntegrityService doctrineIntegrity,
         ILogger<NpcInteractionService> logger)
     {
         _npcRepo = npcRepo;
@@ -44,6 +46,7 @@ public class NpcInteractionService : INpcInteractionService
         _orgRepo = orgRepo;
         _balance = balance;
         _achievementService = achievementService;
+        _doctrineIntegrity = doctrineIntegrity;
         _logger = logger;
     }
 
@@ -72,6 +75,76 @@ public class NpcInteractionService : INpcInteractionService
 
             // Luck events
             events.AddRange(await CheckLuckEventsAsync(worldId, civ, tick));
+
+            // v1.2: Temptation events for high-value NPCs
+            if (tick % 30 == 0)
+                events.AddRange(await CheckTemptationEventsAsync(worldId, civ, tick));
+        }
+
+        return events;
+    }
+
+        return events;
+    }
+
+    // ─── Temptation Events (v1.2) ─────────────────────────
+
+    private async Task<List<NpcEventDocument>> CheckTemptationEventsAsync(
+        string worldId, CivilizationDocument civ, long tick)
+    {
+        var events = new List<NpcEventDocument>();
+        var allNpcs = await _npcRepo.GetByCivilizationAsync(civ.Id);
+
+        // Only check church-rank and high-tier NPCs (performance: not every NPC)
+        var vips = allNpcs.Where(n =>
+            n.State == NpcState.Alive &&
+            (n.DivineProfile.ChurchRank >= ChurchRank.TempleHelper ||
+             n.DivineProfile.IsSaintCandidate ||
+             n.DivineProfile.IsProphetCandidate)
+        ).ToList();
+
+        foreach (var npc in vips)
+        {
+            if (_rng.NextDouble() > 0.08) continue;  // 8% per check
+
+            // Roll temptation type based on god archetype
+            var god = npc.GodInfluenceId != null ? await _godRepo.GetByIdAsync(npc.GodInfluenceId) : null;
+            string temptType = god?.Archetype switch
+            {
+                GodArchetype.Light  => "purity",
+                GodArchetype.War    => "cowardice",
+                GodArchetype.Order  => "rebellion",
+                _                   => "reckless"
+            };
+
+            bool resisted = _rng.NextDouble() < (0.3f + npc.DivineProfile.DoctrineIntegrity.Score / 200f);
+
+            if (resisted)
+            {
+                await _achievementService.AwakentTalentAsync(npc.Id, "unshaken_will", "Resisted temptation");
+                await _doctrineIntegrity.ApplyResistanceAsync(npc.Id, $"Resisted {temptType} temptation", tick);
+
+                events.Add(await LogEventAsync(worldId, civ.Id, NpcEventType.LuckGood, tick,
+                    $"{npc.Name} resisted {temptType} temptation — faith and integrity increase.",
+                    faithImpact: 5f, economyImpact: 0f, stabilityImpact: 0f));
+            }
+            else
+            {
+                // Determine severity
+                var severity = npc.DivineProfile.ChurchRank >= ChurchRank.Saint
+                    ? ViolationSeverity.MajorViolation
+                    : ViolationSeverity.ModerateViolation;
+
+                bool isPublic = _rng.NextDouble() < 0.4f;
+                await _doctrineIntegrity.ApplyViolationAsync(
+                    npc.Id, worldId, severity,
+                    $"Gave in to {temptType} temptation", isPublic, null, tick);
+
+                string scandalNote = isPublic ? " — public scandal!" : " (private)";
+                events.Add(await LogEventAsync(worldId, civ.Id, NpcEventType.Betrayal, tick,
+                    $"{npc.Name} succumbed to {temptType} temptation{scandalNote}",
+                    faithImpact: isPublic ? -15f : -5f, economyImpact: 0f, stabilityImpact: isPublic ? -8f : 0f));
+            }
         }
 
         return events;

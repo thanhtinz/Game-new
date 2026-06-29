@@ -101,6 +101,13 @@ public class WorldSimulationLoop : BackgroundService
             {
                 var achievSvc = scope.ServiceProvider.GetRequiredService<IAchievementService>();
                 await achievSvc.TickAchievementSystemAsync(world.Id, newTick);
+
+                // v1.2: Escort tick — protection, kidnap attempts
+                var escortSvc = scope.ServiceProvider.GetRequiredService<IEscortService>();
+                var escortDeltas = await escortSvc.TickEscortsAsync(world.Id, newTick);
+                if (escortDeltas.Any())
+                    await _hubContext.Clients.Group(world.Id).OnWorldTick(
+                        new WorldTickEvent { Tick = newTick, Cycle = cycle, Deltas = escortDeltas });
             }
 
             // NPCInteractionService: crime, accidents, social events (every 10 ticks)

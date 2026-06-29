@@ -499,6 +499,11 @@ public class NpcDivineProfile
     // Divine actions history
     public List<string> ReceivedDivineActions { get; set; } = new(); // DivineAction names
     public string? ChosenByGodId { get; set; }   // "Mark as Chosen" target
+
+    // Add-On v1.2: Doctrine Integrity
+    public DoctrineIntegrityRecord DoctrineIntegrity { get; set; } = new();
+    public EscortGroup? AssignedEscort { get; set; }
+    public List<GodNoteWarningTag> ActiveWarnings { get; set; } = new();
 }
 
 // God Note entry (returned to players)
@@ -517,4 +522,69 @@ public class GodNoteEntry
     public List<string> RecommendedActions { get; set; } = new();
     public float DivineAttentionScore { get; set; }
     public GodNoteTab Tab { get; set; }
+}
+
+// ─── Add-On v1.2: Doctrine Integrity & Escort System ─────
+
+public class DoctrineIntegrityRecord
+{
+    public float Score { get; set; } = 80f;   // 0-100
+    public DoctrineIntegrityStatus Status =>
+        Score >= 90 ? DoctrineIntegrityStatus.Exalted :
+        Score >= 70 ? DoctrineIntegrityStatus.Faithful :
+        Score >= 50 ? DoctrineIntegrityStatus.Shaken :
+        Score >= 25 ? DoctrineIntegrityStatus.Compromised :
+                      DoctrineIntegrityStatus.Broken;
+
+    public float PowerModifier => Status switch
+    {
+        DoctrineIntegrityStatus.Exalted     => 1.30f,  // mid of 1.20-1.40
+        DoctrineIntegrityStatus.Faithful    => 1.05f,
+        DoctrineIntegrityStatus.Shaken      => 0.825f, // mid of 0.75-0.90
+        DoctrineIntegrityStatus.Compromised => 0.55f,  // mid of 0.40-0.70
+        DoctrineIntegrityStatus.Broken      => 0.15f,  // mid of 0.00-0.30
+        _ => 1f
+    };
+
+    public List<string> ViolationHistory { get; set; } = new(); // event descriptions
+    public List<GodNoteWarningTag> ActiveWarnings { get; set; } = new();
+    public bool IsExcommunicated { get; set; }
+    public bool IsCoverUpActive { get; set; }
+    public long LastViolationTick { get; set; }
+    public float RedemptionProgress { get; set; }   // 0-100, pilgrimage/trial progress
+}
+
+public class EscortMember
+{
+    public string NpcId { get; set; } = string.Empty;
+    public EscortRole Role { get; set; }
+    public EscortBehavior CurrentBehavior { get; set; } = EscortBehavior.Follow;
+    public float Loyalty { get; set; } = 70f;       // 0-100
+    public bool IsCorrupted { get; set; }            // secretly serves rival god
+    public string? RivalGodId { get; set; }          // if corrupted
+}
+
+public class EscortGroup
+{
+    public string ProtectedNpcId { get; set; } = string.Empty;
+    public List<EscortMember> Members { get; set; } = new();
+    public float GroupStrength { get; set; }         // sum of escort power
+    public float DangerLevel { get; set; }           // current threat level
+    public bool IsActive { get; set; } = true;
+    public string? LastKnownLocationCivId { get; set; }
+    public long FormedAtTick { get; set; }
+}
+
+public class ViolationEvent
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N")[..8];
+    public string NpcId { get; set; } = string.Empty;
+    public string WorldId { get; set; } = string.Empty;
+    public ViolationSeverity Severity { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public float IntegrityLoss { get; set; }
+    public bool IsPublic { get; set; }              // scandal vs private
+    public bool IsResisted { get; set; }            // NPC resisted temptation?
+    public long Tick { get; set; }
+    public string? TriggeredByGodId { get; set; }  // rival god who engineered event
 }

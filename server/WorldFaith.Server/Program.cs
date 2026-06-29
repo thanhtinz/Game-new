@@ -137,6 +137,9 @@ builder.Services.AddSingleton<IConversionService, ConversionService>();
 builder.Services.AddSingleton<IAiDirectorService, AiDirectorService>();
 // Add-On v1.1: NPC Achievement & Divine Recognition
 builder.Services.AddSingleton<IAchievementService, AchievementService>();
+// Add-On v1.2: Doctrine Integrity & Escort System
+builder.Services.AddSingleton<IDoctrineIntegrityService, DoctrineIntegrityService>();
+builder.Services.AddSingleton<IEscortService, EscortService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();

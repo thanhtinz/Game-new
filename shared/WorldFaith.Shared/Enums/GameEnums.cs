@@ -272,3 +272,62 @@ public enum DivineAction
 {
     Bless, SendDream, Test, Promote, MarkAsChosen, Protect, Ignore, Punish, Corrupt
 }
+
+// ─── Add-On v1.2: Doctrine Integrity & Escort System ─────
+
+public enum DoctrineIntegrityStatus
+{
+    Exalted     = 4,  // 90-100: +20% to +40% divine power
+    Faithful    = 3,  // 70-89:  normal or slight bonus
+    Shaken      = 2,  // 50-69:  -10% to -25% divine power
+    Compromised = 1,  // 25-49:  -30% to -60% divine power
+    Broken      = 0,  // 0-24:   most power lost or converted
+}
+
+public enum ViolationSeverity
+{
+    MinorContradiction, // -2 to -5
+    ModerateViolation,  // -8 to -15
+    MajorViolation,     // -20 to -35
+    SevereBetral,       // -40 to -70
+    DoctrineInversion,  // -80 to -100 → triggers fall
+}
+
+public enum GodNoteWarningTag
+{
+    PureCandidate,      // NPC strongly matches doctrine
+    ShakenFaith,        // integrity dropping
+    Tempted,            // near a violation event
+    Compromised,        // already violated, power weakening
+    AtRiskOfFall,       // may fall / corrupt / convert
+    ProtectedAsset,     // important enough to need escorts
+}
+
+public enum EscortRole
+{
+    GuardKnight,        // frontline protection
+    Healer,             // sustain VIP health/sanity
+    Disciple,           // spread stories, witness miracles
+    Scribe,             // document, diplomacy
+    Fanatic,            // self-sacrifice willing
+    PilgrimFollower,    // crowds that form around prophets
+    CorruptedGuard,     // secretly serves rival god
+    CultistAgent,       // planted by dark org
+}
+
+public enum EscortBehavior
+{
+    Follow,     // stay close during travel
+    Guard,      // defensive radius when threat appears
+    Evacuate,   // move VIP to safe location
+    Intercept,  // attack enemy before reaching VIP
+    Witness,    // spread stories of the VIP
+    Sacrifice,  // die to protect saint/prophet
+    Betray,     // secretly serve rival god
+}
+
+public enum DoctrineTag
+{
+    Purity, War, Knowledge, Nature, Darkness, Order,
+    Chaos, Death, Light, Balance
+}

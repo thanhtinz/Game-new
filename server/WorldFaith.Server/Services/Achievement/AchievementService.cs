@@ -1,5 +1,6 @@
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
+using WorldFaith.Server.Services.NPC;
 using WorldFaith.Shared.Enums;
 
 namespace WorldFaith.Server.Services.Achievement;
@@ -21,6 +22,7 @@ public class AchievementService : IAchievementService
     private readonly IGodRepository _godRepo;
     private readonly IReligionRepository _religionRepo;
     private readonly ICivilizationRepository _civRepo;
+    private readonly IDoctrineIntegrityService _doctrineIntegrity;
     private readonly ILogger<AchievementService> _logger;
     private readonly Random _rng = new();
 
@@ -103,12 +105,14 @@ public class AchievementService : IAchievementService
         IGodRepository godRepo,
         IReligionRepository religionRepo,
         ICivilizationRepository civRepo,
+        IDoctrineIntegrityService doctrineIntegrity,
         ILogger<AchievementService> logger)
     {
         _npcRepo = npcRepo;
         _godRepo = godRepo;
         _religionRepo = religionRepo;
         _civRepo = civRepo;
+        _doctrineIntegrity = doctrineIntegrity;
         _logger = logger;
     }
 
@@ -421,16 +425,20 @@ public class AchievementService : IAchievementService
                 break;
 
             case DivineAction.Test:
-                // Divine trial — có thể unlock saint/prophet hoặc nhận achievement
+                // Divine trial — 70% unlock saint/prophet path or earn achievement
                 if (_rng.NextDouble() < 0.7f)
                 {
                     await EarnAchievementAsync(npcId, "survived_divine_trial", tick);
                     npc.DivineProfile.DestinyModifier += 20f;
+                    // Passed trial = integrity gain
+                    await _doctrineIntegrity.ApplyResistanceAsync(npcId, "Passed divine trial", tick);
                 }
                 else
                 {
-                    // Trial failed → slight corruption
+                    // Failed → moderate doctrine violation (doubt emerged)
                     npc.DivineProfile.CorruptionRisk += 10f;
+                    await _doctrineIntegrity.ApplyViolationAsync(npcId, "", ViolationSeverity.ModerateViolation,
+                        "Failed divine trial — doubt emerged", false, null, tick);
                 }
                 changed = true;
                 break;
@@ -456,10 +464,12 @@ public class AchievementService : IAchievementService
                 break;
 
             case DivineAction.Corrupt:
-                // Dark god action
+                // Dark god action — triggers severe doctrine violation
                 npc.DivineProfile.CorruptionRisk += 25f;
                 npc.DivineProfile.IsDarkPathCandidate = true;
                 await AwakentTalentAsync(npcId, "cursed_blood", "Corrupted by Dark God");
+                await _doctrineIntegrity.ApplyViolationAsync(npcId, "", ViolationSeverity.SevereBetral,
+                    "Corrupted by a dark god's influence", false, godId, tick);
                 changed = true;
                 break;
 
