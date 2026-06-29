@@ -181,3 +181,17 @@ export const relicsApi = {
     apiFetch(`/api/admin/relics/${id}/transfer`, { method: 'POST', body: JSON.stringify({ ownerNpcId, civId }) }),
   destroy:      (id: string) => apiFetch(`/api/admin/relics/${id}/destroy`, { method: 'POST' }),
 }
+
+// ─── God Note / Achievement (Add-On v1.1) ────────────────
+export const godNoteApi = {
+  getByGod:   (worldId: string, godId: string, tab?: string) =>
+    apiFetch(`/api/admin/god-note?worldId=${worldId}&godId=${godId}${tab ? `&tab=${tab}` : ''}`),
+  applyAction:(npcId: string, godId: string, action: string) =>
+    apiFetch('/api/admin/god-note/action', { method: 'POST', body: JSON.stringify({ npcId, godId, action }) }),
+  getAchievements:(npcId: string) =>
+    apiFetch(`/api/admin/npcs/${npcId}/achievements`),
+  earnAchievement:(npcId: string, achievementKey: string) =>
+    apiFetch(`/api/admin/npcs/${npcId}/achievements/earn`, { method: 'POST', body: JSON.stringify({ achievementKey }) }),
+  awaken:(npcId: string, talentName: string) =>
+    apiFetch(`/api/admin/npcs/${npcId}/talents/awaken`, { method: 'POST', body: JSON.stringify({ talentName }) }),
+}

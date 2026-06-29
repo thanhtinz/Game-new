@@ -8,6 +8,7 @@ using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Middleware;
 using WorldFaith.Server.Services.Auth;
+using WorldFaith.Server.Services.Achievement;
 using WorldFaith.Server.Services.NPC;
 using WorldFaith.Server.Services.Organization;
 using WorldFaith.Server.Services.Race;
@@ -134,6 +135,8 @@ builder.Services.AddSingleton<IGovernmentService, GovernmentService>();
 builder.Services.AddSingleton<IBelieverTypeService, BelieverTypeService>();
 builder.Services.AddSingleton<IConversionService, ConversionService>();
 builder.Services.AddSingleton<IAiDirectorService, AiDirectorService>();
+// Add-On v1.1: NPC Achievement & Divine Recognition
+builder.Services.AddSingleton<IAchievementService, AchievementService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();

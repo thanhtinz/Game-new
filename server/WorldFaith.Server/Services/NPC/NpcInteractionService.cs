@@ -1,5 +1,6 @@
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
+using WorldFaith.Server.Services.Achievement;
 using WorldFaith.Server.Services.Admin;
 using WorldFaith.Shared.Contracts;
 
@@ -20,6 +21,7 @@ public class NpcInteractionService : INpcInteractionService
     private readonly IReligionRepository _religionRepo;
     private readonly IOrganizationRepository _orgRepo;
     private readonly IBalanceConfigService _balance;
+    private readonly IAchievementService _achievementService;
     private readonly ILogger<NpcInteractionService> _logger;
     private readonly Random _rng = new();
 
@@ -31,6 +33,7 @@ public class NpcInteractionService : INpcInteractionService
         IReligionRepository religionRepo,
         IOrganizationRepository orgRepo,
         IBalanceConfigService balance,
+        IAchievementService achievementService,
         ILogger<NpcInteractionService> logger)
     {
         _npcRepo = npcRepo;
@@ -40,6 +43,7 @@ public class NpcInteractionService : INpcInteractionService
         _religionRepo = religionRepo;
         _orgRepo = orgRepo;
         _balance = balance;
+        _achievementService = achievementService;
         _logger = logger;
     }
 
@@ -192,6 +196,14 @@ public class NpcInteractionService : INpcInteractionService
                 faithImpact: 8f, economyImpact: -5f, stabilityImpact: -10f);
             civ.Population = (int)(civ.Population * 0.9f);
             await _civRepo.UpdateAsync(civ);
+
+            // NPCs pious với piety cao có thể earn achievement "survived_plague_prayer"
+            var piousNpcs = await _npcRepo.GetByTierAsync(civ.WorldId, NpcTier.Servant);
+            var survivor = piousNpcs.Where(n => n.CivilizationId == civ.Id && n.Piety > 70f)
+                .OrderBy(_ => _rng.Next()).FirstOrDefault();
+            if (survivor != null && _rng.NextDouble() < 0.3)
+                await _achievementService.EarnAchievementAsync(survivor.Id, "survived_plague_prayer", tick);
+
             events.Add(evt);
         }
 

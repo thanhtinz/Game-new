@@ -219,3 +219,56 @@ public enum WorldAge
     CollapseAge,    // Empires fall, god survival crisis
     RebirthAge,     // New civs, relics carry memory
 }
+
+// ─── Add-On v1.1: NPC Achievement & Divine Recognition ───
+
+public enum AchievementCategory
+{
+    CommonLife, ReligiousDevot, Adventurer, RoyalService, MiracleExposure, DarkForbidden
+}
+
+public enum AchievementRarity
+{
+    Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5
+}
+
+public enum NpcTalentGroup
+{
+    Spiritual, Combat, Mental, Social, DarkForbidden, Resistance
+}
+
+public enum ChurchRank
+{
+    Believer,           // normal follower
+    DevoutBeliever,     // serious follower
+    TempleHelper,       // shrine assistant
+    Priest,             // official religious worker
+    HighPriest,         // major temple leader
+    Prophet,            // receives divine dreams
+    Saint,              // chosen holy figure
+    DivineAvatar,       // rare mortal vessel
+    // Dark equivalents
+    SecretCultist,
+    ForbiddenShrineKeeper,
+    DarkPriest,
+    HereticProphet,
+    BloodSaint,
+    DemonVessel,
+}
+
+public enum NpcMotivation
+{
+    ServeGod, ProtectFamily, BecomeFamous, GainPower, SeekKnowledge, Revenge, Survive
+}
+
+public enum GodNoteTab
+{
+    TopFaithful, RisingTalents, PotentialPriests,
+    SaintCandidates, ProphetCandidates, Champions,
+    DangerousFollowers, HiddenCultAssets
+}
+
+public enum DivineAction
+{
+    Bless, SendDream, Test, Promote, MarkAsChosen, Protect, Ignore, Punish, Corrupt
+}

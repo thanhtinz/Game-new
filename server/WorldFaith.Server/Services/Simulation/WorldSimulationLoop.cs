@@ -9,6 +9,7 @@ using WorldFaith.Server.Services.Leaderboard;
 using WorldFaith.Server.Services.Memory;
 using WorldFaith.Server.Services.NPC;
 using WorldFaith.Server.Services.Organization;
+using WorldFaith.Server.Services.Achievement;
 using WorldFaith.Server.Services.Religion;
 using WorldFaith.Shared.Contracts;
 using WorldFaith.Shared.Enums;
@@ -93,6 +94,13 @@ public class WorldSimulationLoop : BackgroundService
                 if (evoDeltas.Any())
                     await _hubContext.Clients.Group(world.Id).OnWorldTick(
                         new WorldTickEvent { Tick = newTick, Cycle = cycle, Deltas = evoDeltas });
+            }
+
+            // AchievementService — passive talent/achievement checks (every 30 ticks)
+            if (newTick % 30 == 0)
+            {
+                var achievSvc = scope.ServiceProvider.GetRequiredService<IAchievementService>();
+                await achievSvc.TickAchievementSystemAsync(world.Id, newTick);
             }
 
             // NPCInteractionService: crime, accidents, social events (every 10 ticks)

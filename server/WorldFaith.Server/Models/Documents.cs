@@ -223,6 +223,9 @@ public class NpcDocument
     public ChampionPath? ChampionPath { get; set; }
     public int EvolutionPoints { get; set; } // for champion progression
 
+    // Add-On v1.1: Divine Recognition
+    public NpcDivineProfile DivineProfile { get; set; } = new();
+
     // Relationships (Tier 3-5)
     public List<NpcRelationship> Relationships { get; set; } = new();
     public string? SpouseId { get; set; }
@@ -433,4 +436,85 @@ public class GuildMissionDocument
     public string? DiscoveredRelicId { get; set; }
     public float FaithImpact { get; set; }
     public string OutcomeDescription { get; set; } = string.Empty;
+}
+
+// ─── Add-On v1.1: NPC Achievement & Divine Recognition ───
+
+public class NpcAchievement
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N")[..8];
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public AchievementCategory Category { get; set; }
+    public AchievementRarity Rarity { get; set; }
+    public int GodNoteWeight { get; set; }     // +1 đến +150
+    public long EarnedAtTick { get; set; }
+}
+
+public class NpcTalent
+{
+    public string Name { get; set; } = string.Empty;
+    public NpcTalentGroup Group { get; set; }
+    public int RarityScore { get; set; }        // 1-100, dùng trong DivineAttentionScore
+    public bool IsAwakened { get; set; }        // talent có thể ẩn đến khi được kích hoạt
+    public string? AwakenedByEvent { get; set; }
+}
+
+// Lưu profile đầy đủ v1.1 cho NPC tier 2-5
+// (Tier 1 commoners dùng aggregate, không có profile này)
+public class NpcDivineProfile
+{
+    // Achievement & Talent
+    public List<NpcAchievement> Achievements { get; set; } = new();
+    public List<NpcTalent> Talents { get; set; } = new();
+
+    // Divine Attention Score (GDD §5)
+    // = FaithLevel + AchievementValue + TalentRarity + Reputation + MiracleExposure + DestinyModifier - CorruptionRisk
+    public float FaithLevel { get; set; }
+    public float AchievementValue { get; set; }   // sum of GodNoteWeight
+    public float TalentRarity { get; set; }
+    public float Reputation { get; set; }
+    public float MiracleExposure { get; set; }
+    public float DestinyModifier { get; set; }    // hidden seed, revealed over time
+    public float CorruptionRisk { get; set; }
+    public float DivineAttentionScore =>
+        FaithLevel + AchievementValue + TalentRarity + Reputation
+        + MiracleExposure + DestinyModifier - CorruptionRisk;
+
+    // Church progression
+    public ChurchRank ChurchRank { get; set; } = ChurchRank.Believer;
+    public string? AssignedReligionId { get; set; }
+    public long ChurchRankEarnedAt { get; set; }
+
+    // Motivation
+    public NpcMotivation PrimaryMotivation { get; set; }
+    public NpcMotivation? SecondaryMotivation { get; set; }
+
+    // Destiny
+    public bool IsSaintCandidate { get; set; }
+    public bool IsProphetCandidate { get; set; }
+    public bool IsChampionCandidate { get; set; }
+    public bool IsDarkPathCandidate { get; set; }
+
+    // Divine actions history
+    public List<string> ReceivedDivineActions { get; set; } = new(); // DivineAction names
+    public string? ChosenByGodId { get; set; }   // "Mark as Chosen" target
+}
+
+// God Note entry (returned to players)
+public class GodNoteEntry
+{
+    public string NpcId { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public RaceType Race { get; set; }
+    public NpcTier SocialClass { get; set; }
+    public string? ReligionName { get; set; }
+    public float FaithPercent { get; set; }          // 0-100
+    public List<string> TalentNames { get; set; } = new();
+    public List<string> AchievementNames { get; set; } = new();
+    public string Potential { get; set; } = string.Empty;  // "Saintess Candidate" v.v.
+    public string Risk { get; set; } = string.Empty;
+    public List<string> RecommendedActions { get; set; } = new();
+    public float DivineAttentionScore { get; set; }
+    public GodNoteTab Tab { get; set; }
 }

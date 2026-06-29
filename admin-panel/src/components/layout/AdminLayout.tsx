@@ -26,6 +26,7 @@ const NAV_GROUPS = [
     group: 'Nhân Vật',
     items: [
       { href: '/gods',        label: 'Gods',            icon: '⚡' },
+      { href: '/god-note',    label: 'God Note',        icon: '📖' },
       { href: '/npcs',        label: 'NPCs',            icon: '🧑‍🤝‍🧑' },
       { href: '/mobs',        label: 'Mobs / Entities', icon: '🐉' },
     ]
