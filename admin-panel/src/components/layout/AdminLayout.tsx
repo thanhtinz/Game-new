@@ -18,6 +18,8 @@ const NAV_GROUPS = [
       { href: '/worlds',      label: 'Worlds',          icon: '🌍' },
       { href: '/maps',        label: 'Maps & Tiles',    icon: '🗺️'  },
       { href: '/scenarios',   label: 'Scenarios',       icon: '🎭' },
+      { href: '/dungeons',    label: 'Dungeons',        icon: '⚔️'  },
+      { href: '/relics',      label: 'Relics',          icon: '💎' },
     ]
   },
   {

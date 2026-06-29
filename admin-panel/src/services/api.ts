@@ -163,3 +163,21 @@ export const leaderboardApi = {
     apiFetch(`/api/leaderboard/top?type=${type}&limit=${limit}`),
   reset:     () => apiFetch('/api/admin/leaderboard/reset', { method: 'POST' }),
 }
+
+// ─── Dungeons ─────────────────────────────────────────────
+export const dungeonsApi = {
+  getByWorld:   (worldId: string) => apiFetch(`/api/admin/dungeons?worldId=${worldId}`),
+  spawn:        (worldId: string, type: string, x: number, y: number, godId?: string) =>
+    apiFetch('/api/admin/dungeons/spawn', { method: 'POST', body: JSON.stringify({ worldId, type, x, y, godId }) }),
+  seal:         (id: string) => apiFetch(`/api/admin/dungeons/${id}/seal`, { method: 'POST' }),
+  clear:        (id: string) => apiFetch(`/api/admin/dungeons/${id}/clear`, { method: 'POST' }),
+}
+
+// ─── Relics ───────────────────────────────────────────────
+export const relicsApi = {
+  getByWorld:   (worldId: string) => apiFetch(`/api/admin/relics?worldId=${worldId}`),
+  getById:      (id: string) => apiFetch(`/api/admin/relics/${id}`),
+  transfer:     (id: string, ownerNpcId?: string, civId?: string) =>
+    apiFetch(`/api/admin/relics/${id}/transfer`, { method: 'POST', body: JSON.stringify({ ownerNpcId, civId }) }),
+  destroy:      (id: string) => apiFetch(`/api/admin/relics/${id}/destroy`, { method: 'POST' }),
+}
