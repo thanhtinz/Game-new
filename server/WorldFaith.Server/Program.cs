@@ -7,6 +7,7 @@ using StackExchange.Redis;
 using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Auth;
+using WorldFaith.Server.Services.Evolution;
 using WorldFaith.Server.Services.Faith;
 using WorldFaith.Server.Services.Lobby;
 using WorldFaith.Server.Services.Religion;
@@ -87,12 +88,14 @@ builder.Services.AddSingleton<IReligionRepository, ReligionRepository>();
 builder.Services.AddSingleton<IMiracleEventRepository, MiracleEventRepository>();
 builder.Services.AddSingleton<IPlayerRepository, PlayerRepository>();
 builder.Services.AddSingleton<IRoomRepository, RoomRepository>();
+builder.Services.AddSingleton<IEvolutionEntityRepository, EvolutionEntityRepository>();
 
 // ─── Services ────────────────────────────────────────────
 builder.Services.AddSingleton<IFaithService, FaithService>();
 builder.Services.AddSingleton<IMiracleService, MiracleService>();
 builder.Services.AddSingleton<ICivilizationSimulationService, CivilizationSimulationService>();
 builder.Services.AddSingleton<IReligionService, ReligionService>();
+builder.Services.AddSingleton<IEvolutionService, EvolutionService>();
 builder.Services.AddSingleton<IWorldGeneratorService, WorldGeneratorService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();

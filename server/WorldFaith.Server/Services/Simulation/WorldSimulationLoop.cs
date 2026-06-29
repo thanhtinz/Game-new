@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Repositories;
+using WorldFaith.Server.Services.Evolution;
 using WorldFaith.Server.Services.Faith;
 using WorldFaith.Server.Services.Religion;
 using WorldFaith.Shared.Contracts;
@@ -79,6 +80,18 @@ public class WorldSimulationLoop : BackgroundService
                     await _hubContext.Clients.Group(world.Id).OnReligionUpdate(ru);
             }
 
+            // Evolution tick (mỗi 3 tick)
+            if (newTick % 3 == 0)
+            {
+                var evolutionService = scope.ServiceProvider.GetRequiredService<IEvolutionService>();
+                var evoDeltas = await evolutionService.TickAsync(world.Id, newTick);
+                if (evoDeltas.Any())
+                {
+                    var evoTick = new WorldTickEvent { Tick = newTick, Cycle = cycle, Deltas = evoDeltas };
+                    await _hubContext.Clients.Group(world.Id).OnWorldTick(evoTick);
+                }
+            }
+
             // Kiểm tra rebirth cycle
             bool isRebirth = newTick % RebirthTickInterval == 0;
             if (isRebirth)
@@ -151,6 +164,10 @@ public class WorldSimulationLoop : BackgroundService
 
         // Xóa civilizations cũ, chuẩn bị world mới
         await civRepo.DeleteByWorldAsync(worldId);
+
+        // Xóa evolution entities cũ
+        var entityRepo = scope.ServiceProvider.GetRequiredService<IEvolutionEntityRepository>();
+        await entityRepo.DeleteByWorldAsync(worldId);
 
         // Spawn civilizations mới
         var civSim = scope.ServiceProvider.GetRequiredService<ICivilizationSimulationService>();

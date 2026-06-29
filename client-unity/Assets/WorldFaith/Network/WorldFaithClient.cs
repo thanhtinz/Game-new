@@ -153,6 +153,27 @@ namespace WorldFaith.Client.Network
             catch (Exception ex) { Debug.LogError($"[WorldFaith] RequestWorldState lỗi: {ex.Message}"); }
         }
 
+        public async Task EvolveEntityAsync(string entityId)
+        {
+            if (!IsConnected) return;
+            try { await _connection.InvokeAsync("EvolveEntity", entityId); }
+            catch (Exception ex) { Debug.LogError($"[WorldFaith] EvolveEntity lỗi: {ex.Message}"); }
+        }
+
+        public async Task FoundReligionAsync(string religionName, bool isHidden = false)
+        {
+            if (!IsConnected) return;
+            try { await _connection.InvokeAsync("FoundReligion", religionName, isHidden); }
+            catch (Exception ex) { Debug.LogError($"[WorldFaith] FoundReligion lỗi: {ex.Message}"); }
+        }
+
+        public async Task BuildTempleAsync(string religionId, string civId)
+        {
+            if (!IsConnected) return;
+            try { await _connection.InvokeAsync("BuildTemple", religionId, civId); }
+            catch (Exception ex) { Debug.LogError($"[WorldFaith] BuildTemple lỗi: {ex.Message}"); }
+        }
+
         // ─── Event Handlers (server → client) ──────────────────
 
         private void RegisterHandlers()

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Models;
+using WorldFaith.Server.Services.Evolution;
 using WorldFaith.Server.Services.Faith;
 using WorldFaith.Server.Services.Religion;
 using WorldFaith.Server.Services.Simulation;
@@ -41,9 +42,9 @@ public class WorldHub : Hub<IWorldHubClient>
     private readonly IMiracleService _miracleService;
     private readonly ICivilizationSimulationService _civSim;
     private readonly IReligionService _religionService;
+    private readonly IEvolutionService _evolutionService;
     private readonly ILogger<WorldHub> _logger;
 
-    // ConnectionId -> GodId mapping (in-memory, dùng Redis nếu scale)
     private static readonly Dictionary<string, string> ConnectionGodMap = new();
     private static readonly Dictionary<string, string> ConnectionWorldMap = new();
 
@@ -55,6 +56,7 @@ public class WorldHub : Hub<IWorldHubClient>
         IMiracleService miracleService,
         ICivilizationSimulationService civSim,
         IReligionService religionService,
+        IEvolutionService evolutionService,
         ILogger<WorldHub> logger)
     {
         _worldRepo = worldRepo;
@@ -64,6 +66,7 @@ public class WorldHub : Hub<IWorldHubClient>
         _miracleService = miracleService;
         _civSim = civSim;
         _religionService = religionService;
+        _evolutionService = evolutionService;
         _logger = logger;
     }
 
@@ -205,6 +208,36 @@ public class WorldHub : Hub<IWorldHubClient>
             Event = ReligionEvent.TempleBuilt
         };
         await Clients.Group(worldId!).OnReligionUpdate(evt);
+    }
+
+    public async Task EvolveEntity(string entityId)
+    {
+        if (!ConnectionGodMap.TryGetValue(Context.ConnectionId, out var godId)) return;
+        ConnectionWorldMap.TryGetValue(Context.ConnectionId, out var worldId);
+        if (worldId == null) return;
+
+        var success = await _evolutionService.EvolveEntityAsync(worldId, entityId, godId);
+        if (!success)
+        {
+            await Clients.Caller.OnError(new ErrorEvent
+            {
+                Code = "EVOLVE_FAILED",
+                Message = "Không đủ Faith hoặc entity đã đạt max stage"
+            });
+        }
+        else
+        {
+            await Clients.Group(worldId).OnWorldTick(new WorldTickEvent
+            {
+                Tick = 0,
+                Cycle = 0,
+                Deltas = new List<DeltaEvent>
+                {
+                    new() { Type = WorldEventType.EvolutionOccurred, TargetId = entityId,
+                        Description = "Entity được tiến hóa bởi thần lực!" }
+                }
+            });
+        }
     }
 
     // ─── Connection Lifecycle ───────────────────────────────

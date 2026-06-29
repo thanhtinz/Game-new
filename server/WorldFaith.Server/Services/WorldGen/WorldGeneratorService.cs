@@ -17,15 +17,18 @@ public class WorldGeneratorService : IWorldGeneratorService
 {
     private readonly IWorldRepository _worldRepo;
     private readonly ICivilizationRepository _civRepo;
+    private readonly IEvolutionEntityRepository _entityRepo;
     private readonly ILogger<WorldGeneratorService> _logger;
 
     public WorldGeneratorService(
         IWorldRepository worldRepo,
         ICivilizationRepository civRepo,
+        IEvolutionEntityRepository entityRepo,
         ILogger<WorldGeneratorService> logger)
     {
         _worldRepo = worldRepo;
         _civRepo = civRepo;
+        _entityRepo = entityRepo;
         _logger = logger;
     }
 
@@ -92,6 +95,10 @@ public class WorldGeneratorService : IWorldGeneratorService
 
         // Spawn civilizations trên tiles phù hợp
         await SpawnCivilizationsOnTilesAsync(worldId, tiles, width, height);
+
+        // Spawn evolution entities
+        var evoService = new EvolutionEntitySpawner(_entityRepo, _logger);
+        await evoService.SpawnAsync(worldId, tiles);
 
         _logger.LogInformation("World generation xong: {Count} tiles", tiles.Count);
         return tiles;
@@ -295,5 +302,70 @@ public class PerlinNoise
         float u = h < 2 ? x : y;
         float v = h < 2 ? y : x;
         return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
+    }
+}
+
+// ─── Evolution Entity Spawner (helper) ───────────────────
+/// <summary>
+/// Tách riêng để WorldGeneratorService không cần inject IEvolutionService trực tiếp.
+/// </summary>
+internal class EvolutionEntitySpawner
+{
+    private readonly IEvolutionEntityRepository _repo;
+    private readonly ILogger _logger;
+    private readonly Random _rng = new();
+
+    private static readonly Dictionary<EvolutionStage, float> StagePower = new()
+    {
+        { EvolutionStage.WildAnimal, 10f },
+        { EvolutionStage.Monster,    20f },
+        { EvolutionStage.HumanHero,  30f },
+    };
+
+    private static readonly Dictionary<EvolutionStage, string[]> Names = new()
+    {
+        { EvolutionStage.WildAnimal, new[] { "Sói Hoang", "Gấu Rừng", "Đại Bàng", "Hổ Đen" } },
+        { EvolutionStage.Monster,    new[] { "Quái Vật", "Thủy Quái", "Thạch Khổng Lồ" } },
+        { EvolutionStage.HumanHero,  new[] { "Chiến Binh", "Pháp Sư", "Hiệp Sĩ" } },
+    };
+
+    public EvolutionEntitySpawner(IEvolutionEntityRepository repo, ILogger logger)
+    {
+        _repo = repo;
+        _logger = logger;
+    }
+
+    public async Task SpawnAsync(string worldId, List<WorldTileData> tiles)
+    {
+        var spawns = new List<(EvolutionStage stage, TileType[] validTiles, int count)>
+        {
+            (EvolutionStage.WildAnimal, new[] { TileType.Forest, TileType.Grassland }, 12),
+            (EvolutionStage.Monster,    new[] { TileType.Mountain, TileType.Tundra, TileType.Volcano }, 6),
+            (EvolutionStage.HumanHero,  new[] { TileType.Sacred }, 4),
+        };
+
+        int total = 0;
+        foreach (var (stage, validTypes, count) in spawns)
+        {
+            var candidates = tiles.Where(t => validTypes.Contains(t.Type))
+                .OrderBy(_ => _rng.Next()).Take(count).ToList();
+
+            foreach (var tile in candidates)
+            {
+                var nameList = Names[stage];
+                await _repo.CreateAsync(new EvolutionEntityDocument
+                {
+                    WorldId = worldId,
+                    Stage = stage,
+                    Name = nameList[_rng.Next(nameList.Length)],
+                    X = tile.X,
+                    Y = tile.Y,
+                    Power = StagePower[stage],
+                    EvolutionPoints = 0
+                });
+                total++;
+            }
+        }
+        _logger.LogInformation("Spawned {Count} evolution entities", total);
     }
 }
