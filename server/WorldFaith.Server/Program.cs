@@ -1,9 +1,14 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using Serilog;
 using StackExchange.Redis;
 using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Repositories;
+using WorldFaith.Server.Services.Auth;
 using WorldFaith.Server.Services.Faith;
+using WorldFaith.Server.Services.Lobby;
 using WorldFaith.Server.Services.Simulation;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,17 +37,61 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "worldfaith:";
 });
 
+// ─── JWT Authentication ──────────────────────────────────
+var jwtSecret = builder.Configuration["Jwt:Secret"]
+    ?? "WorldFaith_SuperSecret_Key_MustBeAtLeast32Chars!";
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "WorldFaith";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "WorldFaithPlayers";
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+            ClockSkew = TimeSpan.Zero
+        };
+
+        // SignalR cần JWT qua query string
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    (path.StartsWithSegments("/hubs/world") || path.StartsWithSegments("/hubs/lobby")))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 // ─── Repositories ────────────────────────────────────────
 builder.Services.AddSingleton<IWorldRepository, WorldRepository>();
 builder.Services.AddSingleton<IGodRepository, GodRepository>();
 builder.Services.AddSingleton<ICivilizationRepository, CivilizationRepository>();
 builder.Services.AddSingleton<IReligionRepository, ReligionRepository>();
 builder.Services.AddSingleton<IMiracleEventRepository, MiracleEventRepository>();
+builder.Services.AddSingleton<IPlayerRepository, PlayerRepository>();
+builder.Services.AddSingleton<IRoomRepository, RoomRepository>();
 
 // ─── Services ────────────────────────────────────────────
 builder.Services.AddSingleton<IFaithService, FaithService>();
 builder.Services.AddSingleton<IMiracleService, MiracleService>();
 builder.Services.AddSingleton<ICivilizationSimulationService, CivilizationSimulationService>();
+builder.Services.AddSingleton<IAuthService, AuthService>();
+builder.Services.AddSingleton<ILobbyService, LobbyService>();
 
 // ─── Background Simulation Loop ──────────────────────────
 builder.Services.AddHostedService<WorldSimulationLoop>();
@@ -51,7 +100,7 @@ builder.Services.AddHostedService<WorldSimulationLoop>();
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = builder.Environment.IsDevelopment();
-    options.MaximumReceiveMessageSize = 1024 * 1024; // 1MB
+    options.MaximumReceiveMessageSize = 1024 * 1024;
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
     options.KeepAliveInterval = TimeSpan.FromSeconds(10);
 })
@@ -67,12 +116,12 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins(
-                "http://localhost:3000",   // Dev web client
-                "https://worldfaith.game"  // Production
+                "http://localhost:3000",
+                "https://worldfaith.game"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // Bắt buộc cho SignalR
+            .AllowCredentials();
     });
 });
 
@@ -83,13 +132,15 @@ var app = builder.Build();
 app.UseSerilogRequestLogging();
 app.UseCors("WorldFaithPolicy");
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 
-// ─── SignalR Hub endpoint ────────────────────────────────
-app.MapHub<WorldHub>("/hubs/world");
+// ─── Endpoints ───────────────────────────────────────────
 app.MapControllers();
+app.MapHub<WorldHub>("/hubs/world");
+app.MapHub<LobbyHub>("/hubs/lobby");
 
-// ─── Health check ────────────────────────────────────────
 app.MapGet("/health", () => Results.Ok(new { status = "ok", time = DateTime.UtcNow }));
 
-Log.Information("WorldFaith Server khởi động tại {Urls}", string.Join(", ", app.Urls));
+Log.Information("WorldFaith Server khởi động");
 app.Run();

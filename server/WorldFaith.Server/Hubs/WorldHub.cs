@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Models;
@@ -24,8 +26,13 @@ public interface IWorldHubClient
     Task OnJoinedWorld(GodDto god);
 }
 
+[Authorize]
 public class WorldHub : Hub<IWorldHubClient>
 {
+    private string PlayerId => Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+        ?? Context.User?.FindFirst("sub")?.Value
+        ?? Context.ConnectionId;
+
     private readonly IWorldRepository _worldRepo;
     private readonly IGodRepository _godRepo;
     private readonly ICivilizationRepository _civRepo;
@@ -67,7 +74,7 @@ public class WorldHub : Hub<IWorldHubClient>
             return;
         }
 
-        var playerId = Context.ConnectionId; // Thực tế dùng JWT sub
+        var playerId = PlayerId;
 
         // Kiểm tra god đã tồn tại chưa
         var existingGod = await _godRepo.GetByPlayerAndWorldAsync(playerId, req.WorldId);
