@@ -23,6 +23,7 @@ public interface IWorldRepository
     Task<WorldDocument> CreateAsync(WorldDocument world);
     Task UpdateTickAsync(string worldId, long tick, int cycle);
     Task UpdateTilesAsync(string worldId, List<WorldTileData> tiles);
+    Task UpdateAsync(WorldDocument world);
     Task DeactivateAsync(string worldId);
 }
 
@@ -58,6 +59,9 @@ public class WorldRepository : MongoRepository<WorldDocument>, IWorldRepository
         var update = Builders<WorldDocument>.Update.Set(w => w.Tiles, tiles);
         await Collection.UpdateOneAsync(w => w.Id == worldId, update);
     }
+
+    public async Task UpdateAsync(WorldDocument world)
+        => await Collection.ReplaceOneAsync(w => w.Id == world.Id, world);
 
     public async Task DeactivateAsync(string worldId)
     {

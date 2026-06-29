@@ -123,6 +123,16 @@ public class WorldSimulationLoop : BackgroundService
                         new WorldTickEvent { Tick = newTick, Cycle = cycle, Deltas = orgDeltas });
             }
 
+            // AI Director — pacing, age transitions, crisis (every 20 ticks)
+            if (newTick % 20 == 0)
+            {
+                var aiDirector = scope.ServiceProvider.GetRequiredService<IAiDirectorService>();
+                var directorDeltas = await aiDirector.TickAsync(world.Id, newTick);
+                if (directorDeltas.Any())
+                    await _hubContext.Clients.Group(world.Id).OnWorldTick(
+                        new WorldTickEvent { Tick = newTick, Cycle = cycle, Deltas = directorDeltas });
+            }
+
             // DungeonService tick (every 50 ticks)
             if (newTick % 50 == 0)
             {

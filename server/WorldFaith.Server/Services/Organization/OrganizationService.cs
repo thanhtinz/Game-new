@@ -1,7 +1,9 @@
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Admin;
+using WorldFaith.Server.Services.Dungeon;
 using WorldFaith.Shared.Contracts;
+using WorldFaith.Shared.Enums;
 
 namespace WorldFaith.Server.Services.Organization;
 
@@ -18,6 +20,8 @@ public class OrganizationService : IOrganizationService
     private readonly ICivilizationRepository _civRepo;
     private readonly IGodRepository _godRepo;
     private readonly IReligionRepository _religionRepo;
+    private readonly IDungeonService _dungeonService;
+    private readonly IGuildMissionRepository _missionRepo;
     private readonly IBalanceConfigService _balance;
     private readonly ILogger<OrganizationService> _logger;
     private readonly Random _rng = new();
@@ -28,6 +32,8 @@ public class OrganizationService : IOrganizationService
         ICivilizationRepository civRepo,
         IGodRepository godRepo,
         IReligionRepository religionRepo,
+        IDungeonService dungeonService,
+        IGuildMissionRepository missionRepo,
         IBalanceConfigService balance,
         ILogger<OrganizationService> logger)
     {
@@ -36,6 +42,8 @@ public class OrganizationService : IOrganizationService
         _civRepo = civRepo;
         _godRepo = godRepo;
         _religionRepo = religionRepo;
+        _dungeonService = dungeonService;
+        _missionRepo = missionRepo;
         _balance = balance;
         _logger = logger;
     }
@@ -220,86 +228,73 @@ public class OrganizationService : IOrganizationService
             var npc = await _npcRepo.GetByIdAsync(m.NpcId);
             if (npc != null && npc.State == NpcState.Alive) members.Add(npc);
         }
-
         if (!members.Any()) return deltas;
 
-        // Adventurers spread religion when they travel (every 20 ticks)
+        // Religion spread via travel (every 20 ticks)
         if (tick % 20 == 0 && org.OfficialReligionId != null)
         {
-            var traveler = members
-                .Where(m => m.Tier == NpcTier.Adventurer && !m.IsChampion)
+            var traveler = members.Where(m => m.Tier == NpcTier.Adventurer && !m.IsChampion)
                 .OrderBy(_ => _rng.Next()).FirstOrDefault();
-
             if (traveler != null)
             {
-                // Spread religion to a random civ
                 var allCivs = await _civRepo.GetByWorldAsync(worldId);
-                var targetCiv = allCivs
-                    .Where(c => c.Id != org.CivilizationId)
+                var targetCiv = allCivs.Where(c => c.Id != org.CivilizationId)
                     .OrderBy(_ => _rng.Next()).FirstOrDefault();
-
                 if (targetCiv != null)
-                {
                     deltas.Add(new DeltaEvent
                     {
                         Type = WorldEventType.MiraclePerformed,
                         SourceGodId = org.GodInfluenceId,
                         TargetId = targetCiv.Id,
-                        Description = $"{traveler.Name} mang đức tin đến {targetCiv.Name} trong chuyến hành trình!"
+                        Description = $"{traveler.Name} mang đức tin đến {targetCiv.Name}!"
                     });
-                }
             }
         }
 
-        // Guild quest: Adventurer encounters Evolution Entity
-        if (_rng.NextDouble() < 0.08)
+        // Guild quest → real dungeon mission via DungeonService
+        float questChance = await _balance.GetFloatAsync("org.guild_quest_chance");
+        if (_rng.NextDouble() < questChance)
         {
-            var questers = members
-                .Where(m => m.Tier == NpcTier.Adventurer && !m.IsChampion)
-                .Take(3).ToList();
-
-            if (questers.Any())
+            var adventurers = members.Where(m => m.Tier == NpcTier.Adventurer && !m.IsChampion).Take(3).ToList();
+            if (adventurers.Any())
             {
-                bool survived = _rng.NextDouble() < 0.7;
-                if (survived)
+                // Check for active mission to resolve
+                var activeMission = await _missionRepo.GetActiveByOrgAsync(org.Id);
+                if (activeMission != null)
                 {
-                    var hero = questers.OrderBy(_ => _rng.Next()).First();
-                    hero.EvolutionPoints += 30;
-                    await _npcRepo.UpdateAsync(hero);
+                    var resolved = await _dungeonService.ResolveMissionAsync(activeMission.Id);
+                    string icon = resolved.State == GuildMissionState.Success ? "✅" : "❌";
                     deltas.Add(new DeltaEvent
                     {
-                        Type = WorldEventType.EvolutionOccurred,
+                        Type = resolved.State == GuildMissionState.Success
+                            ? WorldEventType.EvolutionOccurred : WorldEventType.GodFaded,
                         TargetId = org.CivilizationId,
-                        Description = $"{hero.Name} chiến thắng và tích lũy sức mạnh thần thánh! ({hero.EvolutionPoints} pts)"
+                        Description = $"{icon} {resolved.OutcomeDescription}"
                     });
-
-                    // Champion promotion check
-                    if (hero.EvolutionPoints >= 150 && hero.IsChampion == false
-                        && hero.GodInfluenceId != null && hero.GodTrustLevel >= 70f)
-                    {
-                        hero.IsChampion = true;
-                        await _npcRepo.UpdateAsync(hero);
-                        deltas.Add(new DeltaEvent
+                    // Champion check after mission success
+                    if (resolved.State == GuildMissionState.Success)
+                        foreach (var adv in adventurers.Where(a =>
+                            a.EvolutionPoints >= 150 && !a.IsChampion
+                            && a.GodInfluenceId != null && a.GodTrustLevel >= 70f))
                         {
-                            Type = WorldEventType.EvolutionOccurred,
-                            SourceGodId = hero.GodInfluenceId,
-                            TargetId = org.CivilizationId,
-                            Description = $"🌟 {hero.Name} đã trở thành Champion của Thần Linh!"
-                        });
-                    }
+                            adv.IsChampion = true;
+                            await _npcRepo.UpdateAsync(adv);
+                            deltas.Add(new DeltaEvent
+                            {
+                                Type = WorldEventType.EvolutionOccurred,
+                                SourceGodId = adv.GodInfluenceId,
+                                TargetId = org.CivilizationId,
+                                Description = $"🌟 {adv.Name} trở thành Champion của Thần Linh!"
+                            });
+                        }
                 }
                 else
                 {
-                    var fallen = questers.First();
-                    fallen.State = NpcState.Dead;
-                    await _npcRepo.UpdateAsync(fallen);
-                    org.Members.RemoveAll(m => m.NpcId == fallen.Id);
-                    await _orgRepo.UpdateAsync(org);
                     deltas.Add(new DeltaEvent
                     {
-                        Type = WorldEventType.GodFaded,
+                        Type = WorldEventType.DivineConflict,
                         TargetId = org.CivilizationId,
-                        Description = $"{fallen.Name} hy sinh trong quest. Guild mất đi một thành viên tài năng."
+                        Description = $"🗡️ {adventurers.Count} thành viên Guild lên đường thực hiện nhiệm vụ!"
                     });
                 }
             }

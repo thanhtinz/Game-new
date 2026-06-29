@@ -1,6 +1,7 @@
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Admin;
+using WorldFaith.Server.Services.Religion;
 using WorldFaith.Shared.Enums;
 using WorldFaith.Shared.Models;
 
@@ -16,39 +17,70 @@ public class CivilizationSimulationService : ICivilizationSimulationService
 {
     private readonly ICivilizationRepository _civRepo;
     private readonly IReligionRepository _religionRepo;
+    private readonly IWorldRepository _worldRepo;
+    private readonly IGodRepository _godRepo;
     private readonly IBalanceConfigService _balance;
+    private readonly IGovernmentService _govService;
+    private readonly IBelieverTypeService _believerTypes;
     private readonly ILogger<CivilizationSimulationService> _logger;
     private readonly Random _rng = new();
 
     private static readonly string[] CivNamePrefixes = { "Ara", "Sol", "Mor", "Thal", "Eld", "Vor", "Kha", "Zyn" };
     private static readonly string[] CivNameSuffixes = { "eth", "ian", "ara", "os", "um", "or", "ix", "ar" };
 
+    private static readonly Dictionary<RaceType, GovernmentType> RaceDefaultGov = new()
+    {
+        [RaceType.Human]     = GovernmentType.Monarchy,
+        [RaceType.Elf]       = GovernmentType.NobleCouncil,
+        [RaceType.Dwarf]     = GovernmentType.NobleCouncil,
+        [RaceType.Orc]       = GovernmentType.TribalClan,
+        [RaceType.Beastfolk] = GovernmentType.TribalClan,
+        [RaceType.Demon]     = GovernmentType.MonsterHorde,
+        [RaceType.Angel]     = GovernmentType.Theocracy,
+        [RaceType.Undead]    = GovernmentType.Monarchy,
+    };
+
     public CivilizationSimulationService(
         ICivilizationRepository civRepo,
         IReligionRepository religionRepo,
+        IWorldRepository worldRepo,
+        IGodRepository godRepo,
         IBalanceConfigService balance,
+        IGovernmentService govService,
+        IBelieverTypeService believerTypes,
         ILogger<CivilizationSimulationService> logger)
     {
         _civRepo = civRepo;
         _religionRepo = religionRepo;
+        _worldRepo = worldRepo;
+        _godRepo = godRepo;
         _balance = balance;
+        _govService = govService;
+        _believerTypes = believerTypes;
         _logger = logger;
     }
 
     public async Task SpawnInitialCivilizationsAsync(string worldId, int count)
     {
         var personalities = Enum.GetValues<CivilizationPersonality>();
+        var races = Enum.GetValues<RaceType>();
 
         for (int i = 0; i < count; i++)
         {
+            var race = races[_rng.Next(races.Length)];
             var civ = new CivilizationDocument
             {
-                WorldId = worldId,
-                Name = GenerateCivName(),
-                Personality = personalities[_rng.Next(personalities.Length)],
+                WorldId    = worldId,
+                Name       = GenerateCivName(),
+                Personality= personalities[_rng.Next(personalities.Length)],
+                PrimaryRace= race,
+                Government = RaceDefaultGov.GetValueOrDefault(race, GovernmentType.Monarchy),
                 Population = _rng.Next(80, 150),
-                Economy = _rng.Next(30, 70),
-                Military = _rng.Next(10, 40),
+                Economy    = _rng.Next(30, 70),
+                Military   = _rng.Next(10, 40),
+                Food       = _rng.Next(40, 80),
+                Stability  = _rng.Next(50, 80),
+                Happiness  = _rng.Next(40, 70),
                 ControlledTiles = GenerateStartingTiles(i, count)
             };
             await _civRepo.CreateAsync(civ);
@@ -59,15 +91,40 @@ public class CivilizationSimulationService : ICivilizationSimulationService
 
     public async Task<List<CivilizationUpdateEvent>> TickAsync(string worldId, long tick)
     {
-        var civs = await _civRepo.GetByWorldAsync(worldId);
+        var civs    = await _civRepo.GetByWorldAsync(worldId);
         var religions = await _religionRepo.GetByWorldAsync(worldId);
+        var world   = await _worldRepo.GetByIdAsync(worldId);
         var updates = new List<CivilizationUpdateEvent>();
 
         foreach (var civ in civs)
         {
+            if (civ.State == CivilizationState.Fallen) continue;
             bool changed = false;
 
-            // AI hành động theo personality
+            // ── Government modifiers ──────────────────────────
+            await _govService.ApplyGovernmentModifiersAsync(civ, tick);
+
+            // ── Forbidden God: penalize civs that outlawed a god ──
+            if (world != null && world.ForbiddenGodIds.Count > 0)
+                changed |= await ApplyForbiddenGodPenaltyAsync(civ, world);
+
+            // ── Civ-level forbidden: suppress god within civ ──
+            changed |= await SuppressForbiddenGodsAsync(civ);
+
+            // ── Rebellion check ───────────────────────────────
+            float rebellionRisk = _govService.GetRebellionRisk(civ);
+            if (_rng.NextDouble() < rebellionRisk * 0.01f)  // per tick
+            {
+                civ.Stability = MathF.Max(0f, civ.Stability - 10f);
+                civ.AiMemory.GodTrustLevel -= 5f;
+                _logger.LogInformation("Civ {Name} rebellion flare (risk={Risk:P1})", civ.Name, rebellionRisk);
+                changed = true;
+            }
+
+            // ── Food/famine tick ──────────────────────────────
+            changed |= SimulateFoodCycle(civ, tick);
+
+            // ── AI personality behavior ───────────────────────
             switch (civ.Personality)
             {
                 case CivilizationPersonality.Aggressive:
@@ -87,10 +144,11 @@ public class CivilizationSimulationService : ICivilizationSimulationService
                     break;
             }
 
-            // Tăng trưởng dân số từ balance config
-            changed |= await SimulatePopulationGrowthAsync(civ);
+            // ── Government evolution (every 200 ticks) ────────
+            if (tick % 200 == 0)
+                await _govService.EvolveGovernmentAsync(civ);
 
-            // Kiểm tra state transition
+            changed |= await SimulatePopulationGrowthAsync(civ);
             changed |= CheckStateTransition(civ);
 
             if (changed)
@@ -103,7 +161,71 @@ public class CivilizationSimulationService : ICivilizationSimulationService
         return updates;
     }
 
-    // ─── AI Behaviors ──────────────────────────────────────
+    // ─── Forbidden God System ─────────────────────────────────
+
+    private async Task<bool> ApplyForbiddenGodPenaltyAsync(CivilizationDocument civ, WorldDocument world)
+    {
+        if (civ.RulingReligionId == null) return false;
+        var religion = await _religionRepo.GetByIdAsync(civ.RulingReligionId);
+        if (religion == null) return false;
+
+        // If the ruling god is forbidden world-wide
+        if (world.ForbiddenGodIds.Contains(religion.GodId))
+        {
+            // Faith/trust drops — outsiders won't convert here
+            civ.AiMemory.GodTrustLevel -= 2f;
+            civ.Stability -= 0.5f;  // Internal tension
+
+            // Cultists form to preserve the forbidden faith
+            if (_rng.NextDouble() < 0.05)
+            {
+                await _believerTypes.ShiftBelieverTypesAsync(religion.Id, "Persecution", 0.05f);
+                _logger.LogInformation("Civ {Name} followers go underground (god is forbidden)", civ.Name);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private async Task<bool> SuppressForbiddenGodsAsync(CivilizationDocument civ)
+    {
+        // Theocracy and Monarchy aggressively suppress rival religions
+        if (civ.Government != GovernmentType.Theocracy && civ.Government != GovernmentType.Monarchy)
+            return false;
+        // Suppression logic handled by FaithService and GodRankService
+        return false;
+    }
+
+    // ─── Food / Famine ────────────────────────────────────────
+
+    private bool SimulateFoodCycle(CivilizationDocument civ, long tick)
+    {
+        if (tick % 20 != 0) return false;
+
+        // Food consumed by population
+        float consumption = civ.Population * 0.01f;
+        civ.Food -= consumption;
+
+        // Natural food regeneration based on economy
+        float regen = civ.Economy * 0.05f;
+        civ.Food = MathF.Clamp(civ.Food + regen, 0f, 200f);
+
+        // Famine
+        if (civ.Food < 10f)
+        {
+            civ.Population = (int)(civ.Population * 0.98f); // 2% die per cycle
+            civ.Happiness -= 5f;
+            civ.Stability -= 3f;
+        }
+        else if (civ.Food > 80f)
+        {
+            civ.Happiness = MathF.Min(100f, civ.Happiness + 0.5f);
+        }
+
+        civ.Happiness = MathF.Clamp(civ.Happiness, 0f, 100f);
+        civ.Stability = MathF.Clamp(civ.Stability, 0f, 100f);
+        return true;
+    }
 
     private bool SimulateAggressive(CivilizationDocument civ, List<CivilizationDocument> allCivs, long tick)
     {
