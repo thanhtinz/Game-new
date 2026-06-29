@@ -19,6 +19,7 @@ public interface IWorldRepository
 {
     Task<WorldDocument?> GetByIdAsync(string id);
     Task<List<WorldDocument>> GetActiveWorldsAsync();
+    Task<List<WorldDocument>> GetAllAsync();
     Task<WorldDocument> CreateAsync(WorldDocument world);
     Task UpdateTickAsync(string worldId, long tick, int cycle);
     Task UpdateTilesAsync(string worldId, List<WorldTileData> tiles);
@@ -34,6 +35,9 @@ public class WorldRepository : MongoRepository<WorldDocument>, IWorldRepository
 
     public async Task<List<WorldDocument>> GetActiveWorldsAsync()
         => await Collection.Find(w => w.IsActive).ToListAsync();
+
+    public async Task<List<WorldDocument>> GetAllAsync()
+        => await Collection.Find(_ => true).SortByDescending(w => w.CreatedAt).Limit(50).ToListAsync();
 
     public async Task<WorldDocument> CreateAsync(WorldDocument world)
     {

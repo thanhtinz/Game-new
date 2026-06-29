@@ -9,6 +9,8 @@ public interface IPlayerRepository
     Task<PlayerDocument?> GetByIdAsync(string id);
     Task<PlayerDocument?> GetByEmailAsync(string email);
     Task<PlayerDocument?> GetByUsernameAsync(string username);
+    Task<List<PlayerDocument>> GetAllAsync(int page = 1, int pageSize = 20, string? search = null);
+    Task<List<PlayerDocument>> GetAllAsync();
     Task<PlayerDocument> CreateAsync(PlayerDocument player);
     Task UpdateLastLoginAsync(string playerId);
     Task AddRefreshTokenAsync(string playerId, RefreshTokenEntry token);
@@ -16,6 +18,7 @@ public interface IPlayerRepository
     Task RevokeAllRefreshTokensAsync(string playerId);
     Task<PlayerDocument?> GetByRefreshTokenAsync(string token);
     Task UpdateStatsAsync(string playerId, bool won);
+    Task SetActiveAsync(string playerId, bool isActive);
 }
 
 public class PlayerRepository : IPlayerRepository
@@ -100,6 +103,30 @@ public class PlayerRepository : IPlayerRepository
             .Inc(p => p.TotalGames, 1)
             .Inc(p => p.TotalWins, won ? 1 : 0)
             .Inc(p => p.Experience, won ? 100 : 20);
+        await _collection.UpdateOneAsync(p => p.Id == playerId, update);
+    }
+
+    public async Task<List<PlayerDocument>> GetAllAsync()
+        => await _collection.Find(_ => true).ToListAsync();
+
+    public async Task<List<PlayerDocument>> GetAllAsync(int page, int pageSize, string? search = null)
+    {
+        var filter = search != null
+            ? Builders<PlayerDocument>.Filter.Or(
+                Builders<PlayerDocument>.Filter.Regex(p => p.Username, new MongoDB.Bson.BsonRegularExpression(search, "i")),
+                Builders<PlayerDocument>.Filter.Regex(p => p.Email, new MongoDB.Bson.BsonRegularExpression(search, "i")))
+            : Builders<PlayerDocument>.Filter.Empty;
+
+        return await _collection.Find(filter)
+            .SortByDescending(p => p.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Limit(pageSize)
+            .ToListAsync();
+    }
+
+    public async Task SetActiveAsync(string playerId, bool isActive)
+    {
+        var update = Builders<PlayerDocument>.Update.Set(p => p.IsActive, isActive);
         await _collection.UpdateOneAsync(p => p.Id == playerId, update);
     }
 }

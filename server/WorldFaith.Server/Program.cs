@@ -6,6 +6,7 @@ using Serilog;
 using StackExchange.Redis;
 using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Repositories;
+using WorldFaith.Server.Services.Admin;
 using WorldFaith.Server.Services.Auth;
 using WorldFaith.Server.Services.Evolution;
 using WorldFaith.Server.Services.Faith;
@@ -58,10 +59,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-            ClockSkew = TimeSpan.Zero
+            ClockSkew = TimeSpan.Zero,
+            RoleClaimType = "role"
         };
 
-        // SignalR cần JWT qua query string
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -78,7 +79,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+});
 
 // ─── Repositories ────────────────────────────────────────
 builder.Services.AddSingleton<IWorldRepository, WorldRepository>();
@@ -99,6 +103,8 @@ builder.Services.AddSingleton<IEvolutionService, EvolutionService>();
 builder.Services.AddSingleton<IWorldGeneratorService, WorldGeneratorService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
+builder.Services.AddSingleton<IAdminService, AdminService>();
+builder.Services.AddSingleton<IBalanceConfigService, BalanceConfigService>();
 
 // ─── Background Simulation Loop ──────────────────────────
 builder.Services.AddHostedService<WorldSimulationLoop>();
@@ -150,4 +156,13 @@ app.MapHub<LobbyHub>("/hubs/lobby");
 app.MapGet("/health", () => Results.Ok(new { status = "ok", time = DateTime.UtcNow }));
 
 Log.Information("WorldFaith Server khởi động");
+
+// Seed default balance config
+using (var scope = app.Services.CreateScope())
+{
+    var balanceConfig = scope.ServiceProvider.GetRequiredService<IBalanceConfigService>();
+    await balanceConfig.SeedDefaultsAsync();
+    Log.Information("Balance config seeded");
+}
+
 app.Run();
