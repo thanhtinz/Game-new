@@ -11,8 +11,6 @@ using WorldFaith.Shared.Contracts;
 using WorldFaith.Shared.Enums;
 using WorldFaith.Shared.Models;
 
-namespace WorldFaith.Server.Hubs;
-
 // Interface cho client methods (strongly-typed hub)
 public interface IWorldHubClient
 {
@@ -241,6 +239,45 @@ public class WorldHub : Hub<IWorldHubClient>
     }
 
     // ─── Connection Lifecycle ───────────────────────────────
+
+    public async Task IssueCommandment(string civId, string commandmentType, string? message = null)
+    {
+        if (!ConnectionGodMap.TryGetValue(Context.ConnectionId, out var godId)) return;
+        ConnectionWorldMap.TryGetValue(Context.ConnectionId, out var worldId);
+        if (worldId == null) return;
+
+        if (!Enum.TryParse<CommandmentType>(commandmentType, out var type))
+        {
+            await Clients.Caller.OnError(new ErrorEvent { Code = "INVALID_COMMANDMENT", Message = "Loại lệnh không hợp lệ" });
+            return;
+        }
+
+        var commandmentService = Context.GetHttpContext()?.RequestServices.GetService<ICommandmentService>();
+        if (commandmentService == null) return;
+
+        var (evt, error) = await commandmentService.IssueCommandmentAsync(worldId, godId, civId, type, message);
+        if (error != null)
+        {
+            await Clients.Caller.OnError(new ErrorEvent { Code = "COMMANDMENT_FAILED", Message = error });
+            return;
+        }
+
+        // Broadcast kết quả cho tất cả gods trong world
+        await Clients.Group(worldId).OnWorldTick(new WorldTickEvent
+        {
+            Tick = 0, Cycle = 0,
+            Deltas = new List<DeltaEvent>
+            {
+                new()
+                {
+                    Type = WorldEventType.DivineConflict,
+                    SourceGodId = godId,
+                    TargetId = civId,
+                    Description = $"{evt.GodName}: \"{evt.Message}\" → {evt.ObeyReason}"
+                }
+            }
+        });
+    }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {

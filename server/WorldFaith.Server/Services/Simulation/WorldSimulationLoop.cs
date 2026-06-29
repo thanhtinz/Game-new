@@ -100,7 +100,11 @@ public class WorldSimulationLoop : BackgroundService
 
             // Kiểm tra win condition (nếu có scenario)
             var scenarioCtrl = scope.ServiceProvider.GetRequiredService<IScenarioController>();
-            var scenarioCfg  = ScenarioConfigs.All[ScenarioType.Standard]; // TODO: load từ world config
+            // Load scenario config từ world document
+            if (!Enum.TryParse<ScenarioType>(world.ScenarioType, out var scenarioType))
+                scenarioType = ScenarioType.Standard;
+            var scenarioCfg = ScenarioConfigs.All.TryGetValue(scenarioType, out var cfg)
+                ? cfg : ScenarioConfigs.All[ScenarioType.Standard];
             var (ended, winnerId, reason) = await scenarioCtrl.CheckWinConditionAsync(
                 world.Id, newTick, cycle, scenarioCfg);
 

@@ -1,5 +1,6 @@
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
+using WorldFaith.Server.Services.Leaderboard;
 using WorldFaith.Shared.Contracts;
 using WorldFaith.Shared.Enums;
 
@@ -17,6 +18,7 @@ public class ReligionService : IReligionService
     private readonly IReligionRepository _religionRepo;
     private readonly ICivilizationRepository _civRepo;
     private readonly IGodRepository _godRepo;
+    private readonly ILeaderboardService _leaderboard;
     private readonly ILogger<ReligionService> _logger;
     private readonly Random _rng = new();
 
@@ -28,11 +30,13 @@ public class ReligionService : IReligionService
         IReligionRepository religionRepo,
         ICivilizationRepository civRepo,
         IGodRepository godRepo,
+        ILeaderboardService leaderboard,
         ILogger<ReligionService> logger)
     {
         _religionRepo = religionRepo;
         _civRepo = civRepo;
         _godRepo = godRepo;
+        _leaderboard = leaderboard;
         _logger = logger;
     }
 
@@ -85,6 +89,10 @@ public class ReligionService : IReligionService
                 var schism = await TriggerSchismAsync(worldId, religion);
                 if (schism != null)
                 {
+                    // Record schism stat
+                    var god = await _godRepo.GetByIdAsync(religion.GodId);
+                    if (god?.PlayerId != null)
+                        await _leaderboard.RecordSchismAsync(god.PlayerId);
                     updates.Add(new ReligionUpdateEvent
                     {
                         ReligionId = religion.Id,
@@ -116,6 +124,10 @@ public class ReligionService : IReligionService
                 var crusadeTarget = await CheckCrusadeAsync(worldId, religion, religions, civs);
                 if (crusadeTarget != null)
                 {
+                    // Record crusade stat
+                    var god = await _godRepo.GetByIdAsync(religion.GodId);
+                    if (god?.PlayerId != null)
+                        await _leaderboard.RecordCrusadeAsync(god.PlayerId);
                     updates.Add(new ReligionUpdateEvent
                     {
                         ReligionId = religion.Id,

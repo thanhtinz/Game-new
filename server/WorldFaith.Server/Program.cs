@@ -6,7 +6,7 @@ using Serilog;
 using StackExchange.Redis;
 using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Repositories;
-using WorldFaith.Server.Services.Admin;
+using WorldFaith.Server.Middleware;
 using WorldFaith.Server.Services.Auth;
 using WorldFaith.Server.Services.Chat;
 using WorldFaith.Server.Services.Leaderboard;
@@ -99,6 +99,8 @@ builder.Services.AddSingleton<IEvolutionEntityRepository, EvolutionEntityReposit
 // ─── Services ────────────────────────────────────────────
 builder.Services.AddSingleton<IBalanceConfigService, BalanceConfigService>();
 builder.Services.AddSingleton<IFaithService, FaithService>();
+builder.Services.AddSingleton<ICommandmentRepository, CommandmentRepository>();
+builder.Services.AddSingleton<ICommandmentService, CommandmentService>();
 builder.Services.AddSingleton<IMiracleService, MiracleService>();
 builder.Services.AddSingleton<ICivilizationSimulationService, CivilizationSimulationService>();
 builder.Services.AddSingleton<IReligionService, ReligionService>();
@@ -151,6 +153,13 @@ var app = builder.Build();
 app.UseSerilogRequestLogging();
 app.UseCors("WorldFaithPolicy");
 app.UseRouting();
+app.UseWorldFaithRateLimit(opt =>
+{
+    opt.ApiMaxRequests   = 120;
+    opt.ApiWindowSeconds = 60;
+    opt.AuthMaxRequests  = 10;
+    opt.AuthWindowSeconds= 60;
+});
 app.UseAuthentication();
 app.UseAuthorization();
 

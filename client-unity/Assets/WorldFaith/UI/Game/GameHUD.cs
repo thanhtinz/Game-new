@@ -26,6 +26,7 @@ namespace WorldFaith.Client.UI.Game
         [SerializeField] private Button tabEvolutionBtn;
         [SerializeField] private Button tabMapBtn;
         [SerializeField] private Button tabChatBtn;
+        [SerializeField] private Button tabCommandmentBtn;
 
         [Header("Panels")]
         [SerializeField] private GameObject miraclePanel;
@@ -33,6 +34,7 @@ namespace WorldFaith.Client.UI.Game
         [SerializeField] private GameObject evolutionPanel;
         [SerializeField] private GameObject mapPanel;
         [SerializeField] private GameObject chatPanel;
+        [SerializeField] private GameObject commandmentPanel;
 
         [Header("Event Log")]
         [SerializeField] private Transform eventLogContainer;
@@ -62,6 +64,7 @@ namespace WorldFaith.Client.UI.Game
             tabEvolutionBtn?.onClick.AddListener(() => ShowPanel(evolutionPanel));
             tabMapBtn?.onClick.AddListener(() => ShowPanel(mapPanel));
             tabChatBtn?.onClick.AddListener(() => ShowPanel(chatPanel));
+            tabCommandmentBtn?.onClick.AddListener(() => ShowPanel(commandmentPanel));
 
             returnToLobbyBtn?.onClick.AddListener(OnReturnToLobby);
 

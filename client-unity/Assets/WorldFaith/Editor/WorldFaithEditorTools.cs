@@ -52,6 +52,8 @@ namespace WorldFaith.Editor
             CreateManagerObject<UI.Game.SettingsPanel>("SettingsPanel");
             CreateManagerObject<UI.Game.TutorialSystem>("TutorialSystem");
             CreateManagerObject<UI.Game.LeaderboardPanel>("LeaderboardPanel");
+            CreateManagerObject<UI.Game.CommandmentPanel>("CommandmentPanel");
+            CreateManagerObject<UI.Game.GodSelectionScreen>("GodSelectionScreen");
 
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             Debug.Log("✅ WorldFaith Game Scene objects created (full set)!");

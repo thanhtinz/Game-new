@@ -563,80 +563,85 @@ Vòng lặp tiếp theo hoặc kết thúc game
 **Faith Economy**
 - Faith tăng thụ động từ followers, temples, devotion level
 - Dark god archetypes (Darkness/Death/Chaos) nhận thêm từ Fear
+- **Archetype bonus** áp dụng thực tế: Light giảm cost HealFollower về 0, War giảm HolyWar 30%, Darkness double Curse damage, Chaos random x0.8-1.6 effect...
 - Max Faith điều chỉnh được qua Admin Panel
 
-**15 Miracle Types**
+**God Commandment System**
+- God phát lệnh trực tiếp đến civilization (8 loại lệnh)
+- Civ AI phản hồi dựa vào Trust level: nghe lệnh hoặc phớt lờ
+- Trust thấp → lệnh bị bỏ qua, trust cao → civ thực hiện ngay
+- Các lệnh: ExpandTerritory, BuildTemple, SpreadFaith, MakeWar, MakePeace, FocusEconomy, FocusMilitary, Worship
+- Custom message tùy chỉnh lời phán
 
-| Tier | Miracle | Faith | Hiệu ứng |
-|------|---------|-------|----------|
-| 1 | Rain | 10 | Tăng fertility tiles lân cận |
-| 1 | Dream | 5 | Tăng trust của civilization mục tiêu |
-| 1 | BlessHarvest | 15 | Economy +20, Population +5% |
-| 1 | HealFollower | 8 | Tăng trust, hồi phục follower |
-| 1 | Omen | 3 | Điềm báo, tăng nhẹ trust |
-| 2 | Storm | 30 | Military -10 civ lân cận |
-| 2 | Earthquake | 40 | Phá hủy công trình, giảm Population |
-| 2 | Curse | 25 | Economy -15, trust -10 |
-| 2 | Portal | 50 | Tăng thương mại liên vùng |
-| 2 | DivineVoice | 20 | Hướng dẫn civ, trust +15 |
-| 3 | Volcano | 100 | Phá hủy toàn bộ khu vực |
-| 3 | DemonInvasion | 120 | Triệu hồi quỷ tấn công civ |
-| 3 | DivineBeastCreation | 80 | Tạo Divine Beast |
-| 3 | Revelation | 60 | Faith +50 toàn bộ believers |
-| 3 | HolyWar | 150 | Kích hoạt thánh chiến |
+**15 Miracle Types** (xem bảng ở mục trước)
 
-**Counter System:** Rival god có 5 giây để phản phép sau mỗi miracle.
+**Counter System** — Rival god có N giây (từ balance config) để phản phép
 
-**Religion System**
-- Sáng lập tôn giáo (công khai hoặc bí mật)
-- Tôn giáo tự spread sang civ lân cận theo devotion + temple count
-- **Schism:** devotion < 35% → tách ra tôn giáo mới (25% xác suất/50 ticks)
-- **Heresy:** cult ẩn hình thành (8% xác suất/80 ticks)
-- **Crusade:** civ quân sự mạnh tấn công civ theo tôn giáo đối địch
+**Religion System** — Spread, Schism, Heresy, Crusade (stats tracked in Leaderboard)
 
-**Evolution System — 9 stages, 3 nhánh:**
-```
-WildAnimal (100pts) → DivineBeast (500pts) → CelestialGuardian
-HumanHero  (150pts) → Saint       (600pts) → FallenDemonLord
-Monster    (120pts) → Titan       (450pts) → ApocalypticEntity
-```
-- Apex entities (CelestialGuardian, ApocalypticEntity) gây panic toàn vùng bán kính 15 tiles
-- God tốn 50 Faith để force-evolve ngay lập tức
-- Sacred tiles tăng evolution speed x1.5
+**Evolution System** — 9 stages, 3 nhánh, Sacred tile bonus từ config
 
-**Procedural World Generation**
-- Perlin Noise 3-layer: elevation + moisture + temperature
-- 8 biome types: Grassland, Forest, Mountain, Desert, Tundra, Water, Volcano, Sacred
-- Island gradient tạo bờ biển tự nhiên
-- 5-8 Sacred sites ngẫu nhiên mỗi map
-- Civilizations spawn cách nhau tối thiểu width/4
+**Procedural World Generation** — Perlin Noise, 8 biome types, island gradient
 
-**AI Civilization — 5 personality types:**
-
-| Personality | Hành vi |
-|------------|---------|
-| Aggressive | Tấn công civ yếu nhất mỗi 10 ticks |
-| Defensive | Tập trung build economy + military |
-| Fanatic | Spread religion mạnh, devotion cao |
-| Logical | Cân bằng economy và military theo tình huống |
-| Opportunistic | Tấn công khi địch yếu, join religion mạnh nhất |
+**AI Civilization** — 5 personalities, responds to God commands
 
 ### Multiplayer
 
 - **2-8 god** trong cùng một world
-- **3 game modes:** Sandbox, Survival, Competitive
-- **3 điều kiện thắng:** Last Surviving God, Highest Faith After Cycle, Dominant Religion Control
-- **Lobby system:** tạo phòng, private room (password), kick, ready system, countdown
-- **In-game chat:** tin nhắn, emote (`/me`), whisper giữa gods, 8 quick reactions
-- **Leaderboard ELO:** xếp hạng theo rating, wins, total followers
+- **4 game modes:** Sandbox, Survival, Competitive, Scenario
+- **6 Scenarios:** Standard, TheLastLight, ReligionWars, EvolutionRace, FaithCrisis, Apocalypse
+- **3 điều kiện thắng cơ bản** + điều kiện riêng theo Scenario
+- **Lobby system:** tạo phòng, private room, kick, ready, countdown
+- **In-game God Chat:** chat, emote `/me`, whisper, 8 quick reactions
+- **Leaderboard ELO** — rating, wins, followers, miracles, crusades, schisms
 
-### Admin Panel
+### Unity UI (đầy đủ)
 
-- Dashboard realtime (auto-refresh 5 giây)
-- Force end world / Force rebirth cycle
-- World snapshot JSON (debug)
-- Ban/unban players
-- **45 balance parameters** điều chỉnh runtime, không cần restart server
+| Panel | Chức năng |
+|-------|-----------|
+| LoginUI | Đăng nhập / Đăng ký, auto redirect |
+| LobbyUI | Danh sách phòng, tạo phòng, scenario selection |
+| GodSelectionScreen | Chọn archetype với preview bonuses |
+| GameHUD | Faith/followers bar, 7 tabs bottom, event log, toast |
+| MiraclePanel | Chọn miracle, set target, hiển thị cost |
+| MiracleCounterUI | Pending rivals' miracles, countdown, counter selection |
+| ReligionPanel | Sáng lập, xây temple, xem devotion/followers |
+| CommandmentPanel | Phát lệnh thần cho civ, trust check |
+| WorldMapUI | Texture2D map, layers toggle, click-to-miracle |
+| MinimapUI | 128px góc màn hình, camera indicator, click-to-jump |
+| EvolutionPanel | Entity list, filter, force-evolve |
+| ChatPanel | Messages, whisper, reactions, unread badge |
+| LeaderboardPanel | Top 20, 3 tabs, my rank |
+| VictoryDefeatScreen | Win/lose animation, stats, rankings |
+| TutorialSystem | 9 bước, highlight + tooltip, 1 lần |
+| SettingsPanel | Audio sliders, quality, notifications |
+
+### Admin Panel (8 trang)
+
+| Trang | Chức năng |
+|-------|-----------|
+| `/login` | JWT auth |
+| `/dashboard` | 8 stat cards, realtime 5s |
+| `/worlds` | Snapshot, force end/rebirth |
+| `/players` | Search, ban/unban |
+| `/leaderboard` | Rating/wins/followers sort |
+| `/scenarios` | 6 scenario descriptions |
+| `/config` | 45 balance params runtime |
+
+### DevOps
+
+- **4 CI/CD workflows:** build/deploy server, admin panel, PR checks, maintenance
+- **Docker Compose:** MongoDB + Redis + Server
+- **Rate Limiting:** 120 req/60s API, 10 req/60s auth endpoints
+- **Health check** mỗi giờ với auto-restart
+- **MongoDB backup** hàng ngày, giữ 7 bản
+
+### Unit Tests (xunit + Moq + FluentAssertions)
+
+- **FaithServiceTests** — 7 tests: cost lookup, can-perform checks, consume faith, archetype discounts
+- **ArchetypeBonusTests** — 8 tests: cost multipliers, effect multipliers, faith gen, cap
+- **ScenarioControllerTests** — 8 tests: last god standing, religion domination, apex evolution, max cycles
+- **BalanceConfigDefaultsTests** — 7 tests: all keys valid, positive costs, sane intervals
 
 ### Mobile
 
@@ -730,9 +735,16 @@ docker cp worldfaith-mongo:/tmp/backup.gz ./backup.gz
 | Transport | SignalR over WebSocket |
 | Auth | JWT Bearer + Refresh Token rotation |
 | Architecture | Authoritative Server (server tính toán, client render) |
+| Rate Limiting | 120 req/60s API, 10 req/60s auth |
 | Tick rate | 500ms/tick (configurable) |
 | Max players/world | 8 gods |
 | Map size | 64×64 tiles (configurable) |
+| Server files | 64 .cs files |
+| Admin pages | 8 trang (Next.js) |
+| Unity UI scripts | 17 panels + managers |
+| Unit tests | 30 test cases (xunit + Moq) |
+| CI/CD workflows | 4 GitHub Actions |
+| Balance params | 45 tunable runtime |
 
 ---
 

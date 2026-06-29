@@ -29,6 +29,7 @@ namespace WorldFaith.Client.UI.Lobby
         [SerializeField] private TMP_InputField roomNameInput;
         [SerializeField] private TMP_Dropdown maxPlayersDropdown;
         [SerializeField] private TMP_Dropdown gameModeDropdown;
+        [SerializeField] private TMP_Dropdown scenarioDropdown;
         [SerializeField] private Toggle privateToggle;
         [SerializeField] private TMP_InputField passwordInput;
         [SerializeField] private Button confirmCreateBtn;
@@ -203,13 +204,19 @@ namespace WorldFaith.Client.UI.Lobby
             var roomName = roomNameInput?.text?.Trim();
             if (string.IsNullOrEmpty(roomName)) return;
 
+            // Scenario options: Standard, TheLastLight, ReligionWars, EvolutionRace, FaithCrisis, Apocalypse
+            var scenarios = new[] { "Standard", "TheLastLight", "ReligionWars", "EvolutionRace", "FaithCrisis", "Apocalypse" };
+            int scenarioIdx = scenarioDropdown?.value ?? 0;
+            string scenarioType = scenarioIdx < scenarios.Length ? scenarios[scenarioIdx] : "Standard";
+
             var request = new CreateRoomRequest
             {
-                RoomName = roomName,
-                MaxPlayers = (maxPlayersDropdown?.value ?? 0) + 2,
-                GameMode = gameModeDropdown?.options[gameModeDropdown.value].text ?? "Sandbox",
-                IsPrivate = privateToggle?.isOn ?? false,
-                Password = privateToggle?.isOn == true ? passwordInput?.text : null
+                RoomName      = roomName,
+                MaxPlayers    = (maxPlayersDropdown?.value ?? 0) + 2,
+                GameMode      = gameModeDropdown?.options[gameModeDropdown.value].text ?? "Sandbox",
+                ScenarioType  = scenarioType,
+                IsPrivate     = privateToggle?.isOn ?? false,
+                Password      = privateToggle?.isOn == true ? passwordInput?.text : null
             };
 
             await LobbyClient.Instance.CreateRoomAsync(request);

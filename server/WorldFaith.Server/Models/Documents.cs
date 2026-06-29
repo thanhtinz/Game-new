@@ -14,6 +14,7 @@ public class WorldDocument
     public string Name { get; set; } = string.Empty;
     public GameMode Mode { get; set; }
     public VictoryCondition VictoryCondition { get; set; }
+    public string ScenarioType { get; set; } = "Standard";
     public int MaxGods { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }

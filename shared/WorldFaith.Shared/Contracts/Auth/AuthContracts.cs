@@ -60,6 +60,7 @@ public class CreateRoomRequest
     public int MaxPlayers { get; set; } = 4;
     public string GameMode { get; set; } = "Sandbox";
     public string VictoryCondition { get; set; } = "LastSurvivingGod";
+    public string ScenarioType { get; set; } = "Standard";
     public int WorldWidth { get; set; } = 64;
     public int WorldHeight { get; set; } = 64;
     public bool IsPrivate { get; set; }

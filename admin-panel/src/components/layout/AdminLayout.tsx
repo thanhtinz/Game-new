@@ -8,6 +8,7 @@ const NAV = [
   { href: '/worlds',      label: 'Worlds',      icon: '🌍' },
   { href: '/players',     label: 'Players',     icon: '👥' },
   { href: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
+  { href: '/scenarios',   label: 'Scenarios',   icon: '🎭' },
   { href: '/config',      label: 'Balance',     icon: '⚙️' },
 ]
 

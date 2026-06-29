@@ -179,6 +179,13 @@ namespace WorldFaith.Client.Network
             catch (Exception ex) { Debug.LogError($"[WorldFaith] BuildTemple lỗi: {ex.Message}"); }
         }
 
+        public async Task IssueCommandmentAsync(string civId, string commandmentType, string? message = null)
+        {
+            if (!IsConnected) return;
+            try { await _connection.InvokeAsync("IssueCommandment", civId, commandmentType, message); }
+            catch (Exception ex) { Debug.LogError($"[WorldFaith] IssueCommandment lỗi: {ex.Message}"); }
+        }
+
         // ─── Event Handlers (server → client) ──────────────────
 
         private void RegisterHandlers()

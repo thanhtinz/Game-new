@@ -83,12 +83,16 @@ public class FaithService : IFaithService
         var god = await _godRepo.GetByIdAsync(godId);
         if (god == null) return 0f;
 
-        var cost = await GetMiracleCostAsync(miracle);
+        var baseCost  = await GetMiracleCostAsync(miracle);
+        // Archetype discount
+        float discount = ArchetypeBonus.GetMiracleCostMultiplier(god.Archetype, miracle);
+        var cost = MathF.Max(0f, baseCost * discount);
+
         var newFaith = MathF.Max(0f, god.Faith - cost);
         await _godRepo.UpdateFaithAsync(godId, newFaith, god.Trust, god.Fear, god.FollowerCount);
 
-        _logger.LogInformation("God {GodId} spent {Cost} faith on {Miracle}. Remaining: {Faith}",
-            godId, cost, miracle, newFaith);
+        _logger.LogInformation("God {GodId}({Arch}) spent {Cost} faith on {Miracle}. Remaining: {Faith}",
+            godId, god.Archetype, cost, miracle, newFaith);
         return cost;
     }
 
@@ -115,7 +119,10 @@ public class FaithService : IFaithService
             float fearResource  = god.Archetype is GodArchetype.Darkness or GodArchetype.Death or GodArchetype.Chaos
                 ? god.Fear * fearBonus : 0f;
 
-            float gain     = fromFollowers + fromTemples + devotionBonus + fearResource;
+            // Archetype multiplier
+            float archetypeMult = ArchetypeBonus.GetFaithGenMultiplier(god, godReligions, new List<CivilizationDocument>());
+
+            float gain     = (fromFollowers + fromTemples + devotionBonus + fearResource) * archetypeMult;
             float newFaith = MathF.Min(maxFaith, god.Faith + gain);
 
             await _godRepo.UpdateFaithAsync(god.Id, newFaith, god.Trust, god.Fear, god.FollowerCount);

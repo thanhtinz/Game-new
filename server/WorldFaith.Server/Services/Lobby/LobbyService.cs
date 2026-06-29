@@ -71,6 +71,7 @@ public class LobbyService : ILobbyService
             MaxPlayers = Math.Clamp(request.MaxPlayers, 2, 8),
             GameMode = request.GameMode,
             VictoryCondition = request.VictoryCondition,
+            ScenarioType = request.ScenarioType,
             WorldWidth = request.WorldWidth,
             WorldHeight = request.WorldHeight,
             IsPrivate = request.IsPrivate,
@@ -224,6 +225,7 @@ public class LobbyService : ILobbyService
             Width = room.WorldWidth,
             Height = room.WorldHeight,
             VictoryCondition = victory,
+            ScenarioType = room.ScenarioType,
             IsActive = true
         };
         await _worldRepo.CreateAsync(world);
