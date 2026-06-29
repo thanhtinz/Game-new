@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  worldfaith-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: worldfaith-server
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__MongoDB=mongodb://worldfaith-mongo:27017
+      - ConnectionStrings__Redis=worldfaith-redis:6379
+    depends_on:
+      worldfaith-mongo:
+        condition: service_healthy
+      worldfaith-redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worldfaith-mongo:
+    image: mongo:7.0
+    container_name: worldfaith-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  worldfaith-redis:
+    image: redis:7.2-alpine
+    container_name: worldfaith-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+  redis_data:
