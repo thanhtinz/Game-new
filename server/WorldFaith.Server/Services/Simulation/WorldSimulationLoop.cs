@@ -98,6 +98,32 @@ public class WorldSimulationLoop : BackgroundService
                 await HandleRebirthAsync(scope, world.Id, cycle);
             }
 
+            // Kiểm tra win condition (nếu có scenario)
+            var scenarioCtrl = scope.ServiceProvider.GetRequiredService<IScenarioController>();
+            var scenarioCfg  = ScenarioConfigs.All[ScenarioType.Standard]; // TODO: load từ world config
+            var (ended, winnerId, reason) = await scenarioCtrl.CheckWinConditionAsync(
+                world.Id, newTick, cycle, scenarioCfg);
+
+            if (ended)
+            {
+                await worldRepo.DeactivateAsync(world.Id);
+                var gods2 = await godRepo.GetByWorldAsync(world.Id);
+                var rankings = gods2
+                    .OrderByDescending(g => g.FollowerCount)
+                    .Select((g, i) => (g.PlayerId, Rank: i + 1))
+                    .ToDictionary(x => x.PlayerId, x => x.Rank);
+
+                await _hubContext.Clients.Group(world.Id).OnGameEnd(new GameEndEvent
+                {
+                    Condition       = VictoryCondition.LastSurvivingGod,
+                    WinnerGodId     = gods2.FirstOrDefault(g => g.PlayerId == winnerId)?.Id,
+                    FinalRankings   = rankings
+                });
+                _logger.LogInformation("Game ended: {WorldId} — {Reason}", world.Id, reason);
+                continue;
+            }
+
+            await scenarioCtrl.ApplyScenarioEffectsAsync(world.Id, scenarioCfg, newTick);
             await worldRepo.UpdateTickAsync(world.Id, newTick, cycle);
 
             // Broadcast tick event đến tất cả clients trong world group

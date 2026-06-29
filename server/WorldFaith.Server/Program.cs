@@ -103,6 +103,7 @@ builder.Services.AddSingleton<IMiracleService, MiracleService>();
 builder.Services.AddSingleton<ICivilizationSimulationService, CivilizationSimulationService>();
 builder.Services.AddSingleton<IReligionService, ReligionService>();
 builder.Services.AddSingleton<IEvolutionService, EvolutionService>();
+builder.Services.AddSingleton<IScenarioController, ScenarioController>();
 builder.Services.AddSingleton<IWorldGeneratorService, WorldGeneratorService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();

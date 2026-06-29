@@ -21,25 +21,40 @@ namespace WorldFaith.Editor
         [MenuItem(MenuRoot + "Setup/Create Game Scene Objects")]
         public static void SetupGameScene()
         {
-            // Managers
+            // Network
             CreateManagerObject<Network.WorldFaithClient>("WorldFaithClient");
             CreateManagerObject<Network.LobbyClient>("LobbyClient");
             CreateManagerObject<Network.ChatClient>("ChatClient");
             CreateManagerObject<Network.MainThreadDispatcher>("MainThreadDispatcher");
+
+            // Managers
             CreateManagerObject<Managers.GameManager>("GameManager");
             CreateManagerObject<Managers.AuthManager>("AuthManager");
+
+            // Audio & VFX
             CreateManagerObject<AudioManager>("AudioManager");
             CreateManagerObject<VfxManager>("VfxManager");
             CreateManagerObject<WorldEventVisualizer>("WorldEventVisualizer");
+
+            // World
             CreateManagerObject<WorldRenderer>("WorldRenderer");
             CreateManagerObject<CameraController>("Main Camera", isCamera: true);
+
+            // UI
             CreateManagerObject<UI.Game.GameHUD>("GameHUD");
             CreateManagerObject<UI.Game.ChatPanel>("ChatPanel");
             CreateManagerObject<UI.Game.EvolutionPanel>("EvolutionPanel");
+            CreateManagerObject<UI.Game.ReligionPanel>("ReligionPanel");
+            CreateManagerObject<UI.Game.WorldMapUI>("WorldMapUI");
+            CreateManagerObject<UI.Game.MiracleCounterUI>("MiracleCounterUI");
+            CreateManagerObject<UI.Game.VictoryDefeatScreen>("VictoryDefeatScreen");
+            CreateManagerObject<UI.Game.MinimapUI>("MinimapUI");
             CreateManagerObject<UI.Game.SettingsPanel>("SettingsPanel");
+            CreateManagerObject<UI.Game.TutorialSystem>("TutorialSystem");
+            CreateManagerObject<UI.Game.LeaderboardPanel>("LeaderboardPanel");
 
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-            Debug.Log("✅ WorldFaith Game Scene objects created!");
+            Debug.Log("✅ WorldFaith Game Scene objects created (full set)!");
         }
 
         [MenuItem(MenuRoot + "Setup/Create Lobby Scene Objects")]
@@ -111,21 +126,31 @@ namespace WorldFaith.Editor
                     Debug.LogWarning($"⚠️ {name} ({typeof(T).Name}) không có trong scene");
                     ok = false;
                 }
-                else
-                {
-                    Debug.Log($"✅ {name} ok");
-                }
+                else Debug.Log($"✅ {name} ok");
             }
 
+            // Core
             Check<Managers.AuthManager>("AuthManager");
             Check<Managers.GameManager>("GameManager");
             Check<AudioManager>("AudioManager");
             Check<VfxManager>("VfxManager");
             Check<Network.WorldFaithClient>("WorldFaithClient");
             Check<Network.MainThreadDispatcher>("MainThreadDispatcher");
+            Check<WorldRenderer>("WorldRenderer");
 
-            if (ok) Debug.Log("✅ Tất cả managers hợp lệ!");
-            else    Debug.LogWarning("⚠️ Một số managers còn thiếu - chạy Setup trước");
+            // UI
+            Check<UI.Game.GameHUD>("GameHUD");
+            Check<UI.Game.ChatPanel>("ChatPanel");
+            Check<UI.Game.ReligionPanel>("ReligionPanel");
+            Check<UI.Game.WorldMapUI>("WorldMapUI");
+            Check<UI.Game.MiracleCounterUI>("MiracleCounterUI");
+            Check<UI.Game.VictoryDefeatScreen>("VictoryDefeatScreen");
+            Check<UI.Game.MinimapUI>("MinimapUI");
+            Check<UI.Game.TutorialSystem>("TutorialSystem");
+            Check<UI.Game.EvolutionPanel>("EvolutionPanel");
+
+            if (ok) Debug.Log("✅ Tất cả components đầy đủ!");
+            else    Debug.LogWarning("⚠️ Một số components còn thiếu — chạy Setup trước");
         }
 
         // ─── Build Helpers ────────────────────────────────────

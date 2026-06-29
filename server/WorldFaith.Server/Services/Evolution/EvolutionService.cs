@@ -35,8 +35,8 @@ public class EvolutionService : IEvolutionService
         _ => int.MaxValue
     };
 
-    // Power stats theo stage
-    private static readonly Dictionary<EvolutionStage, float> StagePower = new()
+    // Power stats theo stage — public để ScenarioController dùng
+    public static readonly Dictionary<EvolutionStage, float> StagePower = new()
     {
         { EvolutionStage.WildAnimal,        10f },
         { EvolutionStage.DivineBeast,       80f },
@@ -48,6 +48,9 @@ public class EvolutionService : IEvolutionService
         { EvolutionStage.Titan,             200f },
         { EvolutionStage.ApocalypticEntity, 500f },
     };
+
+    public static float GetStagePower(EvolutionStage stage)
+        => StagePower.TryGetValue(stage, out var p) ? p : 10f;
 
     // Tên entity theo stage
     private static readonly Dictionary<EvolutionStage, string[]> StageNames = new()
