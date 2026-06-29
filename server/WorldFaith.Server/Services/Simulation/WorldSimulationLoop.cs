@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.SignalR;
 using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Repositories;
+using WorldFaith.Server.Services.Chat;
 using WorldFaith.Server.Services.Evolution;
 using WorldFaith.Server.Services.Faith;
+using WorldFaith.Server.Services.Leaderboard;
 using WorldFaith.Server.Services.Religion;
 using WorldFaith.Shared.Contracts;
 using WorldFaith.Shared.Enums;
@@ -168,6 +170,36 @@ public class WorldSimulationLoop : BackgroundService
         // Xóa evolution entities cũ
         var entityRepo = scope.ServiceProvider.GetRequiredService<IEvolutionEntityRepository>();
         await entityRepo.DeleteByWorldAsync(worldId);
+
+        // Record leaderboard
+        var leaderboard = scope.ServiceProvider.GetRequiredService<ILeaderboardService>();
+        var rankings = new Dictionary<string, int>();
+        int rank = 1;
+        foreach (var godId in survivedIds)
+        {
+            var god = await godRepo.GetByIdAsync(godId);
+            if (god?.PlayerId != null) rankings[god.PlayerId] = rank++;
+        }
+        foreach (var godId in fadedIds)
+        {
+            var god = await godRepo.GetByIdAsync(godId);
+            if (god?.PlayerId != null) rankings[god.PlayerId] = rank++;
+        }
+        await leaderboard.RecordGameEndAsync(new WorldEndResultDto
+        {
+            WorldId = worldId,
+            WinnerPlayerId = survivedIds.Any()
+                ? (await godRepo.GetByIdAsync(survivedIds[0]))?.PlayerId ?? ""
+                : "",
+            VictoryCondition = "Rebirth",
+            PlayerRankings = rankings,
+            TotalCycles = newCycle
+        });
+
+        // Broadcast chat thông báo rebirth
+        var chatService = scope.ServiceProvider.GetRequiredService<IChatService>();
+        await chatService.BroadcastSystemAsync(worldId,
+            $"🌍 Thế giới bước sang chu kỳ {newCycle}. {fadedIds.Count} thần đã biến mất mãi mãi.");
 
         // Spawn civilizations mới
         var civSim = scope.ServiceProvider.GetRequiredService<ICivilizationSimulationService>();

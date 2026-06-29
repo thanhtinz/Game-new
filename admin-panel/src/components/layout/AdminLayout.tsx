@@ -4,10 +4,11 @@ import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
 
 const NAV = [
-  { href: '/dashboard', label: 'Dashboard', icon: '📊' },
-  { href: '/worlds',    label: 'Worlds',    icon: '🌍' },
-  { href: '/players',   label: 'Players',   icon: '👥' },
-  { href: '/config',    label: 'Balance',   icon: '⚙️' },
+  { href: '/dashboard',   label: 'Dashboard',   icon: '📊' },
+  { href: '/worlds',      label: 'Worlds',      icon: '🌍' },
+  { href: '/players',     label: 'Players',     icon: '👥' },
+  { href: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
+  { href: '/config',      label: 'Balance',     icon: '⚙️' },
 ]
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

@@ -8,6 +8,8 @@ using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Admin;
 using WorldFaith.Server.Services.Auth;
+using WorldFaith.Server.Services.Chat;
+using WorldFaith.Server.Services.Leaderboard;
 using WorldFaith.Server.Services.Evolution;
 using WorldFaith.Server.Services.Faith;
 using WorldFaith.Server.Services.Lobby;
@@ -105,6 +107,9 @@ builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();
 builder.Services.AddSingleton<IBalanceConfigService, BalanceConfigService>();
+builder.Services.AddSingleton<IChatRepository, ChatRepository>();
+builder.Services.AddSingleton<IChatService, ChatService>();
+builder.Services.AddSingleton<ILeaderboardService, LeaderboardService>();
 
 // ─── Background Simulation Loop ──────────────────────────
 builder.Services.AddHostedService<WorldSimulationLoop>();
@@ -152,6 +157,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<WorldHub>("/hubs/world");
 app.MapHub<LobbyHub>("/hubs/lobby");
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", time = DateTime.UtcNow }));
 
