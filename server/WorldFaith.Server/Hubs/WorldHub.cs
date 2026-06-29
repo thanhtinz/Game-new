@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Services.Faith;
+using WorldFaith.Server.Services.Religion;
 using WorldFaith.Server.Services.Simulation;
 using WorldFaith.Shared.Contracts;
 using WorldFaith.Shared.Enums;
@@ -39,6 +40,7 @@ public class WorldHub : Hub<IWorldHubClient>
     private readonly IReligionRepository _religionRepo;
     private readonly IMiracleService _miracleService;
     private readonly ICivilizationSimulationService _civSim;
+    private readonly IReligionService _religionService;
     private readonly ILogger<WorldHub> _logger;
 
     // ConnectionId -> GodId mapping (in-memory, dùng Redis nếu scale)
@@ -52,6 +54,7 @@ public class WorldHub : Hub<IWorldHubClient>
         IReligionRepository religionRepo,
         IMiracleService miracleService,
         ICivilizationSimulationService civSim,
+        IReligionService religionService,
         ILogger<WorldHub> logger)
     {
         _worldRepo = worldRepo;
@@ -60,6 +63,7 @@ public class WorldHub : Hub<IWorldHubClient>
         _religionRepo = religionRepo;
         _miracleService = miracleService;
         _civSim = civSim;
+        _religionService = religionService;
         _logger = logger;
     }
 
@@ -170,6 +174,37 @@ public class WorldHub : Hub<IWorldHubClient>
         if (!ConnectionWorldMap.TryGetValue(Context.ConnectionId, out var worldId)) return;
         var state = await BuildWorldStateAsync(worldId);
         await Clients.Caller.OnWorldState(state);
+    }
+
+    public async Task FoundReligion(string religionName, bool isHidden = false)
+    {
+        if (!ConnectionGodMap.TryGetValue(Context.ConnectionId, out var godId)) return;
+        ConnectionWorldMap.TryGetValue(Context.ConnectionId, out var worldId);
+        if (string.IsNullOrWhiteSpace(religionName) || worldId == null) return;
+
+        var religion = await _religionService.FoundReligionAsync(worldId, godId, religionName.Trim(), isHidden);
+
+        var evt = new ReligionUpdateEvent
+        {
+            ReligionId = religion.Id,
+            GodId = godId,
+            Event = ReligionEvent.Founded,
+            FollowerCount = 0
+        };
+        await Clients.Group(worldId).OnReligionUpdate(evt);
+    }
+
+    public async Task BuildTemple(string religionId, string civId)
+    {
+        if (!ConnectionWorldMap.TryGetValue(Context.ConnectionId, out var worldId)) return;
+        await _religionService.BuildTempleAsync(worldId!, religionId, civId);
+
+        var evt = new ReligionUpdateEvent
+        {
+            ReligionId = religionId,
+            Event = ReligionEvent.TempleBuilt
+        };
+        await Clients.Group(worldId!).OnReligionUpdate(evt);
     }
 
     // ─── Connection Lifecycle ───────────────────────────────

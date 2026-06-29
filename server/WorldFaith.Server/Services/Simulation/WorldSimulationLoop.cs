@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Faith;
+using WorldFaith.Server.Services.Religion;
 using WorldFaith.Shared.Contracts;
 using WorldFaith.Shared.Enums;
 using WorldFaith.Shared.Models;
@@ -68,6 +69,15 @@ public class WorldSimulationLoop : BackgroundService
 
             // AI Civilization tick
             var civUpdates = await civSim.TickAsync(world.Id, newTick);
+
+            // Religion tick (mỗi 5 tick để giảm tải)
+            if (newTick % 5 == 0)
+            {
+                var religionService = scope.ServiceProvider.GetRequiredService<IReligionService>();
+                var religionUpdates = await religionService.TickAsync(world.Id, newTick);
+                foreach (var ru in religionUpdates)
+                    await _hubContext.Clients.Group(world.Id).OnReligionUpdate(ru);
+            }
 
             // Kiểm tra rebirth cycle
             bool isRebirth = newTick % RebirthTickInterval == 0;

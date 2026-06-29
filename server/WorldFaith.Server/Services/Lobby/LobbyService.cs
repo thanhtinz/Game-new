@@ -3,7 +3,7 @@ using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Models.Auth;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Simulation;
-using WorldFaith.Shared.Contracts;
+using WorldFaith.Server.Services.WorldGen;
 using WorldFaith.Shared.Contracts.Auth;
 using WorldFaith.Shared.Enums;
 using WorldFaith.Shared.Models;
@@ -28,6 +28,7 @@ public class LobbyService : ILobbyService
     private readonly IRoomRepository _roomRepo;
     private readonly IWorldRepository _worldRepo;
     private readonly ICivilizationSimulationService _civSim;
+    private readonly IWorldGeneratorService _worldGen;
     private readonly IHubContext<LobbyHub, ILobbyHubClient> _lobbyHub;
     private readonly IHubContext<WorldHub, IWorldHubClient> _worldHub;
     private readonly ILogger<LobbyService> _logger;
@@ -36,6 +37,7 @@ public class LobbyService : ILobbyService
         IRoomRepository roomRepo,
         IWorldRepository worldRepo,
         ICivilizationSimulationService civSim,
+        IWorldGeneratorService worldGen,
         IHubContext<LobbyHub, ILobbyHubClient> lobbyHub,
         IHubContext<WorldHub, IWorldHubClient> worldHub,
         ILogger<LobbyService> logger)
@@ -43,6 +45,7 @@ public class LobbyService : ILobbyService
         _roomRepo = roomRepo;
         _worldRepo = worldRepo;
         _civSim = civSim;
+        _worldGen = worldGen;
         _lobbyHub = lobbyHub;
         _worldHub = worldHub;
         _logger = logger;
@@ -224,7 +227,8 @@ public class LobbyService : ILobbyService
             IsActive = true
         };
         await _worldRepo.CreateAsync(world);
-        await _civSim.SpawnInitialCivilizationsAsync(world.Id, 6);
+        // WorldGenerator sinh map procedural (tiles + civilizations)
+        await _worldGen.GenerateAsync(world.Id, world.Width, world.Height);
 
         await _roomRepo.SetStatusAsync(room.Id, RoomStatus.InGame, world.Id);
 

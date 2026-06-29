@@ -9,7 +9,9 @@ using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Auth;
 using WorldFaith.Server.Services.Faith;
 using WorldFaith.Server.Services.Lobby;
+using WorldFaith.Server.Services.Religion;
 using WorldFaith.Server.Services.Simulation;
+using WorldFaith.Server.Services.WorldGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,6 +92,8 @@ builder.Services.AddSingleton<IRoomRepository, RoomRepository>();
 builder.Services.AddSingleton<IFaithService, FaithService>();
 builder.Services.AddSingleton<IMiracleService, MiracleService>();
 builder.Services.AddSingleton<ICivilizationSimulationService, CivilizationSimulationService>();
+builder.Services.AddSingleton<IReligionService, ReligionService>();
+builder.Services.AddSingleton<IWorldGeneratorService, WorldGeneratorService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 
