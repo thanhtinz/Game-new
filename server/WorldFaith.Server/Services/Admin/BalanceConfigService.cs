@@ -107,6 +107,43 @@ public static class BalanceDefaults
         ["org.underground_heat_gain"]      = ("0.5",   "org",       "Heat gained per tick for underground orgs",     "float"),
         ["org.court_deadlock_economy_dmg"] = ("3",     "org",       "Economy/Military lost per tick in court deadlock","float"),
         ["org.religious_corruption_chance"]= ("0.04",  "org",       "Chance High Priest corruption per tick",        "float"),
+
+        // Food & Famine (v1.0 GDD)
+        ["civ.food_consumption_rate"]      = ("0.01",  "civ",       "Food consumed per population per 20 ticks",     "float"),
+        ["civ.food_regen_rate"]            = ("0.05",  "civ",       "Food regenerated per economy per 20 ticks",     "float"),
+        ["civ.famine_threshold"]           = ("10",    "civ",       "Food level below which famine occurs",          "float"),
+        ["civ.famine_population_loss"]     = ("0.02",  "civ",       "Population lost per famine cycle (2%)",         "float"),
+        ["civ.rebellion_base_chance"]      = ("0.01",  "civ",       "Base rebellion chance multiplier per tick",     "float"),
+
+        // Government (v1.0 GDD)
+        ["gov.evolution_check_interval"]   = ("200",   "gov",       "Ticks between government evolution checks",     "int"),
+        ["gov.theocracy_unity_threshold"]  = ("80",    "gov",       "ReligiousUnity needed for Theocracy transition","float"),
+        ["gov.noble_council_stability_threshold"] = ("30", "gov",   "Stability below which Noble Council may form",  "float"),
+        ["gov.monster_horde_military_threshold"]  = ("80", "gov",   "Military above which Orc/Beastfolk go Horde",   "float"),
+
+        // Age System (v1.0 GDD)
+        ["age.early_to_kingdom_tick"]      = ("100",   "age",       "Tick when Early Age transitions to Kingdom Age","int"),
+        ["age.kingdom_to_conflict_tick"]   = ("300",   "age",       "Tick when Kingdom Age transitions to Conflict", "int"),
+        ["age.conflict_to_collapse_tick"]  = ("600",   "age",       "Tick when Conflict Age transitions to Collapse", "int"),
+        ["age.collapse_to_rebirth_tick"]   = ("850",   "age",       "Tick when Collapse Age transitions to Rebirth",  "int"),
+
+        // God Rank (v1.0 GDD)
+        ["rank.awakened_threshold"]        = ("5000",  "rank",      "Cumulative faith to reach Awakened rank",       "int"),
+        ["rank.established_threshold"]     = ("25000", "rank",      "Cumulative faith to reach Established rank",    "int"),
+        ["rank.revered_threshold"]         = ("100000","rank",      "Cumulative faith to reach Revered rank",        "int"),
+        ["rank.exalted_threshold"]         = ("400000","rank",      "Cumulative faith to reach Exalted rank",        "int"),
+        ["rank.ancient_threshold"]         = ("1000000","rank",     "Cumulative faith to reach Ancient rank",        "int"),
+
+        // Dungeon (v1.0 GDD)
+        ["dungeon.natural_spawn_chance"]   = ("0.01",  "dungeon",   "Chance per 50 ticks for natural dungeon spawn", "float"),
+        ["dungeon.infest_age_ticks"]       = ("200",   "dungeon",   "Ticks before uncleared dungeon becomes Infested","int"),
+        ["dungeon.relic_drop_chance"]      = ("0.4",   "dungeon",   "Chance dungeon contains a relic",               "float"),
+
+        // AI Director
+        ["director.stagnation_check"]      = ("80",    "director",  "Ticks between stagnation checks",               "int"),
+        ["director.balance_check"]         = ("150",   "director",  "Ticks between power balance checks",            "int"),
+        ["director.stagnation_disaster_chance"] = ("0.15", "director", "Chance of injecting crisis during stagnation","float"),
+        ["director.dominant_god_threshold"]= ("0.6",   "director",  "Follower% above which god is 'dominant'",       "float"),
     };
 }
 

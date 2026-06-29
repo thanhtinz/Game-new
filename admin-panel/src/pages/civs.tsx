@@ -7,11 +7,29 @@ import StatCard from '@/components/ui/StatCard'
 import { civsApi, worldsApi } from '@/services/api'
 
 const STATE_COLOR: Record<string, any> = {
-  Tribal:'gray', Kingdom:'blue', Empire:'yellow', Declining:'orange', Fallen:'red'
+  Tribal:'gray', Kingdom:'blue', Empire:'yellow', Collapsing:'orange', Fallen:'red'
 }
-
 const PERSONALITY_COLOR: Record<string, any> = {
   Aggressive:'red', Defensive:'blue', Fanatic:'purple', Logical:'green', Opportunistic:'yellow'
+}
+const GOVT_COLOR: Record<string, any> = {
+  Monarchy:'blue', Theocracy:'purple', NobleCouncil:'yellow',
+  TribalClan:'orange', MerchantState:'green', MonsterHorde:'red'
+}
+const RACES = ['Human','Elf','Dwarf','Orc','Beastfolk','Demon','Angel','Undead']
+const GOVTS = ['Monarchy','Theocracy','NobleCouncil','TribalClan','MerchantState','MonsterHorde']
+const STATES = ['Tribal','Kingdom','Empire','Collapsing','Fallen']
+const PERSONALITIES = ['Aggressive','Defensive','Fanatic','Logical','Opportunistic']
+
+function Bar({ value, max = 100, color = 'bg-blue-500' }: { value: number; max?: number; color?: string }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="w-20 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+        <div className={`h-full ${color} rounded-full`} style={{ width: `${Math.min(100, (value / max) * 100)}%` }} />
+      </div>
+      <span className="text-xs font-mono text-gray-400">{value?.toFixed(0)}</span>
+    </div>
+  )
 }
 
 export default function CivsPage() {
@@ -33,14 +51,16 @@ export default function CivsPage() {
     setLoading(true)
     civsApi.getByWorld(worldId).then(setCivs).catch(() => {}).finally(() => setLoading(false))
   }
-
   useEffect(load, [worldId])
 
   function openEdit(civ: any) {
     setSelected(civ)
     setForm({
       population: civ.population, economy: civ.economy, military: civ.military,
-      personality: civ.personality, state: civ.state, isAtWar: civ.isAtWar
+      food: civ.food, stability: civ.stability, corruption: civ.corruption,
+      religiousUnity: civ.religiousUnity, happiness: civ.happiness,
+      personality: civ.personality, government: civ.government, state: civ.state,
+      isAtWar: civ.isAtWar
     })
     setModal(true)
   }
@@ -60,6 +80,8 @@ export default function CivsPage() {
 
   const alive = civs.filter(c => c.state !== 'Fallen')
   const totalPop = civs.reduce((s, c) => s + (c.population ?? 0), 0)
+  const atWar = civs.filter(c => c.isAtWar)
+  const famines = civs.filter(c => (c.food ?? 50) < 10)
 
   return (
     <AdminLayout>
@@ -67,7 +89,7 @@ export default function CivsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Civilizations</h2>
-            <p className="text-gray-400 text-sm mt-1">Quản lý economy, military, population, AI behavior</p>
+            <p className="text-gray-400 text-sm mt-1">Economy, Military, Food, Stability, Government, Race</p>
           </div>
           <select value={worldId} onChange={e => setWorldId(e.target.value)}
             className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm">
@@ -78,91 +100,102 @@ export default function CivsPage() {
         {msg && <div className="mb-4 p-3 bg-green-900/40 border border-green-700 rounded-lg text-green-300 text-sm">{msg}</div>}
 
         <div className="grid grid-cols-4 gap-3 mb-6">
-          <StatCard icon="🏰" label="Tổng Civs" value={civs.length} />
-          <StatCard icon="✅" label="Còn Sống" value={alive.length} color="text-green-400" />
-          <StatCard icon="👥" label="Dân Số" value={totalPop.toLocaleString()} color="text-blue-400" />
-          <StatCard icon="⚔️" label="Đang Chiến" value={civs.filter(c => c.isAtWar).length} color="text-red-400" />
+          <StatCard icon="🏰" label="Tổng"        value={civs.length} />
+          <StatCard icon="✅" label="Còn sống"     value={alive.length}            color="text-green-400" />
+          <StatCard icon="⚔️"  label="Đang chiến"  value={atWar.length}            color="text-red-400" />
+          <StatCard icon="🌾" label="Nạn đói"      value={famines.length}           color="text-yellow-400" />
         </div>
 
         <Table loading={loading} onRowClick={openEdit} data={civs} columns={[
-          { key: 'name', label: 'Tên' },
-          { key: 'state', label: 'State', render: r =>
+          { key: 'name',        label: 'Tên' },
+          { key: 'primaryRace', label: 'Race', render: r =>
+            <span className="text-xs text-cyan-400">{r.primaryRace ?? 'Human'}</span> },
+          { key: 'government',  label: 'Govt', render: r =>
+            <Badge label={r.government ?? 'Monarchy'} color={GOVT_COLOR[r.government] ?? 'gray'} /> },
+          { key: 'state',       label: 'State', render: r =>
             <Badge label={r.state} color={STATE_COLOR[r.state] ?? 'gray'} /> },
-          { key: 'personality', label: 'Personality', render: r =>
-            <Badge label={r.personality} color={PERSONALITY_COLOR[r.personality] ?? 'gray'} /> },
-          { key: 'population', label: 'Dân Số', render: r =>
-            <span className="font-mono text-blue-300">{r.population?.toLocaleString()}</span> },
-          { key: 'economy', label: 'Economy', render: r => (
-            <div className="flex items-center gap-1">
-              <div className="w-16 h-1.5 bg-gray-700 rounded-full">
-                <div className="h-full bg-green-500 rounded-full" style={{ width: `${Math.min(100, r.economy ?? 0)}%` }} />
-              </div>
-              <span className="text-xs font-mono text-gray-400">{r.economy?.toFixed(0)}</span>
-            </div>
-          )},
-          { key: 'military', label: 'Military', render: r => (
-            <div className="flex items-center gap-1">
-              <div className="w-16 h-1.5 bg-gray-700 rounded-full">
-                <div className="h-full bg-red-500 rounded-full" style={{ width: `${Math.min(100, r.military ?? 0)}%` }} />
-              </div>
-              <span className="text-xs font-mono text-gray-400">{r.military?.toFixed(0)}</span>
-            </div>
-          )},
-          { key: 'isAtWar', label: 'War', render: r =>
-            r.isAtWar ? <Badge label="At War" color="red" /> : <span className="text-gray-600">—</span> },
-          { key: 'actions', label: '', render: r => (
+          { key: 'economy',     label: 'Eco',  render: r => <Bar value={r.economy ?? 0}  color="bg-green-500" /> },
+          { key: 'military',    label: 'Mil',  render: r => <Bar value={r.military ?? 0} color="bg-red-500" /> },
+          { key: 'food',        label: 'Food', render: r =>
+            <Bar value={r.food ?? 50} color={(r.food ?? 50) < 10 ? 'bg-red-500' : 'bg-yellow-500'} /> },
+          { key: 'stability',   label: 'Stab', render: r =>
+            <Bar value={r.stability ?? 60} color={(r.stability ?? 60) < 30 ? 'bg-red-500' : 'bg-blue-500'} /> },
+          { key: 'population',  label: 'Pop', render: r =>
+            <span className="font-mono text-xs text-blue-300">{r.population?.toLocaleString()}</span> },
+          { key: 'isAtWar',     label: '', render: r =>
+            r.isAtWar ? <Badge label="War" color="red" /> : null },
+          { key: 'actions',     label: '', render: r => (
             <div className="flex gap-1">
               <button onClick={e => { e.stopPropagation(); boost(r.id, 'Economy') }}
-                className="text-xs px-2 py-1 bg-green-900/50 text-green-300 rounded">+Eco</button>
+                className="text-xs px-1.5 py-1 bg-green-900/50 text-green-300 rounded">+E</button>
               <button onClick={e => { e.stopPropagation(); boost(r.id, 'Military') }}
-                className="text-xs px-2 py-1 bg-blue-900/50 text-blue-300 rounded">+Mil</button>
+                className="text-xs px-1.5 py-1 bg-blue-900/50 text-blue-300 rounded">+M</button>
+              <button onClick={e => { e.stopPropagation(); boost(r.id, 'Food') }}
+                className="text-xs px-1.5 py-1 bg-yellow-900/50 text-yellow-300 rounded">+F</button>
               <button onClick={e => { e.stopPropagation(); collapse(r.id) }}
-                className="text-xs px-2 py-1 bg-red-900/50 text-red-300 rounded">Collapse</button>
+                className="text-xs px-1.5 py-1 bg-red-900/50 text-red-300 rounded">✕</button>
             </div>
           )},
         ]} />
 
-        <Modal open={modal} title={`Civ: ${selected?.name}`} onClose={() => setModal(false)} width="max-w-xl">
+        <Modal open={modal} title={`Civ: ${selected?.name}`} onClose={() => setModal(false)} width="max-w-2xl">
           {selected && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              {/* Core stats */}
+              <div className="grid grid-cols-3 gap-3">
                 {[
-                  { key: 'population', label: 'Dân Số', type: 'number' },
-                  { key: 'economy', label: 'Economy', type: 'number', step: '1' },
-                  { key: 'military', label: 'Military', type: 'number', step: '1' },
+                  { key: 'population', label: 'Dân số' },
+                  { key: 'economy',    label: 'Economy' },
+                  { key: 'military',   label: 'Military' },
+                  { key: 'food',       label: 'Food' },
+                  { key: 'stability',  label: 'Stability' },
+                  { key: 'corruption', label: 'Corruption' },
+                  { key: 'religiousUnity', label: 'Religious Unity' },
+                  { key: 'happiness',  label: 'Happiness' },
                 ].map(f => (
                   <div key={f.key}>
                     <label className="block text-xs text-gray-400 mb-1">{f.label}</label>
-                    <input {...f} value={form[f.key] ?? 0}
+                    <input type="number" value={form[f.key] ?? 0}
                       onChange={e => setForm((p: any) => ({ ...p, [f.key]: parseFloat(e.target.value) }))}
-                      className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm"
-                    />
+                      className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-sm" />
                   </div>
                 ))}
+              </div>
+
+              {/* Selects */}
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">Government</label>
+                  <select value={form.government}
+                    onChange={e => setForm((p: any) => ({ ...p, government: e.target.value }))}
+                    className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-sm">
+                    {GOVTS.map(g => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                </div>
                 <div>
                   <label className="block text-xs text-gray-400 mb-1">Personality</label>
                   <select value={form.personality}
                     onChange={e => setForm((p: any) => ({ ...p, personality: e.target.value }))}
-                    className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
-                    {['Aggressive','Defensive','Fanatic','Logical','Opportunistic'].map(p =>
-                      <option key={p} value={p}>{p}</option>)}
+                    className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-sm">
+                    {PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs text-gray-400 mb-1">State</label>
                   <select value={form.state}
                     onChange={e => setForm((p: any) => ({ ...p, state: e.target.value }))}
-                    className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
-                    {['Tribal','Kingdom','Empire','Declining','Fallen'].map(s =>
-                      <option key={s} value={s}>{s}</option>)}
+                    className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-sm">
+                    {STATES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
               </div>
+
               <div className="flex items-center gap-3">
                 <input type="checkbox" id="atwar" checked={form.isAtWar ?? false}
                   onChange={e => setForm((p: any) => ({ ...p, isAtWar: e.target.checked }))} />
                 <label htmlFor="atwar" className="text-sm text-gray-300">Đang chiến tranh</label>
               </div>
+
               <div className="flex justify-end gap-3">
                 <button onClick={() => setModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Hủy</button>
                 <button onClick={save} className="px-4 py-2 text-sm bg-purple-700 rounded-lg">Lưu</button>
