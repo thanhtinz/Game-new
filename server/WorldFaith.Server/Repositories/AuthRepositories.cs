@@ -19,6 +19,7 @@ public interface IPlayerRepository
     Task<PlayerDocument?> GetByRefreshTokenAsync(string token);
     Task UpdateStatsAsync(string playerId, bool won);
     Task SetActiveAsync(string playerId, bool isActive);
+    Task SetAdminAsync(string playerId, bool isAdmin);
 }
 
 public class PlayerRepository : IPlayerRepository
@@ -127,6 +128,12 @@ public class PlayerRepository : IPlayerRepository
     public async Task SetActiveAsync(string playerId, bool isActive)
     {
         var update = Builders<PlayerDocument>.Update.Set(p => p.IsActive, isActive);
+        await _collection.UpdateOneAsync(p => p.Id == playerId, update);
+    }
+
+    public async Task SetAdminAsync(string playerId, bool isAdmin)
+    {
+        var update = Builders<PlayerDocument>.Update.Set(p => p.IsAdmin, isAdmin);
         await _collection.UpdateOneAsync(p => p.Id == playerId, update);
     }
 }

@@ -16,6 +16,7 @@ public interface IAuthService
     Task<AuthResponse> RefreshTokenAsync(string refreshToken);
     Task<bool> LogoutAsync(string playerId, string refreshToken);
     Task<PlayerProfileDto?> GetProfileAsync(string playerId);
+    Task<bool> SeedAdminAsync(string email, string password);
 }
 
 public class AuthService : IAuthService
@@ -114,6 +115,33 @@ public class AuthService : IAuthService
         return player == null ? null : MapToDto(player);
     }
 
+    public async Task<bool> SeedAdminAsync(string email, string password)
+    {
+        var existing = await _playerRepo.GetByEmailAsync(email);
+        if (existing != null)
+        {
+            if (!existing.IsAdmin)
+            {
+                await _playerRepo.SetAdminAsync(existing.Id, true);
+                _logger.LogInformation("Promoted existing account to admin: {Email}", email);
+            }
+            return true;
+        }
+
+        var admin = new PlayerDocument
+        {
+            Username = "admin",
+            Email = email.ToLower(),
+            DisplayName = "Administrator",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password, workFactor: 12),
+            IsAdmin = true,
+            IsActive = true
+        };
+        await _playerRepo.CreateAsync(admin);
+        _logger.LogInformation("Admin account created: {Email}", email);
+        return true;
+    }
+
     // ─── Token Generation ────────────────────────────────────
 
     private async Task<AuthResponse> GenerateTokensAsync(PlayerDocument player, string deviceInfo)
@@ -151,6 +179,7 @@ public class AuthService : IAuthService
             new Claim(JwtRegisteredClaimNames.Email, player.Email),
             new Claim("username", player.Username),
             new Claim("displayName", player.DisplayName),
+            new Claim("role", player.IsAdmin ? "Admin" : "Player"),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

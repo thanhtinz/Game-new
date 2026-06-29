@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using WorldFaith.Client.Network;
 using WorldFaith.Shared.Contracts;
@@ -28,6 +29,8 @@ namespace WorldFaith.Client.Managers
         public event System.Action<WorldStateDto> OnWorldLoaded;
         public event System.Action<long, int> OnTick;
         public event System.Action<MiracleResultEvent> OnMiracleResult;
+        public event System.Action<ReligionUpdateEvent> OnReligionUpdate;
+        public event System.Action<CivilizationUpdateEvent> OnCivilizationUpdate;
         public event System.Action<WorldRebirthEvent> OnRebirth;
         public event System.Action<GameEndEvent> OnGameOver;
         public event System.Action<string> OnNotification;
@@ -42,11 +45,44 @@ namespace WorldFaith.Client.Managers
         private void Start()
         {
             SubscribeToNetworkEvents();
+
+            // Tự động init nếu có worldId (từ LobbyScene)
+            var worldId = PlayerPrefs.GetString("wf_world_id", "");
+            if (!string.IsNullOrEmpty(worldId))
+                InitializeGameScene();
         }
 
         private void OnDestroy()
         {
             UnsubscribeFromNetworkEvents();
+        }
+
+        /// <summary>Kết nối WorldHub + ChatHub và request world state.</summary>
+        public async void InitializeGameScene()
+        {
+            var worldId = PlayerPrefs.GetString("wf_world_id", "");
+            if (string.IsNullOrEmpty(worldId))
+            {
+                Debug.LogError("[GameManager] Không tìm thấy worldId trong PlayerPrefs");
+                return;
+            }
+
+            // Kết nối WorldHub (với JWT)
+            var worldClient = WorldFaithClient.Instance;
+            if (worldClient != null && !worldClient.IsConnected)
+                await worldClient.ConnectAsync();
+
+            // Kết nối ChatHub
+            var chatClient = Network.ChatClient.Instance;
+            if (chatClient != null && !chatClient.IsConnected)
+            {
+                await chatClient.ConnectAsync();
+                await chatClient.JoinWorldChatAsync(worldId);
+            }
+
+            // Request world state sau khi connected
+            if (worldClient != null)
+                await worldClient.RequestWorldStateAsync();
         }
 
         // ─── Network Event Subscriptions ────────────────────────
@@ -160,6 +196,7 @@ namespace WorldFaith.Client.Managers
                 if (evt.NewRulingReligionId != null)
                     civ.RulingReligionId = evt.NewRulingReligionId;
             }
+            OnCivilizationUpdate?.Invoke(evt);
 
             if (evt.Collapsed)
                 OnNotification?.Invoke($"Civilization {evt.Name} đã sụp đổ!");
@@ -171,11 +208,12 @@ namespace WorldFaith.Client.Managers
             {
                 religion.FollowerCount = evt.FollowerCount;
                 if (evt.Erased)
-                {
                     Religions.Remove(evt.ReligionId);
-                    OnNotification?.Invoke("Một tôn giáo đã bị xóa sổ khỏi thế giới!");
-                }
             }
+            OnReligionUpdate?.Invoke(evt);
+
+            if (evt.Erased)
+                OnNotification?.Invoke("Một tôn giáo đã bị xóa sổ khỏi thế giới!");
         }
 
         private void HandleWorldRebirth(WorldRebirthEvent evt)

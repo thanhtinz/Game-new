@@ -25,6 +25,7 @@ public class PlayerDocument
     public List<RefreshTokenEntry> RefreshTokens { get; set; } = new();
 
     public bool IsActive { get; set; } = true;
+    public bool IsAdmin { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime LastLoginAt { get; set; } = DateTime.UtcNow;
 }

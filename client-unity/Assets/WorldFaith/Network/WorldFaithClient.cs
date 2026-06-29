@@ -67,8 +67,13 @@ namespace WorldFaith.Client.Network
             if (_isConnecting || IsConnected) return;
             _isConnecting = true;
 
+            var token = Managers.AuthManager.Instance?.AccessToken ?? "";
+            var urlWithToken = string.IsNullOrEmpty(token)
+                ? serverUrl
+                : $"{serverUrl}?access_token={token}";
+
             _connection = new HubConnectionBuilder()
-                .WithUrl(serverUrl)
+                .WithUrl(urlWithToken)
                 .WithAutomaticReconnect(new[] { TimeSpan.Zero, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10) })
                 .Build();
 

@@ -1,5 +1,7 @@
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
+using WorldFaith.Server.Services.Admin;
+using WorldFaith.Server.Services.Leaderboard;
 using WorldFaith.Shared.Enums;
 using WorldFaith.Shared.Contracts;
 
@@ -18,6 +20,8 @@ public class MiracleService : IMiracleService
     private readonly IReligionRepository _religionRepo;
     private readonly IMiracleEventRepository _miracleRepo;
     private readonly IFaithService _faithService;
+    private readonly IBalanceConfigService _balance;
+    private readonly ILeaderboardService _leaderboard;
     private readonly ILogger<MiracleService> _logger;
     private readonly Random _rng = new();
 
@@ -30,6 +34,8 @@ public class MiracleService : IMiracleService
         IReligionRepository religionRepo,
         IMiracleEventRepository miracleRepo,
         IFaithService faithService,
+        IBalanceConfigService balance,
+        ILeaderboardService leaderboard,
         ILogger<MiracleService> logger)
     {
         _godRepo = godRepo;
@@ -37,6 +43,8 @@ public class MiracleService : IMiracleService
         _religionRepo = religionRepo;
         _miracleRepo = miracleRepo;
         _faithService = faithService;
+        _balance = balance;
+        _leaderboard = leaderboard;
         _logger = logger;
     }
 
@@ -70,8 +78,14 @@ public class MiracleService : IMiracleService
         };
         await _miracleRepo.LogAsync(eventDoc);
 
-        // Đưa vào pending để rival gods có thể counter (5 giây)
-        _pendingMiracles[eventDoc.Id] = (eventDoc, DateTime.UtcNow.AddSeconds(5));
+        // Record leaderboard stat
+        var god2 = await _godRepo.GetByIdAsync(godId);
+        if (god2?.PlayerId != null)
+            await _leaderboard.RecordMiracleAsync(god2.PlayerId, wasCountered: false);
+
+        // Đưa vào pending để rival gods có thể counter (từ balance config)
+        int counterWindowSec = (int)await _balance.GetFloatAsync("miracle.counter_window_sec");
+        _pendingMiracles[eventDoc.Id] = (eventDoc, DateTime.UtcNow.AddSeconds(counterWindowSec));
 
         _logger.LogInformation("God {GodId} performed {Miracle} at ({X},{Y})", godId, miracle, x, y);
 

@@ -33,7 +33,7 @@ public class WorldHub : Hub<IWorldHubClient>
 {
     private string PlayerId => Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
         ?? Context.User?.FindFirst("sub")?.Value
-        ?? Context.ConnectionId;
+        ?? string.Empty;
 
     private readonly IWorldRepository _worldRepo;
     private readonly IGodRepository _godRepo;
@@ -45,8 +45,8 @@ public class WorldHub : Hub<IWorldHubClient>
     private readonly IEvolutionService _evolutionService;
     private readonly ILogger<WorldHub> _logger;
 
-    private static readonly Dictionary<string, string> ConnectionGodMap = new();
-    private static readonly Dictionary<string, string> ConnectionWorldMap = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> ConnectionGodMap = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> ConnectionWorldMap = new();
 
     public WorldHub(
         IWorldRepository worldRepo,
@@ -244,8 +244,8 @@ public class WorldHub : Hub<IWorldHubClient>
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        ConnectionGodMap.Remove(Context.ConnectionId);
-        ConnectionWorldMap.Remove(Context.ConnectionId, out var worldId);
+        ConnectionGodMap.TryRemove(Context.ConnectionId, out _);
+        ConnectionWorldMap.TryRemove(Context.ConnectionId, out var worldId);
         if (worldId != null)
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, worldId);
 

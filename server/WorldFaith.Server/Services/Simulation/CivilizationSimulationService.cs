@@ -1,5 +1,6 @@
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
+using WorldFaith.Server.Services.Admin;
 using WorldFaith.Shared.Enums;
 using WorldFaith.Shared.Models;
 
@@ -15,6 +16,7 @@ public class CivilizationSimulationService : ICivilizationSimulationService
 {
     private readonly ICivilizationRepository _civRepo;
     private readonly IReligionRepository _religionRepo;
+    private readonly IBalanceConfigService _balance;
     private readonly ILogger<CivilizationSimulationService> _logger;
     private readonly Random _rng = new();
 
@@ -24,10 +26,12 @@ public class CivilizationSimulationService : ICivilizationSimulationService
     public CivilizationSimulationService(
         ICivilizationRepository civRepo,
         IReligionRepository religionRepo,
+        IBalanceConfigService balance,
         ILogger<CivilizationSimulationService> logger)
     {
         _civRepo = civRepo;
         _religionRepo = religionRepo;
+        _balance = balance;
         _logger = logger;
     }
 
@@ -83,8 +87,8 @@ public class CivilizationSimulationService : ICivilizationSimulationService
                     break;
             }
 
-            // Tăng trưởng dân số tự nhiên
-            changed |= SimulatePopulationGrowth(civ);
+            // Tăng trưởng dân số từ balance config
+            changed |= await SimulatePopulationGrowthAsync(civ);
 
             // Kiểm tra state transition
             changed |= CheckStateTransition(civ);
@@ -182,24 +186,29 @@ public class CivilizationSimulationService : ICivilizationSimulationService
         return false;
     }
 
-    private bool SimulatePopulationGrowth(CivilizationDocument civ)
+    private async Task<bool> SimulatePopulationGrowthAsync(CivilizationDocument civ)
     {
         if (civ.State == CivilizationState.Fallen) return false;
 
         float growthRate = civ.State switch
         {
-            CivilizationState.Tribal => 0.001f,
-            CivilizationState.Kingdom => 0.003f,
-            CivilizationState.Empire => 0.005f,
-            CivilizationState.Collapsing => -0.01f,
+            CivilizationState.Tribal    => await _balance.GetFloatAsync("civ.pop_growth_tribal"),
+            CivilizationState.Kingdom   => await _balance.GetFloatAsync("civ.pop_growth_kingdom"),
+            CivilizationState.Empire    => await _balance.GetFloatAsync("civ.pop_growth_empire"),
+            CivilizationState.Collapsing=> -await _balance.GetFloatAsync("civ.pop_decay_collapsing"),
             _ => 0f
         };
 
         int delta = (int)(civ.Population * growthRate);
         if (delta == 0) return false;
-
         civ.Population = Math.Max(0, civ.Population + delta);
         return true;
+    }
+
+    private bool SimulatePopulationGrowth(CivilizationDocument civ)
+    {
+        // Legacy sync wrapper — dùng async version trong tick
+        return false;
     }
 
     private bool CheckStateTransition(CivilizationDocument civ)

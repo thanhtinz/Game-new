@@ -18,11 +18,6 @@ public class WorldSimulationLoop : BackgroundService
     private readonly IHubContext<WorldHub, IWorldHubClient> _hubContext;
     private readonly ILogger<WorldSimulationLoop> _logger;
 
-    // 1 tick = 500ms
-    private const int TickIntervalMs = 500;
-    // Rebirth cycle sau 1000 ticks
-    private const int RebirthTickInterval = 1000;
-
     public WorldSimulationLoop(
         IServiceScopeFactory scopeFactory,
         IHubContext<WorldHub, IWorldHubClient> hubContext,
@@ -41,18 +36,25 @@ public class WorldSimulationLoop : BackgroundService
         {
             try
             {
-                await TickAllWorldsAsync();
+                // Đọc tick interval từ balance config mỗi lần để hỗ trợ live tuning
+                using var configScope = _scopeFactory.CreateScope();
+                var balance = configScope.ServiceProvider.GetRequiredService<IBalanceConfigService>();
+                int tickMs = await balance.GetIntAsync("faith.tick_interval_ms");
+                if (tickMs < 100) tickMs = 500; // safety floor
+
+                await TickAllWorldsAsync(balance);
+                await Task.Delay(tickMs, stoppingToken);
             }
+            catch (OperationCanceledException) { break; }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi trong simulation tick");
+                await Task.Delay(1000, stoppingToken);
             }
-
-            await Task.Delay(TickIntervalMs, stoppingToken);
         }
     }
 
-    private async Task TickAllWorldsAsync()
+    private async Task TickAllWorldsAsync(IBalanceConfigService balance)
     {
         using var scope = _scopeFactory.CreateScope();
         var worldRepo = scope.ServiceProvider.GetRequiredService<IWorldRepository>();
@@ -61,19 +63,17 @@ public class WorldSimulationLoop : BackgroundService
         var faithService = scope.ServiceProvider.GetRequiredService<IFaithService>();
 
         var activeWorlds = await worldRepo.GetActiveWorldsAsync();
+        int rebirthInterval = await balance.GetIntAsync("world.rebirth_tick_interval");
+        if (rebirthInterval < 10) rebirthInterval = 1000;
 
         foreach (var world in activeWorlds)
         {
             long newTick = world.Tick + 1;
             int cycle = world.Cycle;
 
-            // Faith generation mỗi tick
             await faithService.GenerateFaithTickAsync(world.Id);
-
-            // AI Civilization tick
             var civUpdates = await civSim.TickAsync(world.Id, newTick);
 
-            // Religion tick (mỗi 5 tick để giảm tải)
             if (newTick % 5 == 0)
             {
                 var religionService = scope.ServiceProvider.GetRequiredService<IReligionService>();
@@ -82,20 +82,16 @@ public class WorldSimulationLoop : BackgroundService
                     await _hubContext.Clients.Group(world.Id).OnReligionUpdate(ru);
             }
 
-            // Evolution tick (mỗi 3 tick)
             if (newTick % 3 == 0)
             {
                 var evolutionService = scope.ServiceProvider.GetRequiredService<IEvolutionService>();
                 var evoDeltas = await evolutionService.TickAsync(world.Id, newTick);
                 if (evoDeltas.Any())
-                {
-                    var evoTick = new WorldTickEvent { Tick = newTick, Cycle = cycle, Deltas = evoDeltas };
-                    await _hubContext.Clients.Group(world.Id).OnWorldTick(evoTick);
-                }
+                    await _hubContext.Clients.Group(world.Id).OnWorldTick(
+                        new WorldTickEvent { Tick = newTick, Cycle = cycle, Deltas = evoDeltas });
             }
 
-            // Kiểm tra rebirth cycle
-            bool isRebirth = newTick % RebirthTickInterval == 0;
+            bool isRebirth = newTick % rebirthInterval == 0;
             if (isRebirth)
             {
                 cycle++;

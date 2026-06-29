@@ -97,6 +97,7 @@ builder.Services.AddSingleton<IRoomRepository, RoomRepository>();
 builder.Services.AddSingleton<IEvolutionEntityRepository, EvolutionEntityRepository>();
 
 // ─── Services ────────────────────────────────────────────
+builder.Services.AddSingleton<IBalanceConfigService, BalanceConfigService>();
 builder.Services.AddSingleton<IFaithService, FaithService>();
 builder.Services.AddSingleton<IMiracleService, MiracleService>();
 builder.Services.AddSingleton<ICivilizationSimulationService, CivilizationSimulationService>();
@@ -106,7 +107,6 @@ builder.Services.AddSingleton<IWorldGeneratorService, WorldGeneratorService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();
-builder.Services.AddSingleton<IBalanceConfigService, BalanceConfigService>();
 builder.Services.AddSingleton<IChatRepository, ChatRepository>();
 builder.Services.AddSingleton<IChatService, ChatService>();
 builder.Services.AddSingleton<ILeaderboardService, LeaderboardService>();
@@ -163,12 +163,18 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok", time = DateTime.UtcN
 
 Log.Information("WorldFaith Server khởi động");
 
-// Seed default balance config
+// Seed default balance config + admin account
 using (var scope = app.Services.CreateScope())
 {
     var balanceConfig = scope.ServiceProvider.GetRequiredService<IBalanceConfigService>();
     await balanceConfig.SeedDefaultsAsync();
     Log.Information("Balance config seeded");
+
+    var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+    var adminEmail    = builder.Configuration["Admin:Email"]    ?? "admin@worldfaith.game";
+    var adminPassword = builder.Configuration["Admin:Password"] ?? "Admin@WorldFaith2024!";
+    await authService.SeedAdminAsync(adminEmail, adminPassword);
+    Log.Information("Admin account seeded: {Email}", adminEmail);
 }
 
 app.Run();

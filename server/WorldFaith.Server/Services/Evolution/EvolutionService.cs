@@ -1,5 +1,6 @@
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
+using WorldFaith.Server.Services.Admin;
 using WorldFaith.Shared.Contracts;
 using WorldFaith.Shared.Enums;
 
@@ -19,23 +20,19 @@ public class EvolutionService : IEvolutionService
     private readonly IGodRepository _godRepo;
     private readonly ICivilizationRepository _civRepo;
     private readonly IWorldRepository _worldRepo;
+    private readonly IBalanceConfigService _balance;
     private readonly ILogger<EvolutionService> _logger;
     private readonly Random _rng = new();
 
-    // Điểm evolution cần để lên stage tiếp theo
-    private static readonly Dictionary<EvolutionStage, int> EvolutionThresholds = new()
+    private async Task<int> GetThresholdAsync(EvolutionStage stage) => stage switch
     {
-        { EvolutionStage.WildAnimal,   100 },
-        { EvolutionStage.DivineBeast,  500 },
-        // CelestialGuardian = max, không tiến hóa thêm
-
-        { EvolutionStage.HumanHero,    150 },
-        { EvolutionStage.Saint,        600 },
-        // FallenDemonLord = max
-
-        { EvolutionStage.Monster,      120 },
-        { EvolutionStage.Titan,        450 },
-        // ApocalypticEntity = max
+        EvolutionStage.WildAnimal  => await _balance.GetIntAsync("evolution.wild_to_divine_pts"),
+        EvolutionStage.DivineBeast => await _balance.GetIntAsync("evolution.divine_to_celestial"),
+        EvolutionStage.HumanHero   => await _balance.GetIntAsync("evolution.hero_to_saint_pts"),
+        EvolutionStage.Saint       => await _balance.GetIntAsync("evolution.saint_to_demon_pts"),
+        EvolutionStage.Monster     => await _balance.GetIntAsync("evolution.monster_to_titan"),
+        EvolutionStage.Titan       => await _balance.GetIntAsync("evolution.titan_to_apocalyptic"),
+        _ => int.MaxValue
     };
 
     // Power stats theo stage
@@ -71,12 +68,14 @@ public class EvolutionService : IEvolutionService
         IGodRepository godRepo,
         ICivilizationRepository civRepo,
         IWorldRepository worldRepo,
+        IBalanceConfigService balance,
         ILogger<EvolutionService> logger)
     {
         _entityRepo = entityRepo;
         _godRepo = godRepo;
         _civRepo = civRepo;
         _worldRepo = worldRepo;
+        _balance = balance;
         _logger = logger;
     }
 
@@ -190,14 +189,17 @@ public class EvolutionService : IEvolutionService
             var world = await _worldRepo.GetByIdAsync(worldId);
             var tile = world?.Tiles.FirstOrDefault(t => t.X == entity.X && t.Y == entity.Y);
             if (tile?.Type == TileType.Sacred)
-                naturalGain = (int)(naturalGain * 1.5f);
+            {
+                float sacredBonus = await _balance.GetFloatAsync("evolution.sacred_tile_bonus");
+                naturalGain = (int)(naturalGain * sacredBonus);
+            }
 
             entity.EvolutionPoints += naturalGain;
             changed = true;
 
-            // Kiểm tra evolve tự động
-            if (EvolutionThresholds.TryGetValue(entity.Stage, out int threshold)
-                && entity.EvolutionPoints >= threshold)
+            // Kiểm tra evolve tự động (dùng balance config threshold)
+            int threshold = await GetThresholdAsync(entity.Stage);
+            if (entity.EvolutionPoints >= threshold)
             {
                 var nextStage = GetNextStage(entity.Stage);
                 if (nextStage.HasValue)
@@ -256,8 +258,7 @@ public class EvolutionService : IEvolutionService
         if (entity == null || god == null) return false;
         if (entity.WorldId != worldId) return false;
 
-        // Tốn Faith để force evolve
-        float cost = 50f;
+        float cost = await _balance.GetFloatAsync("evolution.force_evolve_cost");
         if (god.Faith < cost) return false;
 
         var nextStage = GetNextStage(entity.Stage);
