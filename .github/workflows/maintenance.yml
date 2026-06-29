@@ -1,0 +1,77 @@
+name: Scheduled Maintenance
+
+on:
+  schedule:
+    - cron: '0 * * * *'    # Health check mỗi giờ
+    - cron: '0 2 * * *'    # Backup MongoDB lúc 2am
+  workflow_dispatch:        # Trigger thủ công
+
+jobs:
+  # ── Health Check ──────────────────────────────────────────
+  health-check:
+    name: Server Health Check
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 * * * *' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Check server health
+        id: health
+        run: |
+          response=$(curl -sf --max-time 10 "${{ secrets.SERVER_URL }}/health" || echo "FAIL")
+          echo "response=$response" >> $GITHUB_OUTPUT
+          if [[ "$response" == *"ok"* ]]; then
+            echo "status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "status=unhealthy" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Alert on failure
+        if: steps.health.outputs.status == 'unhealthy'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            echo "⚠️ Health check thất bại - restart server..."
+            cd /opt/worldfaith
+            docker-compose restart worldfaith-server
+            sleep 15
+            response=$(curl -sf http://localhost:5000/health || echo "FAIL")
+            if [[ "$response" == *"ok"* ]]; then
+              echo "✅ Server đã khởi động lại thành công"
+            else
+              echo "❌ Server vẫn lỗi sau restart"
+            fi
+
+  # ── MongoDB Backup ────────────────────────────────────────
+  backup:
+    name: MongoDB Backup
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 2 * * *' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Create backup
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            BACKUP_DIR=/opt/worldfaith/backups
+            BACKUP_FILE="worldfaith-$(date +%Y%m%d-%H%M%S).gz"
+            mkdir -p $BACKUP_DIR
+
+            # Dump MongoDB từ Docker container
+            docker exec worldfaith-mongo mongodump \
+              --db worldfaith \
+              --archive=/tmp/$BACKUP_FILE \
+              --gzip
+
+            docker cp worldfaith-mongo:/tmp/$BACKUP_FILE $BACKUP_DIR/$BACKUP_FILE
+            echo "✅ Backup xong: $BACKUP_FILE ($(du -sh $BACKUP_DIR/$BACKUP_FILE | cut -f1))"
+
+            # Giữ 7 backup gần nhất
+            ls -t $BACKUP_DIR/*.gz | tail -n +8 | xargs -r rm
+            echo "Backup files hiện có:"
+            ls -lh $BACKUP_DIR/
