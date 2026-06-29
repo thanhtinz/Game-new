@@ -1,155 +1,150 @@
-'use client'
-import { useState } from 'react'
-import useSWR from 'swr'
-import { serverApi } from '@/services/api'
-import { BalanceConfig } from '@/types'
+import { useEffect, useState } from 'react'
 import AdminLayout from '@/components/layout/AdminLayout'
+import { serverApi } from '@/services/api'
 
-const CATEGORIES = ['all', 'faith', 'miracle', 'religion', 'evolution', 'civ', 'world']
-
-const CATEGORY_COLORS: Record<string, string> = {
-  faith:     'bg-yellow-900 text-yellow-300',
-  miracle:   'bg-blue-900 text-blue-300',
-  religion:  'bg-orange-900 text-orange-300',
-  evolution: 'bg-green-900 text-green-300',
-  civ:       'bg-purple-900 text-purple-300',
-  world:     'bg-teal-900 text-teal-300',
+const CATEGORY_ICON: Record<string, string> = {
+  faith: '⚡', miracle: '✨', religion: '✝️', evolution: '🐉',
+  civ: '🏰', world: '🌍', npc: '🧑', org: '🏛️'
 }
 
 export default function ConfigPage() {
-  const [category, setCategory] = useState('all')
-  const [editKey, setEditKey] = useState<string | null>(null)
-  const [editValue, setEditValue] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [savedKey, setSavedKey] = useState<string | null>(null)
+  const [configs, setConfigs] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [category, setCategory] = useState('')
+  const [editing, setEditing] = useState<Record<string, string>>({})
+  const [saved, setSaved] = useState<Record<string, boolean>>({})
+  const [search, setSearch] = useState('')
+  const [msg, setMsg] = useState('')
 
-  const { data: configs, mutate } = useSWR<BalanceConfig[]>(
-    ['config', category],
-    () => serverApi.getConfig(category === 'all' ? undefined : category),
-    { refreshInterval: 30000 }
-  )
-
-  const handleEdit = (config: BalanceConfig) => {
-    setEditKey(config.key)
-    setEditValue(config.value)
+  const load = () => {
+    setLoading(true)
+    serverApi.getConfig(category || undefined).then(d => {
+      setConfigs(Array.isArray(d) ? d : Object.entries(d).map(([key, val]: any) => ({ key, ...val })))
+    }).catch(() => {}).finally(() => setLoading(false))
   }
 
-  const handleSave = async (key: string) => {
-    setSaving(true)
-    try {
-      await serverApi.updateConfig(key, editValue)
-      setSavedKey(key)
-      setTimeout(() => setSavedKey(null), 2000)
-      setEditKey(null)
-      mutate()
-    } finally {
-      setSaving(false)
-    }
+  useEffect(load, [category])
+
+  async function save(key: string) {
+    const val = editing[key]
+    if (val === undefined) return
+    await serverApi.updateConfig(key, val)
+    setSaved(p => ({ ...p, [key]: true }))
+    setTimeout(() => setSaved(p => ({ ...p, [key]: false })), 2000)
+    setMsg(`✓ Đã lưu: ${key}`)
+    setTimeout(() => setMsg(''), 3000)
   }
 
-  const groupedByCategory = configs?.reduce((acc, c) => {
-    if (!acc[c.category]) acc[c.category] = []
-    acc[c.category].push(c)
+  async function seedDefaults() {
+    if (!confirm('Reset toàn bộ về default? Các chỉnh sửa hiện tại sẽ bị mất!')) return
+    await serverApi.seedConfig(); setMsg('Đã reset về default'); load()
+  }
+
+  const categories = [...new Set(configs.map(c => c.category))].filter(Boolean)
+
+  const filtered = configs.filter(c => {
+    const matchCat = !category || c.category === category
+    const matchSearch = !search || c.key?.includes(search) || c.description?.includes(search)
+    return matchCat && matchSearch
+  })
+
+  const grouped = filtered.reduce((acc: Record<string, any[]>, c) => {
+    const cat = c.category ?? 'other'
+    if (!acc[cat]) acc[cat] = []
+    acc[cat].push(c)
     return acc
-  }, {} as Record<string, BalanceConfig[]>) ?? {}
+  }, {})
 
   return (
     <AdminLayout>
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Balance Config</h2>
-          <button
-            onClick={async () => { await serverApi.seedConfig(); mutate() }}
-            className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg text-sm transition-colors"
-          >
-            🔄 Reset Defaults
-          </button>
+          <div>
+            <h2 className="text-2xl font-bold">Balance Config</h2>
+            <p className="text-gray-400 text-sm mt-1">{configs.length} params — thay đổi có hiệu lực sau 60 giây</p>
+          </div>
+          <div className="flex gap-3">
+            <input placeholder="Tìm tham số..."
+              value={search} onChange={e => setSearch(e.target.value)}
+              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm w-48 focus:border-purple-600 outline-none"
+            />
+            <button onClick={seedDefaults}
+              className="px-4 py-2 bg-red-900/50 border border-red-800 text-red-300 rounded-lg text-sm hover:bg-red-900">
+              ↺ Reset Default
+            </button>
+          </div>
         </div>
 
-        {/* Category Tabs */}
-        <div className="flex gap-2 mb-6 flex-wrap">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-sm capitalize transition-colors ${
-                category === cat
-                  ? 'bg-purple-700 text-white'
-                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-              }`}
-            >
-              {cat}
+        {/* Category tabs */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          <button onClick={() => setCategory('')}
+            className={`px-3 py-1.5 rounded-lg text-xs ${!category ? 'bg-purple-700 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>
+            Tất cả ({configs.length})
+          </button>
+          {categories.map(c => (
+            <button key={c} onClick={() => setCategory(category === c ? '' : c)}
+              className={`px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 ${
+                category === c ? 'bg-purple-700 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+              }`}>
+              {CATEGORY_ICON[c] ?? '⚙️'} {c} ({configs.filter(x => x.category === c).length})
             </button>
           ))}
         </div>
 
-        <div className="space-y-6">
-          {Object.entries(groupedByCategory).map(([cat, items]) => (
-            <div key={cat} className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-              <div className="p-3 border-b border-gray-800 flex items-center gap-2">
-                <span className={`px-2 py-0.5 rounded text-xs font-bold capitalize ${CATEGORY_COLORS[cat] ?? 'bg-gray-800 text-gray-300'}`}>
-                  {cat}
-                </span>
-                <span className="text-gray-500 text-sm">{items.length} params</span>
-              </div>
+        {msg && <div className="mb-4 p-3 bg-green-900/40 border border-green-700 rounded-lg text-green-300 text-sm">{msg}</div>}
 
-              <div className="divide-y divide-gray-800/50">
-                {items.map(config => (
-                  <div key={config.key} className="p-3 flex items-center gap-4 hover:bg-gray-800/30">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-mono text-sm text-purple-300">{config.key}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">{config.description}</div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {/* Type badge */}
-                      <span className="text-xs text-gray-600 font-mono">{config.dataType}</span>
-
-                      {editKey === config.key ? (
-                        <>
+        {loading ? (
+          <div className="text-center py-20 text-gray-500 animate-pulse">Đang tải...</div>
+        ) : (
+          <div className="space-y-6">
+            {Object.entries(grouped).map(([cat, items]) => (
+              <div key={cat}>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-base">{CATEGORY_ICON[cat] ?? '⚙️'}</span>
+                  <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">{cat}</h3>
+                  <span className="text-xs text-gray-600">({(items as any[]).length})</span>
+                </div>
+                <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+                  {(items as any[]).map((c, i) => {
+                    const currentVal = editing[c.key] ?? c.value ?? ''
+                    const isDirty = editing[c.key] !== undefined && editing[c.key] !== c.value
+                    return (
+                      <div key={c.key}
+                        className={`flex items-center gap-4 px-4 py-3 ${i > 0 ? 'border-t border-gray-800/60' : ''} hover:bg-gray-800/30 transition-colors`}>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-mono text-gray-200">{c.key}</p>
+                          {c.description && <p className="text-xs text-gray-500 mt-0.5">{c.description}</p>}
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded">{c.type}</span>
                           <input
-                            value={editValue}
-                            onChange={e => setEditValue(e.target.value)}
-                            className="bg-gray-800 border border-purple-600 rounded px-2 py-1 text-sm font-mono w-28 focus:outline-none"
-                            autoFocus
-                            onKeyDown={e => e.key === 'Enter' && handleSave(config.key)}
+                            value={currentVal}
+                            onChange={e => setEditing(p => ({ ...p, [c.key]: e.target.value }))}
+                            onKeyDown={e => e.key === 'Enter' && save(c.key)}
+                            className={`w-28 bg-gray-800 border rounded px-2 py-1.5 text-sm font-mono text-right focus:outline-none ${
+                              isDirty ? 'border-yellow-600 text-yellow-300' : 'border-gray-700 text-gray-300'
+                            } focus:border-purple-500`}
                           />
                           <button
-                            onClick={() => handleSave(config.key)}
-                            disabled={saving}
-                            className="bg-green-800 hover:bg-green-700 text-green-300 px-2 py-1 rounded text-xs transition-colors"
+                            onClick={() => save(c.key)}
+                            disabled={!isDirty}
+                            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                              saved[c.key] ? 'bg-green-700 text-white' :
+                              isDirty ? 'bg-purple-700 hover:bg-purple-600 text-white' :
+                              'bg-gray-800 text-gray-600 cursor-default'
+                            }`}
                           >
-                            {saving ? '...' : '✓'}
+                            {saved[c.key] ? '✓' : 'Lưu'}
                           </button>
-                          <button
-                            onClick={() => setEditKey(null)}
-                            className="bg-gray-800 hover:bg-gray-700 px-2 py-1 rounded text-xs transition-colors"
-                          >
-                            ✕
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <span className={`font-mono text-sm font-bold px-2 py-1 rounded ${
-                            savedKey === config.key ? 'bg-green-900 text-green-300' : 'bg-gray-800 text-white'
-                          }`}>
-                            {config.value}
-                          </span>
-                          <button
-                            onClick={() => handleEdit(config)}
-                            className="bg-gray-800 hover:bg-purple-900 hover:text-purple-300 px-2 py-1 rounded text-xs transition-colors"
-                          >
-                            ✏️
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </AdminLayout>
   )
