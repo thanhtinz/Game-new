@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.SignalR;
 using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Chat;
+using WorldFaith.Server.Services.Dungeon;
 using WorldFaith.Server.Services.Evolution;
 using WorldFaith.Server.Services.Faith;
 using WorldFaith.Server.Services.Leaderboard;
+using WorldFaith.Server.Services.Memory;
 using WorldFaith.Server.Services.NPC;
 using WorldFaith.Server.Services.Organization;
 using WorldFaith.Server.Services.Religion;
@@ -119,6 +121,35 @@ public class WorldSimulationLoop : BackgroundService
                 if (orgDeltas.Any())
                     await _hubContext.Clients.Group(world.Id).OnWorldTick(
                         new WorldTickEvent { Tick = newTick, Cycle = cycle, Deltas = orgDeltas });
+            }
+
+            // DungeonService tick (every 50 ticks)
+            if (newTick % 50 == 0)
+            {
+                var dungeonService = scope.ServiceProvider.GetRequiredService<IDungeonService>();
+                var dungeonDeltas = await dungeonService.TickAsync(world.Id, newTick);
+                if (dungeonDeltas.Any())
+                    await _hubContext.Clients.Group(world.Id).OnWorldTick(
+                        new WorldTickEvent { Tick = newTick, Cycle = cycle, Deltas = dungeonDeltas });
+            }
+
+            // MemoryService tick — relic faith gen (every 10 ticks)
+            if (newTick % 10 == 0)
+            {
+                var memoryService = scope.ServiceProvider.GetRequiredService<IMemoryService>();
+                await memoryService.TickAsync(world.Id, newTick);
+            }
+
+            // GodRankService — check ranks every 100 ticks
+            if (newTick % 100 == 0)
+            {
+                var rankService = scope.ServiceProvider.GetRequiredService<IGodRankService>();
+                var gods2 = await godRepo.GetByWorldAsync(world.Id);
+                foreach (var g in gods2)
+                {
+                    await rankService.UpdateRankAsync(g.Id);
+                    await rankService.CheckForgottenStateAsync(world.Id, g.Id);
+                }
             }
 
             bool isRebirth = newTick % rebirthInterval == 0;

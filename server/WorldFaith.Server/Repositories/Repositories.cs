@@ -74,6 +74,7 @@ public interface IGodRepository
     Task<List<GodDocument>> GetByWorldAsync(string worldId);
     Task<GodDocument> CreateAsync(GodDocument god);
     Task UpdateFaithAsync(string godId, float faith, float trust, float fear, int followerCount);
+    Task UpdateAsync(GodDocument god);
     Task UnlockMiracleAsync(string godId, MiracleType miracle);
     Task KillGodAsync(string godId);
 }
@@ -107,6 +108,9 @@ public class GodRepository : MongoRepository<GodDocument>, IGodRepository
             .Set(g => g.LastActionAt, DateTime.UtcNow);
         await Collection.UpdateOneAsync(g => g.Id == godId, update);
     }
+
+    public async Task UpdateAsync(GodDocument god)
+        => await Collection.ReplaceOneAsync(g => g.Id == god.Id, god);
 
     public async Task UnlockMiracleAsync(string godId, MiracleType miracle)
     {
@@ -319,4 +323,110 @@ public class NpcEventRepository : MongoRepository<NpcEventDocument>, INpcEventRe
     public async Task<List<NpcEventDocument>> GetByCivilizationAsync(string civId, int limit = 20)
         => await Collection.Find(e => e.CivilizationId == civId)
             .SortByDescending(e => e.OccurredAt).Limit(limit).ToListAsync();
+}
+
+// ─── Race Repository ──────────────────────────────────────
+public interface IRaceRepository
+{
+    Task<RaceDocument?> GetByTypeAsync(string worldId, RaceType type);
+    Task<List<RaceDocument>> GetByWorldAsync(string worldId);
+    Task<RaceDocument> CreateAsync(RaceDocument race);
+    Task UpdateAsync(RaceDocument race);
+}
+
+public class RaceRepository : MongoRepository<RaceDocument>, IRaceRepository
+{
+    public RaceRepository(IMongoDatabase db) : base(db, "races") { }
+    public async Task<RaceDocument?> GetByTypeAsync(string worldId, RaceType type)
+        => await Collection.Find(r => r.WorldId == worldId && r.Type == type).FirstOrDefaultAsync();
+    public async Task<List<RaceDocument>> GetByWorldAsync(string worldId)
+        => await Collection.Find(r => r.WorldId == worldId).ToListAsync();
+    public async Task<RaceDocument> CreateAsync(RaceDocument race)
+    {
+        await Collection.InsertOneAsync(race);
+        return race;
+    }
+    public async Task UpdateAsync(RaceDocument race)
+        => await Collection.ReplaceOneAsync(r => r.Id == race.Id, race);
+}
+
+// ─── Dungeon Repository ───────────────────────────────────
+public interface IDungeonRepository
+{
+    Task<DungeonDocument> CreateAsync(DungeonDocument dungeon);
+    Task<List<DungeonDocument>> GetByWorldAsync(string worldId);
+    Task<DungeonDocument?> GetByIdAsync(string id);
+    Task UpdateAsync(DungeonDocument dungeon);
+    Task<List<DungeonDocument>> GetActiveAsync(string worldId);
+}
+
+public class DungeonRepository : MongoRepository<DungeonDocument>, IDungeonRepository
+{
+    public DungeonRepository(IMongoDatabase db) : base(db, "dungeons") { }
+    public async Task<DungeonDocument> CreateAsync(DungeonDocument d)
+    {
+        await Collection.InsertOneAsync(d);
+        return d;
+    }
+    public async Task<List<DungeonDocument>> GetByWorldAsync(string worldId)
+        => await Collection.Find(d => d.WorldId == worldId).ToListAsync();
+    public async Task<DungeonDocument?> GetByIdAsync(string id)
+        => await Collection.Find(d => d.Id == id).FirstOrDefaultAsync();
+    public async Task UpdateAsync(DungeonDocument d)
+        => await Collection.ReplaceOneAsync(x => x.Id == d.Id, d);
+    public async Task<List<DungeonDocument>> GetActiveAsync(string worldId)
+        => await Collection.Find(d => d.WorldId == worldId && d.State == DungeonState.Active).ToListAsync();
+}
+
+// ─── Relic Repository ─────────────────────────────────────
+public interface IRelicRepository
+{
+    Task<RelicDocument> CreateAsync(RelicDocument relic);
+    Task<List<RelicDocument>> GetByWorldAsync(string worldId);
+    Task<List<RelicDocument>> GetByGodAsync(string worldId, string godId);
+    Task<RelicDocument?> GetByIdAsync(string id);
+    Task UpdateAsync(RelicDocument relic);
+}
+
+public class RelicRepository : MongoRepository<RelicDocument>, IRelicRepository
+{
+    public RelicRepository(IMongoDatabase db) : base(db, "relics") { }
+    public async Task<RelicDocument> CreateAsync(RelicDocument r)
+    {
+        await Collection.InsertOneAsync(r);
+        return r;
+    }
+    public async Task<List<RelicDocument>> GetByWorldAsync(string worldId)
+        => await Collection.Find(r => r.WorldId == worldId && r.IsActive).ToListAsync();
+    public async Task<List<RelicDocument>> GetByGodAsync(string worldId, string godId)
+        => await Collection.Find(r => r.WorldId == worldId && r.OriginGodId == godId && r.IsActive).ToListAsync();
+    public async Task<RelicDocument?> GetByIdAsync(string id)
+        => await Collection.Find(r => r.Id == id).FirstOrDefaultAsync();
+    public async Task UpdateAsync(RelicDocument r)
+        => await Collection.ReplaceOneAsync(x => x.Id == r.Id, r);
+}
+
+// ─── Guild Mission Repository ─────────────────────────────
+public interface IGuildMissionRepository
+{
+    Task<GuildMissionDocument> CreateAsync(GuildMissionDocument mission);
+    Task<List<GuildMissionDocument>> GetByWorldAsync(string worldId);
+    Task<GuildMissionDocument?> GetActiveByOrgAsync(string orgId);
+    Task UpdateAsync(GuildMissionDocument mission);
+}
+
+public class GuildMissionRepository : MongoRepository<GuildMissionDocument>, IGuildMissionRepository
+{
+    public GuildMissionRepository(IMongoDatabase db) : base(db, "guild_missions") { }
+    public async Task<GuildMissionDocument> CreateAsync(GuildMissionDocument m)
+    {
+        await Collection.InsertOneAsync(m);
+        return m;
+    }
+    public async Task<List<GuildMissionDocument>> GetByWorldAsync(string worldId)
+        => await Collection.Find(m => m.WorldId == worldId).SortByDescending(m => m.StartedAtTick).Limit(50).ToListAsync();
+    public async Task<GuildMissionDocument?> GetActiveByOrgAsync(string orgId)
+        => await Collection.Find(m => m.OrganizationId == orgId && m.State == GuildMissionState.Active).FirstOrDefaultAsync();
+    public async Task UpdateAsync(GuildMissionDocument m)
+        => await Collection.ReplaceOneAsync(x => x.Id == m.Id, m);
 }

@@ -1,6 +1,7 @@
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Admin;
+using WorldFaith.Server.Services.Race;
 using WorldFaith.Shared.Enums;
 
 namespace WorldFaith.Server.Services.Faith;
@@ -20,6 +21,7 @@ public class FaithService : IFaithService
     private readonly ICivilizationRepository _civRepo;
     private readonly IReligionRepository _religionRepo;
     private readonly IBalanceConfigService _balance;
+    private readonly IRaceAffinityService _raceAffinity;
     private readonly ILogger<FaithService> _logger;
 
     // Mapping MiracleType → balance config key
@@ -47,12 +49,14 @@ public class FaithService : IFaithService
         ICivilizationRepository civRepo,
         IReligionRepository religionRepo,
         IBalanceConfigService balance,
+        IRaceAffinityService raceAffinity,
         ILogger<FaithService> logger)
     {
         _godRepo = godRepo;
         _civRepo = civRepo;
         _religionRepo = religionRepo;
         _balance = balance;
+        _raceAffinity = raceAffinity;
         _logger = logger;
     }
 
@@ -122,7 +126,29 @@ public class FaithService : IFaithService
             // Archetype multiplier
             float archetypeMult = ArchetypeBonus.GetFaithGenMultiplier(god, godReligions, new List<CivilizationDocument>());
 
-            float gain     = (fromFollowers + fromTemples + devotionBonus + fearResource) * archetypeMult;
+            // Race Affinity modifier — aggregate across civs following this god
+            float raceAffinityMult = 1f;
+            var civIds = godReligions.SelectMany(r => r.CivilizationIds).Distinct().ToList();
+            if (civIds.Any())
+            {
+                float totalAffinityMult = 0f;
+                int civCount = 0;
+                foreach (var civId in civIds.Take(10)) // sample max 10 civs để tránh quá chậm
+                {
+                    var civ = await _civRepo.GetByIdAsync(civId);
+                    if (civ == null) continue;
+                    float affMult = await _raceAffinity.GetFaithGainModifierAsync(worldId, civ.PrimaryRace, god.Archetype);
+                    totalAffinityMult += affMult;
+                    civCount++;
+                }
+                if (civCount > 0) raceAffinityMult = totalAffinityMult / civCount;
+            }
+
+            // God Rank multiplier
+            float rankMult = god.RankData.RankMultiplier;
+
+            float gain = (fromFollowers + fromTemples + devotionBonus + fearResource)
+                * archetypeMult * raceAffinityMult * rankMult;
             float newFaith = MathF.Min(maxFaith, god.Faith + gain);
 
             await _godRepo.UpdateFaithAsync(god.Id, newFaith, god.Trust, god.Fear, god.FollowerCount);

@@ -58,6 +58,12 @@ public class GodDocument
         MiracleType.BlessHarvest
     };
     public bool IsAlive { get; set; } = true;
+    // v1.0 GDD additions
+    public GodRankData RankData { get; set; } = new();
+    public List<GodMemoryEntry> Memories { get; set; } = new();
+    public List<string> RelicIds { get; set; } = new();          // relics linked to this god
+    public List<string> ForbiddenInCivIds { get; set; } = new(); // civs that outlawed this god
+    public bool IsForgotten { get; set; } = false;               // true = no followers, surviving via relics
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime LastActionAt { get; set; } = DateTime.UtcNow;
 }
@@ -71,6 +77,7 @@ public class CivilizationDocument
     public string WorldId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public CivilizationPersonality Personality { get; set; }
+    public RaceType PrimaryRace { get; set; } = RaceType.Human;  // v1.0 GDD
     public int Population { get; set; } = 100;
     public float Economy { get; set; } = 50f;
     public float Military { get; set; } = 30f;
@@ -111,6 +118,14 @@ public class ReligionDocument
     public bool IsHidden { get; set; }
     public List<string> CivilizationIds { get; set; } = new();
     public List<string> SchismIds { get; set; } = new();
+    // v1.0 GDD: Doctrine Axes
+    public DoctrineValues Doctrine { get; set; } = new();
+    // Believer type breakdown
+    public int CasualCount { get; set; }
+    public int DevoutCount { get; set; }
+    public int FanaticCount { get; set; }
+    public int CultistCount { get; set; }
+    public int HereticCount { get; set; }
     public DateTime FoundedAt { get; set; } = DateTime.UtcNow;
 }
 
@@ -293,4 +308,120 @@ public class NpcEventDocument
     public string? RespondingGodId { get; set; }
     public long Tick { get; set; }
     public DateTime OccurredAt { get; set; } = DateTime.UtcNow;
+}
+
+// ─── Race Affinity System (GDD v1.0 Mục 9) ───────────────
+public class RaceAffinityEntry
+{
+    public GodArchetype Domain { get; set; }
+    public float Percentage { get; set; }  // 10-170
+}
+
+public class RaceDocument
+{
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+    public string WorldId { get; set; } = string.Empty;
+    public RaceType Type { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public List<RaceAffinityEntry> AffinityMatrix { get; set; } = new();
+    public List<string> CulturalTaboos { get; set; } = new();     // God archetype names blocked
+    public List<RaceTrait> PassiveTraits { get; set; } = new();
+    public Dictionary<string, float> EnvironmentalMemory { get; set; } = new(); // godId → trust modifier
+}
+
+// ─── God Rank + Memory (GDD v1.0 Mục 7 + 22) ────────────
+public class GodMemoryEntry
+{
+    public MemoryType Type { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public string? RelatedCivId { get; set; }
+    public long Tick { get; set; }
+    public float TrustImpact { get; set; }
+}
+
+// GodDocument: thêm Rank, Memory, RelicIds, ForbiddenIn
+public class GodRankData
+{
+    public GodRank Rank { get; set; } = GodRank.Nascent;
+    public int TotalFaithEarned { get; set; }
+    public float RankMultiplier => Rank switch
+    {
+        GodRank.Forgotten   => 0.1f,
+        GodRank.Nascent     => 1.0f,
+        GodRank.Awakened    => 1.2f,
+        GodRank.Established => 1.5f,
+        GodRank.Revered     => 1.8f,
+        GodRank.Exalted     => 2.2f,
+        GodRank.Ancient     => 3.0f,
+        _ => 1f
+    };
+}
+
+// ─── Doctrine System (GDD v1.0 Mục 13) ───────────────────
+public class DoctrineValues
+{
+    // Mỗi axis: -100 (low end) đến +100 (high end)
+    public float MercyVsPunishment { get; set; } = 0f;    // -100=mercy, +100=punishment
+    public float IsolationVsExpansion { get; set; } = 0f; // -100=isolate, +100=expand
+    public float HarmonyVsDominion { get; set; } = 0f;    // -100=harmony, +100=dominion
+    public float FreedomVsOrder { get; set; } = 0f;       // -100=freedom, +100=order
+    public float SacrificeVsProsperity { get; set; } = 0f;// -100=sacrifice, +100=prosperity
+}
+
+// ─── Dungeon System (GDD v1.0 Mục 12, 16) ────────────────
+public class DungeonDocument
+{
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+    public string WorldId { get; set; } = string.Empty;
+    public DungeonType Type { get; set; }
+    public DungeonState State { get; set; } = DungeonState.Active;
+    public int X { get; set; }
+    public int Y { get; set; }
+    public float DangerLevel { get; set; } = 30f;   // 0-100
+    public float Reward { get; set; } = 50f;         // faith/relic potential
+    public string? OriginGodId { get; set; }         // god who spawned it
+    public string? ActiveMissionId { get; set; }
+    public string? RelicId { get; set; }             // relic inside if any
+    public long SpawnedAtTick { get; set; }
+}
+
+public class RelicDocument
+{
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+    public string WorldId { get; set; } = string.Empty;
+    public RelicType Type { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? OriginGodId { get; set; }
+    public string? CurrentOwnerId { get; set; }     // NPC or civ holding it
+    public string? LocationDungeonId { get; set; }
+    public string? LocationCivId { get; set; }
+    public float MemoryPower { get; set; } = 50f;   // how well it preserves god memory
+    public float FaithBonus { get; set; }            // passive faith bonus to holder's god
+    public bool IsActive { get; set; } = true;
+    public long DiscoveredAtTick { get; set; }
+    public List<GodMemoryEntry> Memories { get; set; } = new();
+}
+
+public class GuildMissionDocument
+{
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+    public string WorldId { get; set; } = string.Empty;
+    public string OrganizationId { get; set; } = string.Empty;
+    public string DungeonId { get; set; } = string.Empty;
+    public GuildMissionState State { get; set; } = GuildMissionState.Active;
+    public List<string> AdventurerIds { get; set; } = new();
+    public string? QuestGiverId { get; set; }   // Noble/Civ who commissioned
+    public long StartedAtTick { get; set; }
+    public long? CompletedAtTick { get; set; }
+    public string? DiscoveredRelicId { get; set; }
+    public float FaithImpact { get; set; }
+    public string OutcomeDescription { get; set; } = string.Empty;
 }

@@ -128,3 +128,70 @@ public enum NpcEventResult { Ignored, GodIntervened, NaturalResolution }
 public enum CrimeType { Theft, Corruption, Assassination, Extortion, TaxEvasion, Heresy }
 public enum PoliticalEventType { Election, Rebellion, Coronation, Alliance, Embargo }
 public enum MarriageType { Political, Royal, Forbidden, Religious, Arranged }
+
+// ─── Race System (v1.0 GDD) ──────────────────────────────
+public enum RaceType
+{
+    Human, Elf, Dwarf, Orc, Beastfolk, Demon, Angel, Undead
+}
+
+public enum RaceTrait
+{
+    Genius, Fanatic, Compassionate, Ambitious, Traumatized, Curious, Traditional, Reckless
+}
+
+// Affinity tier từ GDD v1.0
+public enum AffinityTier
+{
+    Taboo        = 0,   // 10-20%
+    Rejected     = 1,   // 30-50%
+    Difficult    = 2,   // 60-80%
+    Neutral      = 3,   // 90-110%
+    Preferred    = 4,   // 120-140%
+    DeepHarmony  = 5,   // 150-170%
+}
+
+// ─── Dungeon System ───────────────────────────────────────
+public enum DungeonType
+{
+    AncientRuins, MonstersLair, ForbiddenSanctum, LostTemple, DarkPortal
+}
+
+public enum DungeonState { Active, Cleared, Sealed, Infested, Awakening }
+
+public enum RelicType
+{
+    FaithCrystal, AncientScripture, DivineShard, CursedArtifact,
+    HeroicWeapon, ForgottenIdol, SacredBone, MythicGem
+}
+
+public enum GuildMissionState { Active, Success, Failed, Corrupted }
+
+// ─── God Rank ─────────────────────────────────────────────
+public enum GodRank
+{
+    Forgotten   = 0,
+    Nascent     = 1,
+    Awakened    = 2,
+    Established = 3,
+    Revered     = 4,
+    Exalted     = 5,
+    Ancient     = 6,
+}
+
+// ─── Religion Doctrine ───────────────────────────────────
+public enum DoctrineAxis
+{
+    MercyVsPunishment,
+    IsolationVsExpansion,
+    HarmonyVsDominion,
+    FreedomVsOrder,
+    SacrificeVsProsperity,
+}
+
+// ─── Memory / Relic ──────────────────────────────────────
+public enum MemoryType
+{
+    MiracleSuccess, MiracleFail, MonsterSlain, NobleConverted,
+    SchismOccurred, HolyWarWon, DisasterSurvived, GodForgotten
+}

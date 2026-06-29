@@ -3,6 +3,7 @@ using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Models.Auth;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.NPC;
+using WorldFaith.Server.Services.Race;
 using WorldFaith.Server.Services.Simulation;
 using WorldFaith.Server.Services.WorldGen;
 using WorldFaith.Shared.Contracts.Auth;
@@ -248,6 +249,11 @@ public class LobbyService : ILobbyService
                 await npcSpawn.SpawnForCivilizationAsync(world.Id, civ);
             _logger.LogInformation("Spawned NPCs for {Count} civilizations in world {WorldId}", civs.Count, world.Id);
         }
+
+        // Seed race affinity data (v1.0 GDD)
+        var raceService = _serviceProvider?.GetService<IRaceAffinityService>();
+        if (raceService != null)
+            await raceService.SeedRaceDataAsync(world.Id);
 
         await _roomRepo.SetStatusAsync(room.Id, RoomStatus.InGame, world.Id);
 
