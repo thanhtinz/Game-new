@@ -264,28 +264,31 @@ What gets created: all network clients, all managers, `WorldRenderer`, `CameraCo
 
 After running the scene setup, some `[SerializeField]` references need to be assigned manually. This section covers the most common ones.
 
-### GameScene — WorldRenderer
+### GameScene — WorldRenderer (2D Sprites)
 
 Find `WorldRenderer` in the Hierarchy. In the Inspector, assign these under **Tile Prefabs** and **Marker Prefabs**:
 
 | Field | What to assign |
 |---|---|
-| Grassland Prefab | A plane/quad with `tile_grassland` material |
-| Forest Prefab | A plane/quad with `tile_forest` material |
-| Mountain Prefab | A plane/quad with `tile_mountain` material |
-| Desert Prefab | A plane/quad with `tile_desert` material |
-| Water Prefab | A plane/quad with `tile_water` material |
-| Volcano Prefab | A plane/quad with `tile_volcano` material |
-| Sacred Prefab | A plane/quad with `tile_sacred` material |
-| Temple Prefab | A small 3D object or sprite |
-| City Marker Prefab | A marker sprite |
+| Grassland Sprite | Import `tile_grassland.png` as Sprite (2D and UI), drag here |
+| Forest Sprite | `tile_forest.png` |
+| Mountain Sprite | `tile_mountain.png` |
+| Desert Sprite | `tile_desert.png` |
+| Tundra Sprite | `tile_tundra.png` |
+| Water Sprite | `tile_water.png` |
+| Volcano Sprite | `tile_volcano.png` |
+| Sacred Sprite | `tile_sacred.png` |
+| Temple Sprite | A small sprite icon for temples |
+| City Marker Sprite | A dot or flag sprite for city markers |
 
-**Quick way to create tile prefabs:**
-1. Create a Quad: right-click Hierarchy → 3D Object → Quad
-2. Drag one of your tile textures onto it (creates a material automatically)
-3. Drag the Quad from Hierarchy → Project window to save it as a Prefab
-4. Rename it (e.g., `GrasslandTile`)
-5. Repeat for each tile type
+**Quick way to create tile sprites:**
+1. Import your tile texture PNG into `Assets/WorldFaith/World/Tiles/`
+2. Select the texture in the Project window
+3. In the Inspector, set **Texture Type → Sprite (2D and UI)** → Apply
+4. Drag the sprite from the Project window onto the corresponding field in WorldRenderer
+5. Repeat for each of the 8 tile types
+
+The sprites are placed directly by `WorldRenderer` — no Prefab needed for tiles.
 
 ### GameScene — AudioManager
 
@@ -360,7 +363,10 @@ http://localhost:5000/hubs/chat    →  https://api.yourdomain.com/hubs/chat
 
 ### Minimum required assets (game cannot run without these)
 
-**Tile textures** — `Assets/WorldFaith/World/Tiles/` — 64×64 px PNG:
+**Tile sprites** — `Assets/WorldFaith/World/Tiles/` — 64×64 px PNG:
+
+> After importing, select each PNG → Inspector → Texture Type: **Sprite (2D and UI)** → Pixels Per Unit: **64** → Apply
+
 
 | File | Color hint |
 |---|---|

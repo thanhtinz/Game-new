@@ -184,18 +184,42 @@ namespace WorldFaith.Editor
 
         private static void CreateManagerObject<T>(string name, bool isCamera = false) where T : Component
         {
-            // Kiểm tra đã tồn tại chưa
             if (Object.FindObjectOfType<T>() != null)
             {
-                Debug.Log($"⏭ {name} đã tồn tại, bỏ qua");
+                Debug.Log($"Skipped (already exists): {name}");
                 return;
             }
 
             GameObject go;
             if (isCamera)
             {
-                go = new GameObject(name);
-                go.AddComponent<Camera>();
+                // Check if a Main Camera already exists in the scene
+                var existingCam = Camera.main;
+                if (existingCam != null)
+                    go = existingCam.gameObject;
+                else
+                {
+                    go = new GameObject(name);
+                    go.tag = "MainCamera";
+                    go.AddComponent<Camera>();
+                }
+
+                // Configure for 2D top-down orthographic
+                var cam = go.GetComponent<Camera>();
+                cam.orthographic     = true;
+                cam.orthographicSize = 10f;
+                cam.clearFlags       = CameraClearFlags.SolidColor;
+                cam.backgroundColor  = new Color(0.05f, 0.05f, 0.1f);
+                cam.nearClipPlane    = -100f;
+                cam.farClipPlane     = 100f;
+
+                // Position: Z = -10 so it looks toward Z=0 where sprites live
+                go.transform.position = new Vector3(32f, 32f, -10f);
+                go.transform.rotation = Quaternion.identity;
+
+                // Add AudioListener if missing
+                if (go.GetComponent<AudioListener>() == null)
+                    go.AddComponent<AudioListener>();
             }
             else
             {
@@ -203,7 +227,7 @@ namespace WorldFaith.Editor
             }
 
             go.AddComponent<T>();
-            Debug.Log($"✅ Created: {name}");
+            Debug.Log($"Created: {name}");
         }
     }
 

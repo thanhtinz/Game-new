@@ -216,12 +216,12 @@ namespace WorldFaith.Client.UI.Game
             float scaleX = minimapSize.x / _worldW;
             float scaleY = minimapSize.y / _worldH;
 
-            // Camera frustum corners trên world plane
+            // 2D: camera is on XY plane, use X and Y position
             float camX = _mainCam.transform.position.x;
-            float camZ = _mainCam.transform.position.z;
+            float camY = _mainCam.transform.position.y;
 
             float mmX = camX * scaleX;
-            float mmY = camZ * scaleY;
+            float mmY = camY * scaleY;
 
             cameraIndicator.anchoredPosition = new Vector2(
                 Mathf.Clamp(mmX, 0, minimapSize.x),
@@ -235,11 +235,13 @@ namespace WorldFaith.Client.UI.Game
             if (!allowClick || _worldW == 0) return;
 
             var minimapSize = minimapRect?.sizeDelta ?? _normalSize;
+
+            // 2D: map localPoint to world XY
             float worldX = (localPoint.x / minimapSize.x) * _worldW;
-            float worldZ = (localPoint.y / minimapSize.y) * _worldH;
+            float worldY = (localPoint.y / minimapSize.y) * _worldH;
 
             var camCtrl = _mainCam?.GetComponent<CameraController>();
-            camCtrl?.CenterOn(new Vector3(worldX, 0f, worldZ));
+            camCtrl?.CenterOn(new Vector2(worldX, worldY));
         }
 
         // ─── Toggle Size ─────────────────────────────────────────
