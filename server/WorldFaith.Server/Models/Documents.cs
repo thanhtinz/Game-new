@@ -21,6 +21,9 @@ public class WorldDocument
     public int Cycle { get; set; }
     public long Tick { get; set; }
     public bool IsActive { get; set; }
+    // v1.0 GDD
+    public WorldAge CurrentAge { get; set; } = WorldAge.EarlyAge;
+    public List<string> ForbiddenGodIds { get; set; } = new(); // gods outlawed world-wide
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public List<WorldTileData> Tiles { get; set; } = new();
 }
@@ -77,10 +80,16 @@ public class CivilizationDocument
     public string WorldId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public CivilizationPersonality Personality { get; set; }
-    public RaceType PrimaryRace { get; set; } = RaceType.Human;  // v1.0 GDD
+    public RaceType PrimaryRace { get; set; } = RaceType.Human;
+    public GovernmentType Government { get; set; } = GovernmentType.Monarchy;  // v1.0
     public int Population { get; set; } = 100;
     public float Economy { get; set; } = 50f;
     public float Military { get; set; } = 30f;
+    public float Food { get; set; } = 50f;          // v1.0: famine system
+    public float Stability { get; set; } = 60f;     // v1.0: rebellion trigger
+    public float Corruption { get; set; } = 10f;    // v1.0: dark gods amplify
+    public float ReligiousUnity { get; set; } = 50f;// v1.0: schism risk
+    public float Happiness { get; set; } = 50f;     // v1.0: trust/conversion
     public string? RulingReligionId { get; set; }
     public List<string> ReligionIds { get; set; } = new();
     public List<TileCoord> ControlledTiles { get; set; } = new();

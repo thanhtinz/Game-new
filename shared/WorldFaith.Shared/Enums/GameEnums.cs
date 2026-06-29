@@ -195,3 +195,27 @@ public enum MemoryType
     MiracleSuccess, MiracleFail, MonsterSlain, NobleConverted,
     SchismOccurred, HolyWarWon, DisasterSurvived, GodForgotten
 }
+
+// ─── Government Types (GDD v1.0 Section 11) ─────────────
+public enum GovernmentType
+{
+    Monarchy,       // Fast policy; royal faith shifts kingdom
+    Theocracy,      // High unity; priests dominate
+    NobleCouncil,   // Regional stability; factional doctrine
+    TribalClan,     // High loyalty; chief/shaman leads
+    MerchantState,  // Wealth-driven; faith follows profit
+    MonsterHorde,   // Military expansion; strength gods spread fast
+}
+
+// ─── Believer Types (GDD v1.0 Section 8) ─────────────────
+public enum BelieverType { Casual, Devout, Fanatic, Cultist, Heretic }
+
+// ─── Age System (GDD v1.0 Section 5) ─────────────────────
+public enum WorldAge
+{
+    EarlyAge,       // First followers, small villages
+    KingdomAge,     // Political expansion, institutions
+    ConflictAge,    // Holy wars, monsters, champions
+    CollapseAge,    // Empires fall, god survival crisis
+    RebirthAge,     // New civs, relics carry memory
+}
