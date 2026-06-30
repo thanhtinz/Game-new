@@ -51,11 +51,11 @@ docker --version   # must show 24.x.x or higher
 node --version     # must show v20.x.x or higher
 ```
 
-### Unity 2022.3 LTS
+### Unity 6.3 LTS
 ```
 1. Download Unity Hub: https://unity.com/download
 2. Open Unity Hub → sign in → Installs tab → Install Editor
-3. Select Unity 2022.3 LTS
+3. Select Unity 6.3 LTS
 4. Check Android Build Support module if you want Android builds
 5. Click Install — takes 15-30 minutes
 ```
@@ -200,7 +200,7 @@ Open **http://localhost:3001** → sign in with `admin@worldfaith.game` / `Admin
 1. Open Unity Hub
 2. Click Open → Add project from disk
 3. Select the folder: Game-new/client-unity/
-4. Choose Unity 2022.3 LTS when prompted
+4. Choose Unity 6.3 LTS when prompted
 5. Wait for initial import (5-10 minutes — red errors at first are normal)
 ```
 
@@ -875,7 +875,7 @@ Each new world's terrain is built by a WorldBox-style procedural generator (not 
 |---|---|
 | **Server** | ASP.NET Core 8, C#, SignalR WebSocket |
 | **Database** | MongoDB 7.0 + Redis 7.2 |
-| **Client** | Unity 2022.3 LTS (C#), 27 scripts |
+| **Client** | Unity 6.3 LTS (C#), 27 scripts |
 | **Admin Panel** | Next.js 14, TypeScript, Tailwind CSS, SVG Icons |
 | **Auth** | JWT Bearer + Refresh Token Rotation |
 | **Tick Rate** | 500ms/tick (configurable via `faith.tick_interval`) |

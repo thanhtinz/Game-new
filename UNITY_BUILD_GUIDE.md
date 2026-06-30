@@ -32,17 +32,17 @@ You need these installed before opening Unity:
 | Tool | Version | Download |
 |---|---|---|
 | Unity Hub | Latest | https://unity.com/download |
-| Unity Editor | **2022.3 LTS** | Via Unity Hub |
+| Unity Editor | **6.3 LTS** | Via Unity Hub |
 | .NET SDK | 8.0 | https://dotnet.microsoft.com/download |
 | Git | Any | https://git-scm.com |
 
-**Unity modules to install alongside 2022.3 LTS:**
+**Unity modules to install alongside 6.3 LTS:**
 - Android Build Support (includes Android SDK & NDK Tools + OpenJDK)
 - iOS Build Support *(Mac only)*
 - WebGL Build Support
 
 To add modules to an existing Unity installation:  
-Unity Hub → **Installs** → click the gear icon next to 2022.3 LTS → **Add Modules**
+Unity Hub → **Installs** → click the gear icon next to 6.3 LTS → **Add Modules**
 
 ---
 
@@ -55,7 +55,7 @@ Unity Hub → **Installs** → click the gear icon next to 2022.3 LTS → **Add 
 4. Select the folder (do not go inside it)
 5. Click  Add Project
 6. Click on the project to open it — Unity Hub will ask which Editor version to use
-7. Choose  Unity 2022.3 LTS
+7. Choose  Unity 6.3 LTS
 8. Click  Open
 ```
 
@@ -65,9 +65,22 @@ Unity Hub → **Installs** → click the gear icon next to 2022.3 LTS → **Add 
 
 ## 3. Install Required Packages
 
-Go to **Window → Package Manager**.
+Go to **Window → Package Management → Package Manager** (this moved out of the top-level Window menu starting in Unity 6 — in Unity 2022.x it was directly under **Window → Package Manager**).
 
-### 3a. TextMeshPro
+### 3a. Active Input Handling (required for Unity 6)
+
+WorldFaith's `CameraController.cs` uses the **Legacy Input Manager** (`Input.GetTouch`, `Input.GetAxis`, `Input.mousePosition`, etc.), not the newer Input System package. Unity 6 projects can default to **Input System Package (New)** only, which would break this script.
+
+```
+1. Edit → Project Settings → Player
+2. Under Other Settings, find Active Input Handling
+3. Set it to  Input Manager (Old)  or  Both
+4. Unity will prompt to restart the Editor — click Restart
+```
+
+If you'd rather migrate to the new Input System instead of using Legacy, that's a valid choice too, but it requires rewriting `CameraController.cs`'s input handling — out of scope for this guide.
+
+### 3b. TextMeshPro
 
 1. In Package Manager, change the dropdown from **In Project** to **Unity Registry**
 2. Search for `TextMeshPro`
@@ -76,14 +89,14 @@ Go to **Window → Package Manager**.
    **Window → TextMeshPro → Import TMP Essential Resources**
 5. Click **Import** in the dialog that appears
 
-### 3b. Newtonsoft JSON
+### 3c. Newtonsoft JSON
 
 1. Click the **+** button in the top-left corner of Package Manager
 2. Choose **Add package by name**
 3. Type exactly: `com.unity.nuget.newtonsoft-json`
 4. Click **Add**
 
-### 3c. Mobile Notifications (for Android and iOS push notifications)
+### 3d. Mobile Notifications (for Android and iOS push notifications)
 
 1. Click **+** → **Add package by name**
 2. Type: `com.unity.mobile.notifications`
@@ -756,6 +769,7 @@ The server must allow requests from your WebGL domain. Add to `appsettings.json`
 | `The type or namespace 'WorldFaith.Shared' not found` | Shared Library not linked — redo Step 5 |
 | `NullReferenceException` on any Manager | A `[SerializeField]` is not assigned in the Inspector |
 | Scenes missing from Build Settings | Drag them from the Project window into Build Settings |
+| Touch/mouse input does nothing in `CameraController` | Active Input Handling is set to "Input System Package (New)" only — redo Step 3a |
 
 ### Connection issues
 
@@ -771,7 +785,7 @@ The server must allow requests from your WebGL domain. Add to `appsettings.json`
 
 | Problem | Solution |
 |---|---|
-| Android: NDK not found | Unity Hub → Installs → gear on 2022.3 → Add Modules → Android Build Support |
+| Android: NDK not found | Unity Hub → Installs → gear on 6.3 → Add Modules → Android Build Support |
 | Android: app crashes immediately | `adb logcat -s Unity` to see Unity crash log |
 | iOS: code signing error | Xcode → Signing & Capabilities → select your Team |
 | iOS: provisioning profile error | Click **Fix Issue** in Xcode or enable Automatic Signing |
@@ -813,8 +827,9 @@ Set these via the Unity Inspector — do **not** edit the `.cs` files directly. 
 ### Build order checklist
 
 ```
-[ ] Unity 2022.3 LTS installed with required modules
+[ ] Unity 6.3 LTS installed with required modules
 [ ] Project opened and initial import completed
+[ ] Active Input Handling set to Input Manager (Old) or Both (Edit → Project Settings → Player)
 [ ] TextMeshPro installed + Essential Resources imported
 [ ] Newtonsoft JSON installed
 [ ] SignalR DLLs in Assets/Plugins/SignalR/ (6 DLL files)
