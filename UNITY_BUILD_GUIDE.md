@@ -288,9 +288,30 @@ Find `WorldRenderer` in the Hierarchy. In the Inspector, assign these under **Ti
 2. Select the texture in the Project window
 3. In the Inspector, set **Texture Type → Sprite (2D and UI)** → Apply
 4. Drag the sprite from the Project window onto the corresponding field in WorldRenderer
-5. Repeat for each of the 8 tile types
+5. Repeat for each of the 10 tile types
 
 The sprites are placed directly by `WorldRenderer` — no Prefab needed for tiles.
+
+### GameScene — Main Camera (2D Orthographic)
+
+WorldFaith renders the world map as a true 2D top-down scene on the XY plane (not 3D with a tilted camera). The `WorldFaithEditorTools` setup script configures this automatically, but it's worth understanding what it sets so you can tune it for your own map size:
+
+| Setting | Default | Notes |
+|---|---|---|
+| Projection | Orthographic | Required — the game will not render correctly in Perspective mode |
+| Position | `(64, 64, -10)` | Centered on a 128×128 map; Z must stay negative so the camera looks toward Z=0 where tiles live |
+| Rotation | `(0, 0, 0)` | No tilt — straight top-down |
+| Orthographic Size | `20` | Initial zoom level; `CameraController` will smoothly animate from here |
+
+On the `CameraController` component (same GameObject), these fields control pan/zoom limits — adjust them if you use a map size other than the 128×128 default:
+
+| Field | Default | Purpose |
+|---|---|---|
+| Pan Limit Min | `(-2, -2)` | World-space XY the camera cannot pan below |
+| Pan Limit Max | `(130, 130)` | World-space XY the camera cannot pan beyond — should be slightly larger than `mapSize * tileSize` |
+| Zoom Min / Max | `3` / `60` | Closest/furthest orthographic size allowed |
+
+If you change the world's `Width`/`Height` (via Balance Config or `CreateWorldRequest`), update **Pan Limit Max** to roughly match the new map size in world units (`mapSize × tileSize`, where `tileSize` defaults to `1`).
 
 ### GameScene — AudioManager
 
@@ -802,7 +823,9 @@ Set these via the Unity Inspector — do **not** edit the `.cs` files directly. 
 [ ] LobbyScene created and saved in Assets/Scenes/
 [ ] GameScene created and saved in Assets/Scenes/
 [ ] Server URLs set in all scenes
-[ ] Tile textures assigned to WorldRenderer prefab fields
+[ ] Tile sprites assigned to WorldRenderer fields (10 types: Grassland, Forest,
+    Mountain, Desert, Tundra, Water, Volcano, Sacred, Beach, River)
+[ ] Main Camera confirmed Orthographic with CameraController pan limits matching map size
 [ ] Audio clips assigned to AudioManager
 [ ] WorldFaith → Validate → Check All Managers → all green
 [ ] Tested in Play mode — login and lobby work

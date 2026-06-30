@@ -421,13 +421,14 @@ See the full list at **[ASSETS.md](./ASSETS.md)** (~204 files).
 
 ### Required — game won't render without these
 
-**8 Tile Textures** — save to `Assets/WorldFaith/World/Tiles/` (64×64 px PNG):
+**10 Tile Textures** — save to `Assets/WorldFaith/World/Tiles/` (64×64 px PNG):
 ```
 tile_grassland.png   tile_forest.png   tile_mountain.png   tile_desert.png
 tile_tundra.png      tile_water.png    tile_volcano.png    tile_sacred.png
+tile_beach.png        tile_river.png
 ```
 
-Suggested colors: Grassland `#4a9c2f` · Forest `#1a5c1a` · Mountain `#7a7a7a` · Desert `#c8b44a` · Tundra `#b0c8e0` · Water `#2a64c8` · Volcano `#c83210` · Sacred `#c8a832`
+Suggested colors: Grassland `#4a9c2f` · Forest `#1a5c1a` · Mountain `#7a7a7a` · Desert `#c8b44a` · Tundra `#b0c8e0` · Water `#2a64c8` · Volcano `#c83210` · Sacred `#c8a832` · Beach `#e6d7a0` · River `#468cdc`
 
 **47 Sound Effects** — save to `Assets/WorldFaith/Audio/SFX/`  
 After copying files, assign them in the Inspector: find `AudioManager` in your GameScene → expand `Sfx Clips[]` → assign each file in `SfxId` enum order.
@@ -605,9 +606,11 @@ Live feed of all in-game events (refreshes every 3 seconds). Use the filter tabs
 - **Force Rebirth** — resets world to tick 0, gods keep their current rank
 
 ### Maps & Tiles
-Visual map editor (64×64 grid). Click any tile to edit its biome, fertility level, and whether it has a temple. Use **Place Sacred** to turn a tile into a Sacred Site (increases evolution points for entities nearby). **Regen Map** rebuilds the entire map with Perlin Noise (requires confirmation).
+Visual map editor (128×128 grid by default). Click any tile to edit its biome, fertility level, and whether it has a temple. Use **Place Sacred** to turn a tile into a Sacred Site (increases evolution points for entities nearby).
 
-Tile color guide: Grassland=green · Forest=dark green · Mountain=gray · Desert=yellow · Tundra=light blue · Water=blue · Volcano=red · Sacred=gold
+**Regen Map** rebuilds the entire map using the WorldBox-style terrain generator — organic continent shapes, ridge-line mountain chains, rivers carved downhill from peaks to the sea, sandy coastlines, and a biome-smoothing pass that removes single-tile noise specks. You can optionally enter a **seed** in the regen dialog; the same seed and map size always reproduce identical terrain, useful for sharing or debugging a specific world layout. Leave it blank for a random seed (requires confirmation either way — this destroys all current tiles, civs, and structures on that world).
+
+Tile color guide: Grassland=green · Forest=dark green · Mountain=gray · Desert=yellow · Tundra=light blue · Water=blue · Volcano=red · Sacred=gold · Beach=sand · River=bright blue
 
 ### Dungeons
 Manage dungeons where Adventure Guild runs missions.
@@ -848,6 +851,22 @@ The AI Director (every 20 ticks) controls world pacing:
 
 **Anti-snowball** (every 150 ticks): if one god holds >60% of all followers → weaker gods receive a faith boost of +50.
 
+### World Generation
+
+Each new world's terrain is built by a WorldBox-style procedural generator (not simple random noise) in nine stages:
+
+1. **Continent shaping** — 2-4 organic landmass "blobs" are placed and blended together with domain-warped noise, producing natural bays and peninsulas instead of a perfect circle
+2. **Elevation** — layered Perlin noise combined with the continent shape
+3. **Ridge mountains** — a separate ridge-noise pass carves connected mountain *ranges* rather than scattered isolated peaks
+4. **Moisture & temperature** — independent noise maps, with temperature falling toward the poles and additionally cooled by elevation
+5. **Biome classification** — elevation/moisture/temperature/ridge values are combined to assign each tile a type
+6. **Rivers** — starting at high-elevation mountain tiles, each river flows downhill (steepest-descent) until it reaches the sea or stalls
+7. **Coastlines** — any land tile touching open water becomes a Beach tile
+8. **Biome smoothing** — a majority-filter pass removes single-tile noise specks so regions read as cohesive Forest/Desert/Grassland blocks instead of static
+9. **Sacred sites & spawning** — 5-8 Sacred tiles are placed, civilizations settle on fertile land (preferring spots near rivers and coastlines), and starting wildlife/monsters/heroes are seeded by biome
+
+**Seeds:** every world has a seed (visible in Admin → Worlds and Admin → Maps). Leaving the seed blank when creating a room or regenerating a map picks a random one; entering the same seed with the same map size always reproduces identical terrain — useful for sharing a specific layout or debugging.
+
 ---
 
 ## 15. Technical Reference
@@ -861,7 +880,7 @@ The AI Director (every 20 ticks) controls world pacing:
 | **Auth** | JWT Bearer + Refresh Token Rotation |
 | **Tick Rate** | 500ms/tick (configurable via `faith.tick_interval`) |
 | **Max players/world** | 8 gods |
-| **Map size** | 64×64 tiles (configurable) |
+| **Map size** | 128×128 tiles by default (configurable, optional seed) |
 | **Server .cs files** | 45 files, 31 service interfaces |
 | **Admin pages** | 19 pages (excluding `_app`, `_document`) |
 | **Unit tests** | 95 test cases (xUnit + Moq + FluentAssertions) |
@@ -966,6 +985,9 @@ A: A stat (0-100) that measures how closely an NPC lives according to their god'
 
 **Q: Why is my Saint's conversion chance so low even with high faith?**  
 A: Three common causes: (1) The NPC's race has low affinity with your god's archetype. (2) The NPC is Tier 4/5 (Noble/Royalty) with inherently low openness (0.15-0.30). (3) Your religion's Doctrine doesn't match the NPC's personality. Check all three via Admin Panel → NPCs and → Religions.
+
+**Q: How do I get the same map every time, or share a map with someone else?**  
+A: Every world has a seed shown in Admin → Worlds and Admin → Maps. When creating a room, enter that same seed (and the same map width/height) and the terrain — continents, mountains, rivers, everything — will be identical. Leaving the seed blank picks a new random one each time.
 
 ---
 
