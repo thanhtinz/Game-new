@@ -90,7 +90,7 @@ public static class ArchetypeBonus
             GodArchetype.Darkness when miracle == MiracleType.DemonInvasion
                 => 0.80f,
 
-            GodArchetype.Chaos when miracle == MiracleType.Storm or MiracleType.Earthquake
+            GodArchetype.Chaos when miracle is MiracleType.Storm or MiracleType.Earthquake
                 => 0.85f,
 
             GodArchetype.War when miracle == MiracleType.HolyWar

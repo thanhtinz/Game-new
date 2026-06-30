@@ -84,9 +84,6 @@ public class NpcInteractionService : INpcInteractionService
         return events;
     }
 
-        return events;
-    }
-
     // ─── Temptation Events (v1.2) ─────────────────────────
 
     private async Task<List<NpcEventDocument>> CheckTemptationEventsAsync(
