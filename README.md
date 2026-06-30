@@ -206,7 +206,11 @@ Open **http://localhost:3001** → sign in with `admin@worldfaith.game` / `Admin
 
 ### Step 2 — Install required packages
 
-Go to **Window → Package Manager → Unity Registry** and install:
+Go to **Window → Package Management → Package Manager → Unity Registry** and install:
+
+**Input System** (required — `CameraController.cs` uses it for pan/zoom/tap-to-select)
+1. Search for "Input System" → Install
+2. If prompted to enable new input backends and restart, click **Yes**
 
 **TextMeshPro**
 1. Search for "TextMeshPro" → Install

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace WorldFaith.Client
 {
@@ -10,6 +11,10 @@ namespace WorldFaith.Client
     ///   - Camera must be set to Orthographic projection in the Inspector.
     ///   - Camera Z position should be -10 (looks at Z=0 where tiles live).
     ///   - Camera rotation must be (0, 0, 0) — looking straight down the -Z axis.
+    ///   - Requires the Input System package (com.unity.inputsystem). Works correctly
+    ///     regardless of the project's Active Input Handling setting (Input Manager (Old),
+    ///     Input System Package (New), or Both) — it never touches the Legacy
+    ///     UnityEngine.Input API, so there's nothing to misconfigure.
     ///
     /// Controls:
     ///   Mobile  : 1 finger drag = pan  |  2 finger pinch = zoom  |  tap = select tile
@@ -31,7 +36,7 @@ namespace WorldFaith.Client
         [SerializeField] private float zoomMax          = 60f;
         [SerializeField] private float zoomSpeed        = 0.05f;
         [SerializeField] private float zoomSmoothing    = 10f;
-        [SerializeField] private float scrollZoomSpeed  = 4f;
+        [SerializeField] private float scrollZoomSpeed  = 0.02f; // InputSystem scroll deltas are larger than legacy GetAxis
 
         [Header("Tap / Click")]
         [SerializeField] private float tapMaxDuration   = 0.2f;
@@ -48,8 +53,8 @@ namespace WorldFaith.Client
         private Vector3 _targetPosition;
         private float   _targetZoom;
 
-        // Touch
-        private int     _activeFingerId    = -1;
+        // Touch (per-finger tracking via Touchscreen.current.touches)
+        private int     _activeTouchId     = -1;
         private Vector2 _touchStartScreen;
         private Vector2 _touchLastScreen;
         private float   _touchStartTime;
@@ -81,7 +86,10 @@ namespace WorldFaith.Client
 
         private void Update()
         {
-            if (Input.touchSupported && Input.touchCount > 0)
+            bool hasActiveTouch = Touchscreen.current != null && Touchscreen.current.touches.Count > 0
+                && AnyTouchInProgress();
+
+            if (hasActiveTouch)
                 HandleTouch();
             else
                 HandleMouse();
@@ -90,70 +98,104 @@ namespace WorldFaith.Client
             ApplySmoothing();
         }
 
+        private static bool AnyTouchInProgress()
+        {
+            var ts = Touchscreen.current;
+            if (ts == null) return false;
+            foreach (var t in ts.touches)
+            {
+                var phase = t.phase.ReadValue();
+                if (phase is UnityEngine.InputSystem.TouchPhase.Began
+                    or UnityEngine.InputSystem.TouchPhase.Moved
+                    or UnityEngine.InputSystem.TouchPhase.Stationary
+                    or UnityEngine.InputSystem.TouchPhase.Ended)
+                    return true;
+            }
+            return false;
+        }
+
         // ─── Touch Input ──────────────────────────────────────
 
         private void HandleTouch()
         {
-            int count = Input.touchCount;
+            var ts = Touchscreen.current;
+            if (ts == null) return;
 
-            if (count == 0)
+            // Collect currently active touches (Began/Moved/Stationary/Ended this frame)
+            var active = new System.Collections.Generic.List<TouchControl>();
+            foreach (var t in ts.touches)
             {
-                _activeFingerId = -1;
-                _isPinching     = false;
+                var phase = t.phase.ReadValue();
+                if (phase is UnityEngine.InputSystem.TouchPhase.Began
+                    or UnityEngine.InputSystem.TouchPhase.Moved
+                    or UnityEngine.InputSystem.TouchPhase.Stationary
+                    or UnityEngine.InputSystem.TouchPhase.Ended)
+                    active.Add(t);
+            }
+
+            if (active.Count == 0)
+            {
+                _activeTouchId = -1;
+                _isPinching    = false;
                 return;
             }
 
             // ── Single finger ──
-            if (count == 1)
+            if (active.Count == 1)
             {
                 _isPinching = false;
-                var touch   = Input.GetTouch(0);
+                var touch  = active[0];
+                int id     = touch.touchId.ReadValue();
+                var phase  = touch.phase.ReadValue();
+                Vector2 pos = touch.position.ReadValue();
 
-                switch (touch.phase)
+                switch (phase)
                 {
-                    case TouchPhase.Began:
-                        _activeFingerId   = touch.fingerId;
-                        _touchStartScreen = touch.position;
-                        _touchLastScreen  = touch.position;
+                    case UnityEngine.InputSystem.TouchPhase.Began:
+                        _activeTouchId    = id;
+                        _touchStartScreen = pos;
+                        _touchLastScreen  = pos;
                         _touchStartTime   = Time.unscaledTime;
                         break;
 
-                    case TouchPhase.Moved:
-                        if (touch.fingerId == _activeFingerId)
+                    case UnityEngine.InputSystem.TouchPhase.Moved:
+                    case UnityEngine.InputSystem.TouchPhase.Stationary:
+                        if (id == _activeTouchId)
                         {
-                            PanByScreenDelta(touch.position - _touchLastScreen);
-                            _touchLastScreen = touch.position;
+                            PanByScreenDelta(pos - _touchLastScreen);
+                            _touchLastScreen = pos;
                         }
                         break;
 
-                    case TouchPhase.Ended:
-                    case TouchPhase.Canceled:
-                        if (touch.fingerId == _activeFingerId)
+                    case UnityEngine.InputSystem.TouchPhase.Ended:
+                        if (id == _activeTouchId)
                         {
                             float dt    = Time.unscaledTime - _touchStartTime;
-                            float moved = Vector2.Distance(touch.position, _touchStartScreen);
+                            float moved = Vector2.Distance(pos, _touchStartScreen);
 
                             if (moved < tapMaxDelta)
                             {
                                 if (dt < tapMaxDuration)
-                                    FireSelection(touch.position);
+                                    FireSelection(pos);
                                 else if (dt >= 0.5f)
-                                    FireLongPress(touch.position);
+                                    FireLongPress(pos);
                             }
-                            _activeFingerId = -1;
+                            _activeTouchId = -1;
                         }
                         break;
                 }
             }
             // ── Two fingers: pinch-zoom + two-finger pan ──
-            else if (count >= 2)
+            else if (active.Count >= 2)
             {
-                _activeFingerId = -1;   // cancel any single-finger action
+                _activeTouchId = -1;   // cancel any single-finger action
 
-                var t0 = Input.GetTouch(0);
-                var t1 = Input.GetTouch(1);
+                Vector2 p0 = active[0].position.ReadValue();
+                Vector2 p1 = active[1].position.ReadValue();
+                Vector2 d0 = active[0].delta.ReadValue();
+                Vector2 d1 = active[1].delta.ReadValue();
 
-                float dist = Vector2.Distance(t0.position, t1.position);
+                float dist = Vector2.Distance(p0, p1);
 
                 if (!_isPinching)
                 {
@@ -168,8 +210,8 @@ namespace WorldFaith.Client
                 _lastPinchDist   = dist;
 
                 // Pan with midpoint
-                Vector2 midNow  = (t0.position + t1.position) * 0.5f;
-                Vector2 midPrev = ((t0.position - t0.deltaPosition) + (t1.position - t1.deltaPosition)) * 0.5f;
+                Vector2 midNow  = (p0 + p1) * 0.5f;
+                Vector2 midPrev = ((p0 - d0) + (p1 - d1)) * 0.5f;
                 PanByScreenDelta(midNow - midPrev);
             }
         }
@@ -178,38 +220,50 @@ namespace WorldFaith.Client
 
         private void HandleMouse()
         {
+            var mouse = Mouse.current;
+            if (mouse == null) return;
+
             // Scroll wheel zoom
-            float scroll = Input.GetAxis("Mouse ScrollWheel");
-            if (Mathf.Abs(scroll) > 0.001f)
+            float scroll = mouse.scroll.ReadValue().y;
+            if (Mathf.Abs(scroll) > 0.01f)
                 _targetZoom = Mathf.Clamp(_targetZoom - scroll * scrollZoomSpeed, zoomMin, zoomMax);
 
             // Right / Middle mouse = pan
-            if (Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2))
+            bool rightDown  = mouse.rightButton.wasPressedThisFrame;
+            bool middleDown = mouse.middleButton.wasPressedThisFrame;
+            bool rightHeld  = mouse.rightButton.isPressed;
+            bool middleHeld = mouse.middleButton.isPressed;
+            bool rightUp    = mouse.rightButton.wasReleasedThisFrame;
+            bool middleUp   = mouse.middleButton.wasReleasedThisFrame;
+
+            if (rightDown || middleDown)
             {
-                _mousePanStart  = Input.mousePosition;
+                _mousePanStart  = mouse.position.ReadValue();
                 _isMousePanning = true;
             }
-            if (_isMousePanning && (Input.GetMouseButton(1) || Input.GetMouseButton(2)))
+            if (_isMousePanning && (rightHeld || middleHeld))
             {
-                Vector3 delta  = Input.mousePosition - _mousePanStart;
+                Vector3 current = mouse.position.ReadValue();
+                Vector3 delta   = current - _mousePanStart;
                 PanByScreenDelta(delta);
-                _mousePanStart = Input.mousePosition;
+                _mousePanStart = current;
             }
-            if (Input.GetMouseButtonUp(1) || Input.GetMouseButtonUp(2))
+            if (rightUp || middleUp)
                 _isMousePanning = false;
 
             // Left mouse = select tile on release
-            if (Input.GetMouseButtonDown(0))
+            if (mouse.leftButton.wasPressedThisFrame)
             {
-                _mouseClickStart = Input.mousePosition;
+                _mouseClickStart = mouse.position.ReadValue();
                 _mouseClickTime  = Time.unscaledTime;
             }
-            if (Input.GetMouseButtonUp(0))
+            if (mouse.leftButton.wasReleasedThisFrame)
             {
+                Vector3 current = mouse.position.ReadValue();
                 float dt    = Time.unscaledTime - _mouseClickTime;
-                float moved = Vector2.Distance(Input.mousePosition, _mouseClickStart);
+                float moved = Vector2.Distance(current, _mouseClickStart);
                 if (dt < tapMaxDuration && moved < tapMaxDelta)
-                    FireSelection(Input.mousePosition);
+                    FireSelection(current);
             }
         }
 
@@ -217,8 +271,15 @@ namespace WorldFaith.Client
 
         private void HandleKeyboard()
         {
-            float h = Input.GetAxisRaw("Horizontal"); // A/D or Left/Right
-            float v = Input.GetAxisRaw("Vertical");   // W/S or Up/Down
+            var kb = Keyboard.current;
+            if (kb == null) return;
+
+            float h = 0f, v = 0f;
+            if (kb.aKey.isPressed || kb.leftArrowKey.isPressed)  h -= 1f;
+            if (kb.dKey.isPressed || kb.rightArrowKey.isPressed) h += 1f;
+            if (kb.sKey.isPressed || kb.downArrowKey.isPressed)  v -= 1f;
+            if (kb.wKey.isPressed || kb.upArrowKey.isPressed)    v += 1f;
+
             if (Mathf.Abs(h) > 0.01f || Mathf.Abs(v) > 0.01f)
             {
                 var kDelta = new Vector3(h, v, 0f) * keyboardPanSpeed * _targetZoom / 10f * Time.unscaledDeltaTime;

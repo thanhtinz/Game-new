@@ -67,18 +67,14 @@ Unity Hub → **Installs** → click the gear icon next to 6.3 LTS → **Add Mod
 
 Go to **Window → Package Management → Package Manager** (this moved out of the top-level Window menu starting in Unity 6 — in Unity 2022.x it was directly under **Window → Package Manager**).
 
-### 3a. Active Input Handling (required for Unity 6)
+### 3a. Input System Package (required)
 
-WorldFaith's `CameraController.cs` uses the **Legacy Input Manager** (`Input.GetTouch`, `Input.GetAxis`, `Input.mousePosition`, etc.), not the newer Input System package. Unity 6 projects can default to **Input System Package (New)** only, which would break this script.
+`CameraController.cs` uses the **Input System package** (`Mouse.current`, `Touchscreen.current`, `Keyboard.current`) rather than the Legacy Input Manager. This means camera pan/zoom/tap-to-select works correctly no matter how the project's **Active Input Handling** setting is configured (Input Manager (Old), Input System Package (New), or Both) — there's nothing to misconfigure. You just need the package installed.
 
-```
-1. Edit → Project Settings → Player
-2. Under Other Settings, find Active Input Handling
-3. Set it to  Input Manager (Old)  or  Both
-4. Unity will prompt to restart the Editor — click Restart
-```
-
-If you'd rather migrate to the new Input System instead of using Legacy, that's a valid choice too, but it requires rewriting `CameraController.cs`'s input handling — out of scope for this guide.
+1. In Package Manager, change the dropdown from **In Project** to **Unity Registry**
+2. Search for `Input System`
+3. Click **Install**
+4. If prompted to enable the new input backends and restart the Editor, click **Yes** — this only affects whether *other* scripts can use `UnityEngine.Input`; `CameraController.cs` works either way
 
 ### 3b. TextMeshPro
 
@@ -769,7 +765,7 @@ The server must allow requests from your WebGL domain. Add to `appsettings.json`
 | `The type or namespace 'WorldFaith.Shared' not found` | Shared Library not linked — redo Step 5 |
 | `NullReferenceException` on any Manager | A `[SerializeField]` is not assigned in the Inspector |
 | Scenes missing from Build Settings | Drag them from the Project window into Build Settings |
-| Touch/mouse input does nothing in `CameraController` | Active Input Handling is set to "Input System Package (New)" only — redo Step 3a |
+| Touch/mouse input does nothing in `CameraController` | Input System package not installed — redo Step 3a |
 
 ### Connection issues
 
@@ -829,7 +825,7 @@ Set these via the Unity Inspector — do **not** edit the `.cs` files directly. 
 ```
 [ ] Unity 6.3 LTS installed with required modules
 [ ] Project opened and initial import completed
-[ ] Active Input Handling set to Input Manager (Old) or Both (Edit → Project Settings → Player)
+[ ] Input System package installed (Edit → Package Manager → Unity Registry)
 [ ] TextMeshPro installed + Essential Resources imported
 [ ] Newtonsoft JSON installed
 [ ] SignalR DLLs in Assets/Plugins/SignalR/ (6 DLL files)
