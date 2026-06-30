@@ -1,4 +1,5 @@
 using WorldFaith.Shared.Enums;
+using WorldFaith.Shared.Models;
 
 namespace WorldFaith.Shared.Contracts;
 
