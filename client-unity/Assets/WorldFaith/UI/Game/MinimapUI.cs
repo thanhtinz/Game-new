@@ -50,6 +50,8 @@ namespace WorldFaith.Client.UI.Game
             { TileType.Water,     new Color32(40,  100, 200, 255) },
             { TileType.Volcano,   new Color32(200, 50,  30,  255) },
             { TileType.Sacred,    new Color32(230, 200, 50,  255) },
+            { TileType.Beach,     new Color32(230, 215, 160, 255) },
+            { TileType.River,     new Color32(70,  140, 220, 255) },
         };
 
         private void Start()

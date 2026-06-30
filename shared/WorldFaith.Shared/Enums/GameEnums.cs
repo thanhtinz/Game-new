@@ -120,7 +120,9 @@ public enum TileType
     Water,
     Tundra,
     Volcano,
-    Sacred
+    Sacred,
+    Beach,    // Coastline transition tile between land and Water
+    River,    // Freshwater tile carved by the river generator
 }
 
 // NPC v3

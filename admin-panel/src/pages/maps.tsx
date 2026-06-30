@@ -4,11 +4,11 @@ import Icon from '@/components/ui/Icon'
 import Modal from '@/components/ui/Modal'
 import { mapsApi, worldsApi } from '@/services/api'
 
-const TILE_TYPES = ['Grassland','Forest','Mountain','Desert','Tundra','Water','Volcano','Sacred']
+const TILE_TYPES = ['Grassland','Forest','Mountain','Desert','Tundra','Water','Volcano','Sacred','Beach','River']
 const TILE_COLORS: Record<string, string> = {
   Grassland: '#4a9c2f', Forest: '#1a5c1a', Mountain: '#7a7a7a',
   Desert: '#c8b44a', Tundra: '#b0c8e0', Water: '#2a64c8',
-  Volcano: '#c83210', Sacred: '#c8a832'
+  Volcano: '#c83210', Sacred: '#c8a832', Beach: '#e6d7a0', River: '#468cdc'
 }
 
 export default function MapsPage() {

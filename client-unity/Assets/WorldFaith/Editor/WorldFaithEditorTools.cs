@@ -207,14 +207,15 @@ namespace WorldFaith.Editor
                 // Configure for 2D top-down orthographic
                 var cam = go.GetComponent<Camera>();
                 cam.orthographic     = true;
-                cam.orthographicSize = 10f;
+                cam.orthographicSize = 20f;
                 cam.clearFlags       = CameraClearFlags.SolidColor;
                 cam.backgroundColor  = new Color(0.05f, 0.05f, 0.1f);
                 cam.nearClipPlane    = -100f;
                 cam.farClipPlane     = 100f;
 
                 // Position: Z = -10 so it looks toward Z=0 where sprites live
-                go.transform.position = new Vector3(32f, 32f, -10f);
+                // Centered for a 128x128 default map (WorldRenderer.CenterCamera() will correct this at runtime)
+                go.transform.position = new Vector3(64f, 64f, -10f);
                 go.transform.rotation = Quaternion.identity;
 
                 // Add AudioListener if missing

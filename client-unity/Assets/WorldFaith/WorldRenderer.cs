@@ -23,6 +23,8 @@ namespace WorldFaith.Client
         [SerializeField] private Sprite waterSprite;
         [SerializeField] private Sprite volcanoSprite;
         [SerializeField] private Sprite sacredSprite;
+        [SerializeField] private Sprite beachSprite;
+        [SerializeField] private Sprite riverSprite;
 
         [Header("Marker Sprites")]
         [SerializeField] private Sprite templeSprite;
@@ -227,6 +229,8 @@ namespace WorldFaith.Client
             TileType.Water     => waterSprite,
             TileType.Volcano   => volcanoSprite,
             TileType.Sacred    => sacredSprite,
+            TileType.Beach     => beachSprite,
+            TileType.River     => riverSprite,
             _                  => grasslandSprite,
         };
 

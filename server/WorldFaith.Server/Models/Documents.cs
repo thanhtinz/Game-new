@@ -38,6 +38,11 @@ public class WorldTileData
     public string? ReligionId { get; set; }
     public bool HasTemple { get; set; }
     public int Population { get; set; }
+    // WorldGen v2: terrain data preserved for rendering and rivers
+    public float Elevation { get; set; }
+    public float Moisture { get; set; }
+    public bool IsRiverSource { get; set; }   // mountain tile where a river begins
+    public bool IsCoast { get; set; }          // land tile directly touching water
 }
 
 // ─── God ────────────────────────────────────────────────

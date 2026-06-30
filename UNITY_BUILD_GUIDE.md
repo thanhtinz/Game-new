@@ -278,6 +278,8 @@ Find `WorldRenderer` in the Hierarchy. In the Inspector, assign these under **Ti
 | Water Sprite | `tile_water.png` |
 | Volcano Sprite | `tile_volcano.png` |
 | Sacred Sprite | `tile_sacred.png` |
+| Beach Sprite | `tile_beach.png` — sandy coastline tile |
+| River Sprite | `tile_river.png` — narrower blue strip, distinct from Water |
 | Temple Sprite | A small sprite icon for temples |
 | City Marker Sprite | A dot or flag sprite for city markers |
 
@@ -367,6 +369,8 @@ http://localhost:5000/hubs/chat    →  https://api.yourdomain.com/hubs/chat
 
 > After importing, select each PNG → Inspector → Texture Type: **Sprite (2D and UI)** → Pixels Per Unit: **64** → Apply
 
+**10 tile types total** (the world generator produces all of these):
+
 
 | File | Color hint |
 |---|---|
@@ -378,6 +382,8 @@ http://localhost:5000/hubs/chat    →  https://api.yourdomain.com/hubs/chat
 | `tile_water.png` | `#2a64c8` |
 | `tile_volcano.png` | `#c83210` |
 | `tile_sacred.png` | `#c8a832` |
+| `tile_beach.png` | `#e6d7a0` — sandy coastline |
+| `tile_river.png` | `#468cdc` — narrower/brighter than Water |
 
 **Sound effects** — `Assets/WorldFaith/Audio/SFX/` — 47 files  
 See `ASSETS.md` for the full list with filenames matching the `SfxId` enum.

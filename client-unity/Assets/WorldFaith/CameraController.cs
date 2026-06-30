@@ -23,12 +23,12 @@ namespace WorldFaith.Client
         [SerializeField] private float panSpeed         = 5f;
         [SerializeField] private float panSmoothing     = 10f;
         [SerializeField] private float keyboardPanSpeed = 8f;
-        [SerializeField] private Vector2 panLimitMin    = new(-2f,  -2f);
-        [SerializeField] private Vector2 panLimitMax    = new(66f,  66f);
+        [SerializeField] private Vector2 panLimitMin    = new(-2f,   -2f);
+        [SerializeField] private Vector2 panLimitMax    = new(130f, 130f);
 
         [Header("Zoom")]
         [SerializeField] private float zoomMin          = 3f;
-        [SerializeField] private float zoomMax          = 35f;
+        [SerializeField] private float zoomMax          = 60f;
         [SerializeField] private float zoomSpeed        = 0.05f;
         [SerializeField] private float zoomSmoothing    = 10f;
         [SerializeField] private float scrollZoomSpeed  = 4f;

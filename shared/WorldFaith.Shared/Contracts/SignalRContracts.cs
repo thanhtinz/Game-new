@@ -45,8 +45,8 @@ public class CreateWorldRequest
     public string WorldName { get; set; } = string.Empty;
     public GameMode Mode { get; set; }
     public int MaxGods { get; set; } = 4;
-    public int WorldWidth { get; set; } = 64;
-    public int WorldHeight { get; set; } = 64;
+    public int WorldWidth { get; set; } = 128;
+    public int WorldHeight { get; set; } = 128;
     public VictoryCondition VictoryCondition { get; set; }
 }
 
