@@ -20,6 +20,8 @@ public interface IPlayerRepository
     Task UpdateStatsAsync(string playerId, bool won);
     Task SetActiveAsync(string playerId, bool isActive);
     Task SetAdminAsync(string playerId, bool isAdmin);
+    Task SetPasswordHashAsync(string playerId, string passwordHash);
+    Task SetBanReasonAsync(string playerId, string? reason);
 }
 
 public class PlayerRepository : IPlayerRepository
@@ -134,6 +136,18 @@ public class PlayerRepository : IPlayerRepository
     public async Task SetAdminAsync(string playerId, bool isAdmin)
     {
         var update = Builders<PlayerDocument>.Update.Set(p => p.IsAdmin, isAdmin);
+        await _collection.UpdateOneAsync(p => p.Id == playerId, update);
+    }
+
+    public async Task SetPasswordHashAsync(string playerId, string passwordHash)
+    {
+        var update = Builders<PlayerDocument>.Update.Set(p => p.PasswordHash, passwordHash);
+        await _collection.UpdateOneAsync(p => p.Id == playerId, update);
+    }
+
+    public async Task SetBanReasonAsync(string playerId, string? reason)
+    {
+        var update = Builders<PlayerDocument>.Update.Set(p => p.BanReason, reason);
         await _collection.UpdateOneAsync(p => p.Id == playerId, update);
     }
 }

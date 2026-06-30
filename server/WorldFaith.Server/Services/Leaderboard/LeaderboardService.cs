@@ -87,6 +87,7 @@ public interface ILeaderboardService
     Task<List<LeaderboardEntryDto>> GetTopPlayersAsync(int limit = 50);
     Task<PlayerDetailStatsDto?> GetPlayerStatsAsync(string playerId);
     Task<List<LeaderboardEntryDto>> GetLeaderboardByStatAsync(string stat, int limit = 20);
+    Task ResetAllAsync();
 }
 
 public class LeaderboardService : ILeaderboardService
@@ -319,4 +320,18 @@ public class LeaderboardService : ILeaderboardService
         FavoriteArchetype = s.FavoriteArchetype,
         TotalFollowers = s.TotalFollowers
     };
+
+    public async Task ResetAllAsync()
+    {
+        // Wipe the Mongo source of truth for all player stats...
+        await _collection.DeleteManyAsync(Builders<PlayerStatsDocument>.Filter.Empty);
+
+        // ...and the three Redis sorted sets that back the fast leaderboard reads.
+        var db = _redis.GetDatabase();
+        await db.KeyDeleteAsync(LeaderboardKey);
+        await db.KeyDeleteAsync(LeaderboardWinsKey);
+        await db.KeyDeleteAsync(LeaderboardFollowersKey);
+
+        _logger.LogWarning("Admin reset the entire leaderboard (Mongo + Redis cleared)");
+    }
 }
