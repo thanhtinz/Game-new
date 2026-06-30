@@ -1,122 +1,149 @@
-# WorldFaith — Unity Client Build Guide
+# WorldFaith — Hướng dẫn build Client Unity (cho người mới)
 
-Complete step-by-step instructions to set up, configure, and build the Unity client for all platforms.
+> Tài liệu này hướng dẫn bạn **mở project Unity, cài thư viện, tạo scene, gán tài nguyên và build game** cho PC / Android / iOS / WebGL.
+> Mỗi bước đều ghi rõ: **làm gì → bấm vào đâu → kết quả mong đợi**. Nếu là lần đầu chạm vào Unity, cứ làm tuần tự, đừng bỏ bước.
 
----
-
-## Table of Contents
-
-1. [Prerequisites](#1-prerequisites)
-2. [Open the Project](#2-open-the-project)
-3. [Install Required Packages](#3-install-required-packages)
-4. [Install SignalR](#4-install-signalr)
-5. [Link the Shared Library](#5-link-the-shared-library)
-6. [Create the Three Scenes](#6-create-the-three-scenes)
-7. [Assign UI References](#7-assign-ui-references)
-8. [Configure Server URLs](#8-configure-server-urls)
-9. [Assign Assets](#9-assign-assets)
-10. [Validate the Setup](#10-validate-the-setup)
-11. [Test in the Editor](#11-test-in-the-editor)
-12. [Build for PC](#12-build-for-pc)
-13. [Build for Android](#13-build-for-android)
-14. [Build for iOS](#14-build-for-ios-mac-only)
-15. [Build for WebGL](#15-build-for-webgl)
-16. [Troubleshooting](#16-troubleshooting)
+> 🖥️ **Trước khi bắt đầu:** Game Server phải chạy được thì client mới kết nối. Hãy hoàn thành **[SETUP.md](./SETUP.md)** trước.
 
 ---
 
-## 1. Prerequisites
+## ⚠️ Đọc cái này trước (rất quan trọng)
 
-You need these installed before opening Unity:
+Có **3 thứ thủ công** mà Unity *không* tự làm cho bạn. Thiếu một trong ba là client sẽ không chạy:
 
-| Tool | Version | Download |
+| # | Việc thủ công | Vì sao cần | Ở bước nào |
+|---|---|---|---|
+| 1 | Cài **DLL SignalR** | Thư viện kết nối realtime với server | [Bước 4](#bước-4--cài-signalr-kết-nối-realtime) |
+| 2 | Sao chép **Shared Library** vào Unity | Enum/model dùng chung server ↔ client | [Bước 5](#bước-5--sao-chép-shared-library) |
+| 3 | Tự **tạo 3 scene** bằng menu WorldFaith | Project không kèm sẵn scene | [Bước 6](#bước-6--tạo-3-scene) |
+
+Nhớ 3 thứ này — khi gặp lỗi "not found" sau này, 90% là do một trong ba bước trên chưa làm xong.
+
+---
+
+## Mục lục
+
+- [Phần A — Chuẩn bị](#phần-a--chuẩn-bị)
+  - [Bước 1 — Cài Unity và công cụ](#bước-1--cài-unity-và-công-cụ)
+  - [Bước 2 — Mở project](#bước-2--mở-project)
+  - [Bước 3 — Cài các package Unity](#bước-3--cài-các-package-unity)
+  - [Bước 4 — Cài SignalR (kết nối realtime)](#bước-4--cài-signalr-kết-nối-realtime)
+  - [Bước 5 — Sao chép Shared Library](#bước-5--sao-chép-shared-library)
+- [Phần B — Dựng scene & cấu hình](#phần-b--dựng-scene--cấu-hình)
+  - [Bước 6 — Tạo 3 scene](#bước-6--tạo-3-scene)
+  - [Bước 7 — Cấu hình địa chỉ Server](#bước-7--cấu-hình-địa-chỉ-server)
+  - [Bước 8 — Gán tài nguyên (ảnh ô đất, âm thanh…)](#bước-8--gán-tài-nguyên-ảnh-ô-đất-âm-thanh)
+  - [Bước 9 — Kiểm tra setup bằng Validator](#bước-9--kiểm-tra-setup-bằng-validator)
+  - [Bước 10 — Chạy thử trong Editor](#bước-10--chạy-thử-trong-editor)
+- [Phần C — Build cho từng nền tảng](#phần-c--build-cho-từng-nền-tảng)
+  - [Bước 11 — Build cho PC (Windows/Mac/Linux)](#bước-11--build-cho-pc)
+  - [Bước 12 — Build cho Android](#bước-12--build-cho-android)
+  - [Bước 13 — Build cho iOS (chỉ trên Mac)](#bước-13--build-cho-ios-chỉ-trên-mac)
+  - [Bước 14 — Build cho WebGL (trình duyệt)](#bước-14--build-cho-webgl-trình-duyệt)
+- [Phần D — Tra cứu](#phần-d--tra-cứu)
+  - [Khắc phục sự cố](#khắc-phục-sự-cố)
+  - [Checklist trước khi build](#checklist-trước-khi-build)
+
+---
+
+# Phần A — Chuẩn bị
+
+## Bước 1 — Cài Unity và công cụ
+
+Bạn cần các công cụ sau **trước khi mở Unity**:
+
+| Công cụ | Phiên bản | Tải ở đâu |
 |---|---|---|
-| Unity Hub | Latest | https://unity.com/download |
-| Unity Editor | **6.3 LTS** | Via Unity Hub |
+| Unity Hub | Mới nhất | https://unity.com/download |
+| Unity Editor | **6.3 LTS** | Cài qua Unity Hub |
 | .NET SDK | 8.0 | https://dotnet.microsoft.com/download |
-| Git | Any | https://git-scm.com |
+| Git | bất kỳ | https://git-scm.com |
 
-**Unity modules to install alongside 6.3 LTS:**
-- Android Build Support (includes Android SDK & NDK Tools + OpenJDK)
-- iOS Build Support *(Mac only)*
-- WebGL Build Support
+### Cài Unity Editor 6.3 LTS
 
-To add modules to an existing Unity installation:  
-Unity Hub → **Installs** → click the gear icon next to 6.3 LTS → **Add Modules**
+1. Mở **Unity Hub** → đăng nhập → tab **Installs** → bấm **Install Editor**.
+2. Chọn **Unity 6.3 LTS** → bấm **Install**. (Mất 15–30 phút.)
+3. Khi được hỏi chọn **modules** (các thành phần bổ sung), tick những cái bạn cần:
+   - ☑️ **Android Build Support** (gồm Android SDK & NDK + OpenJDK) — nếu muốn build Android.
+   - ☑️ **iOS Build Support** — *chỉ có trên Mac* — nếu muốn build iPhone/iPad.
+   - ☑️ **WebGL Build Support** — nếu muốn build chạy trên trình duyệt.
+
+> 💡 Quên tick module? Vào lại sau bằng: Unity Hub → **Installs** → bấm ⚙️ (bánh răng) bên cạnh bản 6.3 → **Add Modules**.
+
+✅ **Hoàn thành bước này khi:** Unity Hub hiển thị bản **6.3 LTS** trong tab Installs.
 
 ---
 
-## 2. Open the Project
+## Bước 2 — Mở project
 
 ```
-1. Open Unity Hub
-2. Click  Open  →  Add project from disk
-3. Navigate to:  Game-new/client-unity/
-4. Select the folder (do not go inside it)
-5. Click  Add Project
-6. Click on the project to open it — Unity Hub will ask which Editor version to use
-7. Choose  Unity 6.3 LTS
-8. Click  Open
+1. Mở Unity Hub
+2. Bấm  Open  →  Add project from disk
+3. Trỏ tới thư mục:  Game-new/client-unity/
+4. CHỌN CHÍNH thư mục đó (đừng đi vào bên trong nó)
+5. Bấm  Add Project
+6. Bấm vào project vừa thêm để mở
+7. Nếu hỏi phiên bản Editor → chọn  Unity 6.3 LTS
 ```
 
-**First-time import takes 5–15 minutes.** Red errors in the Console during this time are expected — they resolve after the next steps.
+⏱️ **Lần mở đầu mất 5–15 phút** để Unity import. Trong lúc này, **Console sẽ hiện lỗi đỏ — đây là điều BÌNH THƯỜNG.** Lỗi sẽ tự hết sau khi bạn hoàn tất Bước 3, 4, 5.
+
+✅ **Hoàn thành bước này khi:** giao diện Unity Editor đã mở, thanh tiến trình góc dưới-phải đã chạy xong.
 
 ---
 
-## 3. Install Required Packages
+## Bước 3 — Cài các package Unity
 
-Go to **Window → Package Management → Package Manager** (this moved out of the top-level Window menu starting in Unity 6 — in Unity 2022.x it was directly under **Window → Package Manager**).
+Mở **Window → Package Management → Package Manager**.
 
-### 3a. Input System Package (required)
+> 📝 Trong Unity 6, menu này nằm ở **Window → Package Management → Package Manager**. (Ở Unity 2022 cũ hơn thì nó nằm thẳng ở **Window → Package Manager**.)
 
-`CameraController.cs` uses the **Input System package** (`Mouse.current`, `Touchscreen.current`, `Keyboard.current`) rather than the Legacy Input Manager. This means camera pan/zoom/tap-to-select works correctly no matter how the project's **Active Input Handling** setting is configured (Input Manager (Old), Input System Package (New), or Both) — there's nothing to misconfigure. You just need the package installed.
+Cài lần lượt **4 package** sau:
 
-1. In Package Manager, change the dropdown from **In Project** to **Unity Registry**
-2. Search for `Input System`
-3. Click **Install**
-4. If prompted to enable the new input backends and restart the Editor, click **Yes** — this only affects whether *other* scripts can use `UnityEngine.Input`; `CameraController.cs` works either way
+### 3a. Input System *(bắt buộc)*
 
-### 3b. TextMeshPro
+Script `CameraController.cs` dùng **Input System** để xử lý kéo/zoom/chạm-chọn camera. Thiếu nó thì điều khiển camera sẽ không hoạt động.
 
-1. In Package Manager, change the dropdown from **In Project** to **Unity Registry**
-2. Search for `TextMeshPro`
-3. Click **Install**
-4. After installation completes, go to:  
-   **Window → TextMeshPro → Import TMP Essential Resources**
-5. Click **Import** in the dialog that appears
+1. Trong Package Manager, đổi dropdown từ **In Project** sang **Unity Registry**.
+2. Tìm `Input System` → bấm **Install**.
+3. Nếu hỏi bật input backend mới và khởi động lại Editor → bấm **Yes**.
 
-### 3c. Newtonsoft JSON
+### 3b. TextMeshPro *(bắt buộc)*
 
-1. Click the **+** button in the top-left corner of Package Manager
-2. Choose **Add package by name**
-3. Type exactly: `com.unity.nuget.newtonsoft-json`
-4. Click **Add**
+1. Đổi dropdown sang **Unity Registry** → tìm `TextMeshPro` → **Install**.
+2. Cài xong, vào **Window → TextMeshPro → Import TMP Essential Resources** → bấm **Import**.
 
-### 3d. Mobile Notifications (for Android and iOS push notifications)
+### 3c. Newtonsoft JSON *(bắt buộc)*
 
-1. Click **+** → **Add package by name**
-2. Type: `com.unity.mobile.notifications`
-3. Click **Add**
+1. Bấm nút **+** (góc trên-trái Package Manager) → **Add package by name**.
+2. Gõ chính xác: `com.unity.nuget.newtonsoft-json` → **Add**.
 
-Wait for the bottom-right progress bar to clear before continuing.
+### 3d. Mobile Notifications *(cho thông báo đẩy Android/iOS)*
+
+1. Bấm **+** → **Add package by name**.
+2. Gõ: `com.unity.mobile.notifications` → **Add**.
+
+⏳ Chờ thanh tiến trình góc dưới-phải chạy xong giữa mỗi lần cài.
+
+✅ **Hoàn thành bước này khi:** cả 4 package xuất hiện trong danh sách **In Project** của Package Manager, không còn lỗi đỏ liên quan đến chúng.
 
 ---
 
-## 4. Install SignalR
+## Bước 4 — Cài SignalR (kết nối realtime)
 
-SignalR is the realtime connection library between the client and server. It is not available through the Unity Package Manager and must be installed manually.
+SignalR là thư viện giúp client nói chuyện realtime với server. Nó **không có** trong Package Manager nên phải cài tay (dùng .NET để tải về rồi chép 6 file DLL vào Unity).
 
 ### Mac / Linux
 
-Run this script from the repository root:
+Chạy từ thư mục gốc `Game-new`:
 
 ```bash
 cd Game-new
 
-# Create the plugin folder
+# Tạo thư mục chứa plugin
 mkdir -p client-unity/Assets/Plugins/SignalR
 
-# Create a temporary .NET project and add SignalR
+# Tạo project .NET tạm và tải SignalR về
 cd /tmp
 mkdir signalr_temp && cd signalr_temp
 dotnet new console -n sr -o sr
@@ -124,11 +151,8 @@ cd sr
 dotnet add package Microsoft.AspNetCore.SignalR.Client --version 8.0.0
 dotnet publish -c Release -o pub
 
-# Copy the DLLs into Unity
-cd /tmp/signalr_temp/sr
-ROOT="$(cd - && pwd)"
-TARGET="$ROOT/client-unity/Assets/Plugins/SignalR"
-
+# Chép 6 DLL vào Unity
+TARGET="<ĐƯỜNG_DẪN_TỚI>/Game-new/client-unity/Assets/Plugins/SignalR"
 cp pub/Microsoft.AspNetCore.SignalR.Client.dll           "$TARGET/"
 cp pub/Microsoft.AspNetCore.SignalR.Client.Core.dll      "$TARGET/"
 cp pub/Microsoft.AspNetCore.SignalR.Common.dll           "$TARGET/"
@@ -136,31 +160,31 @@ cp pub/Microsoft.AspNetCore.SignalR.Protocols.Json.dll   "$TARGET/"
 cp pub/Microsoft.AspNetCore.Http.Connections.Client.dll  "$TARGET/"
 cp pub/Microsoft.AspNetCore.Http.Connections.Common.dll  "$TARGET/"
 
-# Clean up
+# Dọn dẹp
 cd /tmp && rm -rf signalr_temp
-
-echo "Done. DLLs installed."
+echo "Xong. Đã cài 6 DLL."
 ```
+
+> ⚠️ Thay `<ĐƯỜNG_DẪN_TỚI>` bằng đường dẫn thật tới thư mục `Game-new` trên máy bạn (ví dụ `/home/ban/Game-new`).
 
 ### Windows (PowerShell)
 
 ```powershell
-cd Game-New
+cd Game-new
 
-# Create plugin folder
+# Tạo thư mục chứa plugin
 New-Item -ItemType Directory -Force -Path "client-unity\Assets\Plugins\SignalR"
 
-# Create temp project
+# Tạo project .NET tạm
 cd $env:TEMP
-mkdir signalr_temp
-cd signalr_temp
+mkdir signalr_temp; cd signalr_temp
 dotnet new console -n sr -o sr
 cd sr
 dotnet add package Microsoft.AspNetCore.SignalR.Client --version 8.0.0
 dotnet publish -c Release -o pub
 
-# Copy DLLs
-$target = "$PSScriptRoot\client-unity\Assets\Plugins\SignalR"
+# Chép 6 DLL (thay đường dẫn cho đúng máy bạn)
+$target = "C:\duong\dan\Game-new\client-unity\Assets\Plugins\SignalR"
 Copy-Item "pub\Microsoft.AspNetCore.SignalR.Client.dll"           $target
 Copy-Item "pub\Microsoft.AspNetCore.SignalR.Client.Core.dll"      $target
 Copy-Item "pub\Microsoft.AspNetCore.SignalR.Common.dll"           $target
@@ -168,25 +192,22 @@ Copy-Item "pub\Microsoft.AspNetCore.SignalR.Protocols.Json.dll"   $target
 Copy-Item "pub\Microsoft.AspNetCore.Http.Connections.Client.dll"  $target
 Copy-Item "pub\Microsoft.AspNetCore.Http.Connections.Common.dll"  $target
 
-# Clean up
-cd $env:TEMP && Remove-Item -Recurse -Force signalr_temp
-Write-Host "Done."
+cd $env:TEMP; Remove-Item -Recurse -Force signalr_temp
+Write-Host "Xong."
 ```
 
-### Verify
-
-In Unity, go to **Project window → Assets → Plugins → SignalR**. You should see 6 `.dll` files listed.
+✅ **Hoàn thành bước này khi:** trong Unity, mở **Project window → Assets → Plugins → SignalR**, bạn thấy **đủ 6 file `.dll`**.
 
 ---
 
-## 5. Link the Shared Library
+## Bước 5 — Sao chép Shared Library
 
-The shared library contains enums, models, and contracts used by both the server and the client. Unity needs a copy of the source files.
+Shared Library chứa các enum, model, contract mà **cả server lẫn client đều dùng**. Unity cần một bản sao mã nguồn này.
 
 ### Mac / Linux
 
 ```bash
-cd Game-New
+cd Game-new
 
 SRC="shared/WorldFaith.Shared"
 DST="client-unity/Assets/WorldFaith/Shared"
@@ -196,347 +217,258 @@ cp -r "$SRC/Enums"     "$DST/"
 cp -r "$SRC/Models"    "$DST/"
 cp -r "$SRC/Contracts" "$DST/"
 
-echo "Shared library linked."
+echo "Đã sao chép Shared Library."
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
+cd Game-new
 $src = "shared\WorldFaith.Shared"
 $dst = "client-unity\Assets\WorldFaith\Shared"
 
 New-Item -ItemType Directory -Force -Path $dst
 Copy-Item "$src\Enums","$src\Models","$src\Contracts" $dst -Recurse -Force
-
-Write-Host "Shared library linked."
+Write-Host "Đã sao chép Shared Library."
 ```
 
-### Keeping it in sync
+> 🔄 **Lưu ý đồng bộ:** thư mục Shared trong Unity là **bản sao**, không phải liên kết. Mỗi khi server cập nhật shared library, chạy lại lệnh chép trên.
 
-Whenever you update the server's shared library, re-run the copy command above or copy the changed files manually. The Shared folder in Unity is a copy, not a symlink.
+⏳ **Chờ thanh tiến trình của Unity chạy xong.** Console có thể báo lỗi trong lúc import — lỗi sẽ hết khi biên dịch xong.
 
-**Wait for the Unity progress bar to clear** before the next step. The Console may show errors during import — they should resolve once compile finishes.
+✅ **Hoàn thành bước này khi:** Console **không còn lỗi đỏ**, và menu **WorldFaith** xuất hiện trên thanh menu trên cùng của Unity. (Nếu chưa thấy menu, bấm **Assets → Refresh** — phím tắt `Ctrl+R` / `Cmd+R`.)
 
 ---
 
-## 6. Create the Three Scenes
+# Phần B — Dựng scene & cấu hình
 
-WorldFaith uses three scenes in a fixed load order. You must create them yourself using the built-in setup tools.
+## Bước 6 — Tạo 3 scene
+
+WorldFaith dùng **3 scene** nạp theo thứ tự cố định. Project không kèm sẵn — bạn phải tự tạo bằng công cụ Setup tích hợp.
+
+> Mỗi scene làm theo đúng 4 thao tác: **tạo scene mới → lưu vào `Assets/Scenes/` → chạy menu Setup tương ứng → lưu lại (Ctrl+S)**.
 
 ### Scene 1 — LoginScene
 
 ```
 1. File → New Scene → Basic (Built-in) → Create
-2. File → Save As...
-   - Navigate to:  Assets/Scenes/
-   - Name the file:  LoginScene
-   - Click Save
-3. Menu bar → WorldFaith → Setup → Create Login Scene Objects
+2. File → Save As...  → vào thư mục  Assets/Scenes/  → đặt tên  LoginScene  → Save
+3. Menu trên cùng:  WorldFaith → Setup → Create Login Scene Objects
 4. File → Save  (Ctrl+S / Cmd+S)
 ```
-
-What gets created: `AuthManager`, `MainThreadDispatcher`, `LobbyClient`, Canvas with `LoginUI`
+*Tạo ra:* `AuthManager`, `MainThreadDispatcher`, `LobbyClient`, Canvas có `LoginUI`.
 
 ### Scene 2 — LobbyScene
 
 ```
 1. File → New Scene → Basic (Built-in) → Create
-2. File → Save As...
-   - Navigate to:  Assets/Scenes/
-   - Name the file:  LobbyScene
-   - Click Save
-3. Menu bar → WorldFaith → Setup → Create Lobby Scene Objects
+2. File → Save As...  → Assets/Scenes/  → tên  LobbyScene  → Save
+3. WorldFaith → Setup → Create Lobby Scene Objects
 4. File → Save
 ```
-
-What gets created: `AuthManager`, `LobbyClient`, `MainThreadDispatcher`, Canvas with `LobbyUI`, `GodSelectionScreen`
+*Tạo ra:* `AuthManager`, `LobbyClient`, `MainThreadDispatcher`, Canvas có `LobbyUI`, `GodSelectionScreen`.
 
 ### Scene 3 — GameScene
 
 ```
 1. File → New Scene → Basic (Built-in) → Create
-2. File → Save As...
-   - Navigate to:  Assets/Scenes/
-   - Name the file:  GameScene
-   - Click Save
-3. Menu bar → WorldFaith → Setup → Create Game Scene Objects
+2. File → Save As...  → Assets/Scenes/  → tên  GameScene  → Save
+3. WorldFaith → Setup → Create Game Scene Objects
 4. File → Save
 ```
+*Tạo ra:* toàn bộ network client, các manager, `WorldRenderer`, `CameraController`, mọi panel UI.
 
-What gets created: all network clients, all managers, `WorldRenderer`, `CameraController`, all UI panels
+> ❓ **Không thấy menu WorldFaith?** Nó chỉ hiện sau khi Shared Library (Bước 5) import xong. Bấm **Assets → Refresh** (`Ctrl+R`). Nếu vẫn không có, kiểm tra Console — sửa hết lỗi đỏ trước đã.
 
-> **The WorldFaith menu only appears after the Shared Library finishes importing.** If you don't see it, press **Assets → Refresh** (`Ctrl+R` / `Cmd+R`). If it still doesn't appear, check the Console for compile errors and fix them first.
-
----
-
-## 7. Assign UI References
-
-After running the scene setup, some `[SerializeField]` references need to be assigned manually. This section covers the most common ones.
-
-### GameScene — WorldRenderer (2D Sprites)
-
-Find `WorldRenderer` in the Hierarchy. In the Inspector, assign these under **Tile Prefabs** and **Marker Prefabs**:
-
-| Field | What to assign |
-|---|---|
-| Grassland Sprite | Import `tile_grassland.png` as Sprite (2D and UI), drag here |
-| Forest Sprite | `tile_forest.png` |
-| Mountain Sprite | `tile_mountain.png` |
-| Desert Sprite | `tile_desert.png` |
-| Tundra Sprite | `tile_tundra.png` |
-| Water Sprite | `tile_water.png` |
-| Volcano Sprite | `tile_volcano.png` |
-| Sacred Sprite | `tile_sacred.png` |
-| Beach Sprite | `tile_beach.png` — sandy coastline tile |
-| River Sprite | `tile_river.png` — narrower blue strip, distinct from Water |
-| Temple Sprite | A small sprite icon for temples |
-| City Marker Sprite | A dot or flag sprite for city markers |
-
-**Quick way to create tile sprites:**
-1. Import your tile texture PNG into `Assets/WorldFaith/World/Tiles/`
-2. Select the texture in the Project window
-3. In the Inspector, set **Texture Type → Sprite (2D and UI)** → Apply
-4. Drag the sprite from the Project window onto the corresponding field in WorldRenderer
-5. Repeat for each of the 10 tile types
-
-The sprites are placed directly by `WorldRenderer` — no Prefab needed for tiles.
-
-### GameScene — Main Camera (2D Orthographic)
-
-WorldFaith renders the world map as a true 2D top-down scene on the XY plane (not 3D with a tilted camera). The `WorldFaithEditorTools` setup script configures this automatically, but it's worth understanding what it sets so you can tune it for your own map size:
-
-| Setting | Default | Notes |
-|---|---|---|
-| Projection | Orthographic | Required — the game will not render correctly in Perspective mode |
-| Position | `(64, 64, -10)` | Centered on a 128×128 map; Z must stay negative so the camera looks toward Z=0 where tiles live |
-| Rotation | `(0, 0, 0)` | No tilt — straight top-down |
-| Orthographic Size | `20` | Initial zoom level; `CameraController` will smoothly animate from here |
-
-On the `CameraController` component (same GameObject), these fields control pan/zoom limits — adjust them if you use a map size other than the 128×128 default:
-
-| Field | Default | Purpose |
-|---|---|---|
-| Pan Limit Min | `(-2, -2)` | World-space XY the camera cannot pan below |
-| Pan Limit Max | `(130, 130)` | World-space XY the camera cannot pan beyond — should be slightly larger than `mapSize * tileSize` |
-| Zoom Min / Max | `3` / `60` | Closest/furthest orthographic size allowed |
-
-If you change the world's `Width`/`Height` (via Balance Config or `CreateWorldRequest`), update **Pan Limit Max** to roughly match the new map size in world units (`mapSize × tileSize`, where `tileSize` defaults to `1`).
-
-### GameScene — AudioManager
-
-Find `AudioManager` in the Hierarchy → look at Inspector → **Sfx Clips** array. Expand it and assign each SFX audio clip in the order of the `SfxId` enum (found in `Assets/WorldFaith/Shared/Enums/`).
-
-Also assign the five music tracks under **Music**:
-- Music Base → `music_base`
-- Music Religion → `music_religion`
-- Music War → `music_war`
-- Music Apocalypse → `music_apocalypse`
-- Music Victory → `music_victory`
-
-### GameScene — VfxManager
-
-Find `VfxManager` → **Catalog** array. Assign each VFX prefab in `VfxId` enum order. If you don't have VFX yet, leave the array empty — the game will still run without visual effects.
-
-### GameScene — MinimapUI
-
-Find `MinimapUI` → assign a `RawImage` UI element to **Minimap Image**. The image will display the render texture automatically.
-
-### LoginScene and LobbyScene
-
-These scenes have fewer references. Most are wired automatically by the Setup tool. Check the Console after Play for any `MissingReferenceException` errors and assign those specific fields.
+✅ **Hoàn thành bước này khi:** thư mục `Assets/Scenes/` có đủ 3 file: `LoginScene`, `LobbyScene`, `GameScene`.
 
 ---
 
-## 8. Configure Server URLs
+## Bước 7 — Cấu hình địa chỉ Server
 
-Each network script has a `[SerializeField]` `serverUrl` field visible in the Inspector. You need to set this in every scene that contains that script.
+Mỗi script mạng có một trường `serverUrl` hiện trong **Inspector**. Bạn cần đặt địa chỉ này trong mọi scene chứa script đó.
 
-### Development (local)
+> ⚠️ **Đặt qua Inspector — KHÔNG sửa file `.cs` trực tiếp.** Mở scene → chọn GameObject trong Hierarchy → sửa trường trong Inspector.
 
-| GameObject | Script | Field | Value |
+### Khi chạy local (trên máy mình)
+
+| GameObject | Script | Trường | Giá trị |
 |---|---|---|---|
 | `AuthManager` | `AuthManager.cs` | Server Url | `http://localhost:5000` |
 | `WorldFaithClient` | `WorldFaithClient.cs` | Server Url | `http://localhost:5000/hubs/world` |
 | `LobbyClient` | `LobbyClient.cs` | Server Url | `http://localhost:5000/hubs/lobby` |
 | `ChatClient` | `ChatClient.cs` | Server Url | `http://localhost:5000/hubs/chat` |
 
-Each of these GameObjects exists in one or more scenes. Open each scene and set the URL.
+Các GameObject này nằm trong những scene khác nhau — mở từng scene và đặt URL:
 
-### LAN (multiplayer on local network)
+| Scene | GameObject cần đặt URL |
+|---|---|
+| LoginScene | `AuthManager` |
+| LobbyScene | `AuthManager`, `LobbyClient` |
+| GameScene | `WorldFaithClient`, `ChatClient`, `AuthManager` |
 
-Replace `localhost` with your machine's LAN IP address:
+### Khi chơi LAN (nhiều máy cùng mạng)
+
+Thay `localhost` bằng IP LAN của máy chạy server:
 
 ```bash
-# Find your LAN IP:
+# Tìm IP LAN:
 # Mac/Linux:
 ifconfig | grep "inet " | grep -v 127.0.0.1
-
 # Windows:
 ipconfig | findstr "IPv4"
 ```
+Ví dụ: `http://192.168.1.42:5000/hubs/world`.
 
-Example: `http://192.168.1.42:5000/hubs/world`
+### Khi triển khai production
 
-### Production
+Thay bằng tên miền đã deploy, ví dụ `http://localhost:5000` → `https://api.yourdomain.com`.
 
-Replace with your deployed domain:
-```
-http://localhost:5000              →  https://api.yourdomain.com
-http://localhost:5000/hubs/world   →  https://api.yourdomain.com/hubs/world
-http://localhost:5000/hubs/lobby   →  https://api.yourdomain.com/hubs/lobby
-http://localhost:5000/hubs/chat    →  https://api.yourdomain.com/hubs/chat
-```
-
-> **After changing URLs, rebuild the client.** URLs are baked into the build at compile time.
+> ⚠️ **Đổi URL xong phải build lại client** — URL được "nướng" vào bản build lúc biên dịch.
 
 ---
 
-## 9. Assign Assets
+## Bước 8 — Gán tài nguyên (ảnh ô đất, âm thanh…)
 
-### Minimum required assets (game cannot run without these)
+Game cần một số tài nguyên tối thiểu để hiển thị. Danh sách đầy đủ (~204 file) ở **[ASSETS.md](./ASSETS.md)**.
 
-**Tile sprites** — `Assets/WorldFaith/World/Tiles/` — 64×64 px PNG:
+### 8a. Ảnh ô đất (bắt buộc — không có thì bản đồ không hiện)
 
-> After importing, select each PNG → Inspector → Texture Type: **Sprite (2D and UI)** → Pixels Per Unit: **64** → Apply
+Đặt file PNG 64×64 vào `Assets/WorldFaith/World/Tiles/`. Cần đủ **10 loại**:
 
-**10 tile types total** (the world generator produces all of these):
+| File | Gợi ý màu | | File | Gợi ý màu |
+|---|---|---|---|---|
+| `tile_grassland.png` | `#4a9c2f` | | `tile_water.png` | `#2a64c8` |
+| `tile_forest.png` | `#1a5c1a` | | `tile_volcano.png` | `#c83210` |
+| `tile_mountain.png` | `#7a7a7a` | | `tile_sacred.png` | `#c8a832` |
+| `tile_desert.png` | `#c8b44a` | | `tile_beach.png` | `#e6d7a0` (bờ cát) |
+| `tile_tundra.png` | `#b0c8e0` | | `tile_river.png` | `#468cdc` (sáng hơn Water) |
 
+**Cách import mỗi ảnh ô đất:**
+1. Kéo PNG vào `Assets/WorldFaith/World/Tiles/`.
+2. Chọn ảnh trong Project window → Inspector → **Texture Type: Sprite (2D and UI)** → **Pixels Per Unit: 64** → **Apply**.
+3. Trong Hierarchy của GameScene, chọn `WorldRenderer` → kéo từng sprite vào ô tương ứng (Grassland Sprite, Forest Sprite…).
+4. Gán luôn **Temple Sprite** (icon đền) và **City Marker Sprite** (chấm/cờ đánh dấu thành phố).
 
-| File | Color hint |
+### 8b. Âm thanh (bắt buộc để có tiếng)
+
+- **47 hiệu ứng (SFX)** → `Assets/WorldFaith/Audio/SFX/`. Trong GameScene chọn `AudioManager` → mở mảng **Sfx Clips[]** → gán từng file theo đúng thứ tự enum `SfxId` (xem `Assets/WorldFaith/Shared/Enums/`).
+- **5 nhạc nền** → `Assets/WorldFaith/Audio/Music/`, gán vào `AudioManager`:
+
+| File | Trường trong AudioManager |
 |---|---|
-| `tile_grassland.png` | `#4a9c2f` |
-| `tile_forest.png` | `#1a5c1a` |
-| `tile_mountain.png` | `#7a7a7a` |
-| `tile_desert.png` | `#c8b44a` |
-| `tile_tundra.png` | `#b0c8e0` |
-| `tile_water.png` | `#2a64c8` |
-| `tile_volcano.png` | `#c83210` |
-| `tile_sacred.png` | `#c8a832` |
-| `tile_beach.png` | `#e6d7a0` — sandy coastline |
-| `tile_river.png` | `#468cdc` — narrower/brighter than Water |
+| `music_base.mp3` | Music Base |
+| `music_religion.mp3` | Music Religion |
+| `music_war.mp3` | Music War |
+| `music_apocalypse.mp3` | Music Apocalypse |
+| `music_victory.mp3` | Music Victory |
 
-**Sound effects** — `Assets/WorldFaith/Audio/SFX/` — 47 files  
-See `ASSETS.md` for the full list with filenames matching the `SfxId` enum.
+### 8c. Camera 2D (thường tự cấu hình sẵn)
 
-**Music** — `Assets/WorldFaith/Audio/Music/` — 5 files:
-```
-music_base.mp3
-music_religion.mp3
-music_war.mp3
-music_apocalypse.mp3
-music_victory.mp3
-```
+Công cụ Setup đã đặt Main Camera ở chế độ **Orthographic** (chiếu thẳng từ trên xuống). Nếu bạn đổi kích thước bản đồ khác `128×128`, chỉnh trên `CameraController`:
 
-### Optional but recommended
+| Trường | Mặc định | Ý nghĩa |
+|---|---|---|
+| Pan Limit Min | `(-2, -2)` | Giới hạn kéo camera nhỏ nhất |
+| Pan Limit Max | `(130, 130)` | Giới hạn kéo lớn nhất — nên hơi lớn hơn `kích_thước_bản_đồ × tileSize` |
+| Zoom Min / Max | `3` / `60` | Mức zoom gần nhất / xa nhất |
 
-| Type | Location |
+### 8d. Khuyến nghị (có thì đẹp hơn, không có vẫn chạy)
+
+| Loại | Vị trí |
 |---|---|
-| 28 VFX Prefabs (Particle Systems) | `Assets/WorldFaith/VFX/Prefabs/` |
-| 8 God Archetype icons (128×128) | `Assets/WorldFaith/UI/Sprites/` |
-| 15 Miracle icons (64×64) | `Assets/WorldFaith/UI/Sprites/` |
-| Fonts: Cinzel, Nunito, Rajdhani | Download from fonts.google.com |
+| 28 VFX Prefab (Particle) | `Assets/WorldFaith/VFX/Prefabs/` → gán vào `VfxManager → Catalog[]` theo thứ tự enum `VfxId` |
+| 8 icon nguyên mẫu Thần (128×128) | `Assets/WorldFaith/UI/Sprites/` |
+| 15 icon phép màu (64×64) | `Assets/WorldFaith/UI/Sprites/` |
+| Font (Cinzel, Nunito, Rajdhani) | Tải từ fonts.google.com → **Window → TextMeshPro → Font Asset Creator** → Generate → Save |
 
-**To use custom fonts:**
-1. Copy the `.ttf` file into `Assets/Fonts/`
-2. **Window → TextMeshPro → Font Asset Creator**
-3. Source Font File → select your `.ttf`
-4. Click **Generate Font Atlas** → **Save**
-5. Assign the generated `.asset` to TextMeshPro components in the UI
+> Nguồn tài nguyên miễn phí: SFX (freesound.org, kenney.nl) · Nhạc (incompetech.com) · Sprite (kenney.nl, game-icons.net) · Font (fonts.google.com).
 
 ---
 
-## 10. Validate the Setup
+## Bước 9 — Kiểm tra setup bằng Validator
 
-Run the built-in validator to catch missing references before building:
+Trước khi build, chạy công cụ kiểm tra tích hợp để bắt lỗi thiếu tham chiếu:
 
 ```
-Menu: WorldFaith → Validate → Check All Managers
+Menu:  WorldFaith → Validate → Check All Managers
 ```
 
-All items should show a green checkmark in the Console. Common warnings and fixes:
+✅ **Đúng khi:** mọi mục đều dấu tích xanh trong Console.
 
-| Warning | Fix |
+Các cảnh báo thường gặp và cách xử lý:
+
+| Cảnh báo | Cách xử lý |
 |---|---|
-| `AudioManager: SFX clips not assigned` | Assign audio clips in AudioManager Inspector |
-| `VfxManager: catalog empty` | Assign VFX prefabs or ignore if no VFX yet |
-| `WorldRenderer: tile prefabs missing` | Create and assign tile prefabs (Step 7) |
-| `SignalR DLLs not found` | Redo Step 4 |
-
-You can also run individual checks:
-```
-WorldFaith → Validate → Check AudioManager Setup
-WorldFaith → Validate → Check VfxManager Setup
-```
+| `AudioManager: SFX clips not assigned` | Gán audio clip trong Inspector của AudioManager (Bước 8b) |
+| `VfxManager: catalog empty` | Gán VFX prefab, hoặc bỏ qua nếu chưa có VFX |
+| `WorldRenderer: tile prefabs missing` | Gán ảnh ô đất (Bước 8a) |
+| `SignalR DLLs not found` | Làm lại Bước 4 |
 
 ---
 
-## 11. Test in the Editor
+## Bước 10 — Chạy thử trong Editor
 
-Before building, always verify the client works in Play mode.
+Luôn chạy thử trong Play mode trước khi build.
 
-**Start the server first:**
+**1) Khởi động server trước** (xem [SETUP.md](./SETUP.md)):
 ```bash
-cd Game-New/server/WorldFaith.Server
+cd Game-new/server/WorldFaith.Server
 dotnet run
 ```
 
-**Then in Unity:**
+**2) Trong Unity:**
 ```
-1. Open the LoginScene
-2. Press Play (▶)
-3. The Login screen appears
-4. Click "Register" — fill in username, email, password, display name
-5. Click Register → should redirect to login
-6. Log in → Lobby screen appears
-7. Click "Create Room" → room is created
-8. Click "Start" (you are alone, so it may not start — adjust min players in Balance Config)
-9. Alternatively: open a second Unity instance with a different project copy and join the room
+1. Mở LoginScene
+2. Bấm nút Play (▶) ở giữa phía trên
+3. Màn hình đăng nhập hiện ra
+4. Bấm "Register" → điền username, email, password, display name → Register
+5. Đăng nhập → màn hình Lobby hiện ra
+6. Bấm "Create Room" → tạo phòng
+7. Bấm "Start" (nếu chỉ có một mình, có thể chưa start được — chỉnh số người tối thiểu trong Balance Config của Admin Panel)
 ```
 
-**Check the Console for errors during Play.** Common issues:
-- `Connection refused` → server is not running or URL is wrong
-- `401 Unauthorized` → token expired, re-login
-- `NullReferenceException on XxxManager` → a [SerializeField] is not assigned
+✅ **Đúng khi:** đăng nhập và vào được Lobby, Console không có lỗi đỏ trong lúc Play.
+
+Lỗi thường gặp khi Play:
+- `Connection refused` → server chưa chạy, hoặc URL sai (Bước 7).
+- `401 Unauthorized` → token hết hạn, đăng nhập lại.
+- `NullReferenceException on XxxManager` → một `[SerializeField]` chưa được gán.
 
 ---
 
-## 12. Build for PC
+# Phần C — Build cho từng nền tảng
 
-### Windows
+> Mọi nền tảng đều chung 2 việc đầu: **(a)** thêm 3 scene vào Build Settings đúng thứ tự, **(b)** chọn nền tảng rồi **Switch Platform**. Sau đó mỗi nền tảng có vài tùy chỉnh riêng.
 
+**Thêm scene vào Build Settings (làm một lần):**
 ```
-File → Build Settings
-```
-
-1. Click **Add Open Scenes** or drag scenes manually in this order:
-   ```
+File → Build Settings → Add Open Scenes (hoặc kéo thủ công) theo đúng thứ tự:
    0  Assets/Scenes/LoginScene
    1  Assets/Scenes/LobbyScene
    2  Assets/Scenes/GameScene
-   ```
-2. Platform: **PC, Mac & Linux Standalone**
-3. Target Platform: **Windows**
-4. Architecture: **x86_64**
-5. Click **Build**
-6. Choose an output folder (e.g., `Builds/Windows/`)
-7. Wait for the build to complete
+```
 
-Output: a folder containing `WorldFaith.exe` and a `WorldFaith_Data/` folder. Distribute both together.
+---
+
+## Bước 11 — Build cho PC
+
+### Windows
+```
+File → Build Settings
+```
+1. Platform: **PC, Mac & Linux Standalone** → Target Platform: **Windows** → Architecture: **x86_64**.
+2. Bấm **Build** → chọn thư mục xuất (ví dụ `Builds/Windows/`).
+
+*Kết quả:* thư mục chứa `WorldFaith.exe` + thư mục `WorldFaith_Data/`. **Phải giữ cả hai cùng nhau** khi chia sẻ.
 
 ### Mac
-
-Same steps, but:
-- Target Platform: **macOS**
-- Architecture: **Intel 64-bit + Apple Silicon** (for universal binary) or **Apple Silicon** only
-
-Output: `WorldFaith.app` — a self-contained application bundle. Right-click → Open on first launch to bypass Gatekeeper.
+Như trên, nhưng Target Platform: **macOS**, Architecture: **Intel 64-bit + Apple Silicon** (universal) hoặc **Apple Silicon**.
+*Kết quả:* `WorldFaith.app`. Lần đầu mở: chuột phải → **Open** để bỏ qua Gatekeeper.
 
 ### Linux
-
-- Target Platform: **Linux**
-- Architecture: **x86_64**
-
-Output: a `WorldFaith.x86_64` executable. Make it executable:
+Target Platform: **Linux**, Architecture: **x86_64**.
+*Kết quả:* file `WorldFaith.x86_64`. Cấp quyền chạy:
 ```bash
 chmod +x WorldFaith.x86_64
 ./WorldFaith.x86_64
@@ -544,308 +476,194 @@ chmod +x WorldFaith.x86_64
 
 ---
 
-## 13. Build for Android
+## Bước 12 — Build cho Android
 
-### One-time phone setup
-
-On the Android device:
-
+### 12a. Bật chế độ nhà phát triển trên điện thoại (một lần)
 ```
-1. Settings → About Phone (or About Device)
-2. Find "Build Number"
-3. Tap it exactly 7 times — "Developer Mode enabled" appears
-4. Go back to Settings → Developer Options (may appear at the bottom)
-5. Enable "USB Debugging"
-6. Connect the phone to your computer via USB
-7. On the phone, tap "Allow" when asked about USB debugging for this computer
+1. Settings → About Phone
+2. Tìm "Build Number" → chạm 7 lần → "Developer Mode enabled"
+3. Settings → Developer Options → bật "USB Debugging"
+4. Cắm điện thoại vào máy tính qua cáp USB
+5. Trên điện thoại, bấm "Allow" khi hỏi USB debugging
 ```
 
-### Unity Player Settings
+### 12b. Player Settings
+**File → Build Settings → Player Settings** (nút góc dưới-trái):
 
-Go to **File → Build Settings → Player Settings** (bottom-left button):
-
-| Section | Field | Value |
+| Mục | Trường | Giá trị |
 |---|---|---|
-| Other Settings | Package Name | `com.yourname.worldfaith` (lowercase, no spaces) |
+| Other Settings | Package Name | `com.tenban.worldfaith` (chữ thường, không dấu cách) |
 | Other Settings | Version | `1.0` |
 | Other Settings | Bundle Version Code | `1` |
-| Other Settings | Minimum API Level | **Android 8.0 (API level 26)** |
-| Other Settings | Target API Level | **Automatic (highest installed)** |
+| Other Settings | Minimum API Level | **Android 8.0 (API 26)** |
 | Other Settings | Scripting Backend | **IL2CPP** |
 | Other Settings | Target Architectures | **ARMv7** + **ARM64** |
-| Publishing Settings | Custom Main Manifest | *(leave unchecked unless you need custom permissions)* |
 
-### Build
-
-In **Build Settings**:
-1. Platform: **Android**
-2. Click **Switch Platform** (only needed once — wait for reimport)
-3. Connect your Android phone
-4. Click **Build And Run** to build and install directly on the connected phone
-
-Or click **Build** to create an `.apk` file you can install manually:
-```bash
-adb install -r WorldFaith.apk
+### 12c. Build
 ```
+Build Settings → Platform: Android → Switch Platform (chờ reimport)
+→ cắm điện thoại → Build And Run  (build và cài thẳng lên máy)
+```
+Hoặc bấm **Build** để xuất file `.apk` rồi cài thủ công: `adb install -r WorldFaith.apk`.
 
-### For Google Play submission
+> **Lên Google Play:** Player Settings → Publishing Settings → bật **Custom Keystore** (tạo keystore ký), rồi trong Build Settings bật **Build App Bundle (.aab)** → Build → tải `.aab` lên Google Play Console.
 
-In Player Settings → Publishing Settings:
-- Enable **Custom Keystore** and create/use a signing keystore
-- In Build Settings, enable **Build App Bundle (.aab)**
-- Click **Build** — upload the `.aab` to Google Play Console
-
-### Common Android issues
-
-| Problem | Solution |
+| Lỗi Android | Cách xử lý |
 |---|---|
-| Phone not detected | Enable USB Debugging, try a different USB cable |
-| `INSTALL_FAILED_VERSION_DOWNGRADE` | Uninstall the old version from the phone first |
-| Build fails with NDK error | Unity Hub → Installs → Add Modules → Android Build Support (re-install) |
-| App crashes on launch | Run `adb logcat -s Unity` to see the error log |
-| `Failed to connect to server` | Use your LAN IP instead of `localhost` in the Server URL fields |
-| Large APK size | Enable **Split Application Binary** in Player Settings |
+| Không nhận điện thoại | Bật lại USB Debugging, đổi cáp USB |
+| `INSTALL_FAILED_VERSION_DOWNGRADE` | Gỡ bản cũ trên máy trước |
+| Lỗi NDK khi build | Unity Hub → Installs → Add Modules → Android Build Support |
+| Mở app là crash | Chạy `adb logcat -s Unity` xem log lỗi |
+| `Failed to connect to server` | Dùng IP LAN thay cho `localhost` ở Bước 7 |
 
 ---
 
-## 14. Build for iOS (Mac only)
+## Bước 13 — Build cho iOS (chỉ trên Mac)
 
-iOS builds require a Mac with Xcode installed.
+Build iOS bắt buộc dùng máy Mac có **Xcode**.
 
-### Prerequisites
+### 13a. Chuẩn bị
+- **Xcode 14+** (cài từ Mac App Store, miễn phí, ~10 GB).
+- **Tài khoản Apple Developer** (miễn phí để test trên thiết bị; $99/năm để lên App Store).
+- Một iPhone/iPad thật để test (hoặc dùng Simulator của Xcode).
 
-- **Xcode 14+** — install from the Mac App Store (it's free, ~10 GB)
-- **Apple Developer Account** — free for device testing, $99/year for App Store
-- A physical iPhone or iPad for testing (or use the Xcode Simulator)
+### 13b. Player Settings
 
-### Unity Player Settings
-
-Go to **File → Build Settings → Player Settings**:
-
-| Section | Field | Value |
+| Mục | Trường | Giá trị |
 |---|---|---|
-| Other Settings | Bundle Identifier | `com.yourname.worldfaith` |
+| Other Settings | Bundle Identifier | `com.tenban.worldfaith` |
 | Other Settings | Version | `1.0` |
-| Other Settings | Build | `1` |
-| Other Settings | Camera Usage Description | `Used for AR features` *(if applicable)* |
-| Other Settings | Microphone Usage Description | `Used for voice chat` *(if applicable)* |
 | Other Settings | Scripting Backend | **IL2CPP** |
 
-### Build in Unity
-
-1. Platform: **iOS**
-2. Click **Switch Platform** (wait for reimport)
-3. Click **Build** — Unity generates an Xcode project folder (e.g., `Builds/iOS/`)
-
-### Finish in Xcode
-
+### 13c. Build trong Unity
 ```
-1. Open the generated Xcode project:
-   - Navigate to Builds/iOS/
-   - Open  Unity-iPhone.xcodeproj
-
-2. In Xcode, select the project root in the left panel (the blue icon)
-
-3. Click  Signing & Capabilities  tab
-
-4. Under  Team:
-   - Click the dropdown → select your Apple Developer account
-   - If you don't have one, sign in at developer.apple.com
-
-5. Xcode may show a "Provisioning Profile" error — click  Fix Issue  to auto-resolve
-
-6. Connect your iPhone via USB cable
-
-7. In the top toolbar, select your device from the device dropdown
-   (next to the play/stop buttons)
-
-8. Press  Cmd+R  (or click the Play button) to build and install on your device
-
-9. On the iPhone:
-   Settings → General → VPN & Device Management → Trust your developer certificate
+Build Settings → Platform: iOS → Switch Platform → Build
+→ Unity tạo ra một thư mục project Xcode (ví dụ Builds/iOS/)
 ```
 
-### For App Store submission
-
+### 13d. Hoàn tất trong Xcode
 ```
-1. In Xcode: Product → Archive
-2. Wait for archiving to complete
-3. The Organizer window opens automatically
-4. Click  Distribute App
-5. Choose  App Store Connect
-6. Follow the wizard to upload to App Store Connect
-7. In App Store Connect (appstoreconnect.apple.com):
-   - Create an app listing if you haven't already
-   - Select the uploaded build
-   - Submit for review
+1. Mở  Builds/iOS/Unity-iPhone.xcodeproj
+2. Chọn project (icon xanh) ở cột trái → tab  Signing & Capabilities
+3. Ở  Team  → chọn tài khoản Apple Developer của bạn
+4. Nếu báo lỗi Provisioning Profile → bấm  Fix Issue  để tự xử lý
+5. Cắm iPhone qua USB → chọn thiết bị ở thanh trên cùng
+6. Bấm  Cmd+R  để build và cài lên máy
+7. Trên iPhone: Settings → General → VPN & Device Management → Trust chứng chỉ của bạn
 ```
 
-### Common iOS issues
-
-| Problem | Solution |
+| Lỗi iOS | Cách xử lý |
 |---|---|
-| "No signing certificate" | Add your Apple account to Xcode → Preferences → Accounts |
-| "Provisioning profile doesn't include device" | In Xcode → Signing → enable "Automatically manage signing" |
-| App crashes on iPhone | Xcode → Window → Devices and Simulators → select device → View Device Logs |
-| Build fails with bitcode error | Player Settings → Other Settings → disable **Enable Bitcode** |
+| "No signing certificate" | Thêm tài khoản Apple vào Xcode → Settings → Accounts |
+| "Provisioning profile doesn't include device" | Bật **Automatically manage signing** trong Signing |
+| App crash trên iPhone | Xcode → Window → Devices and Simulators → View Device Logs |
+| Lỗi bitcode | Player Settings → Other Settings → tắt **Enable Bitcode** |
 
 ---
 
-## 15. Build for WebGL
+## Bước 14 — Build cho WebGL (trình duyệt)
 
-WebGL runs in a browser — no installation required for players.
+WebGL chạy ngay trong trình duyệt — người chơi không cần cài gì.
 
-### Unity Player Settings
+### 14a. Player Settings
 
-Go to **File → Build Settings → Player Settings**:
-
-| Section | Field | Value |
+| Mục | Trường | Giá trị |
 |---|---|---|
 | Resolution and Presentation | Default Canvas Width | `1280` |
 | Resolution and Presentation | Default Canvas Height | `720` |
 | Publishing Settings | Compression Format | **Gzip** |
 | Publishing Settings | Enable Exceptions | **Explicitly Thrown Exceptions Only** |
-| Publishing Settings | Data Caching | Enabled |
 
-### Build
+### 14b. Build
+```
+Build Settings → Platform: WebGL → Switch Platform → Build
+→ chọn thư mục xuất (ví dụ Builds/WebGL/)
+```
+*Kết quả:* thư mục có `index.html` và các file phụ trợ.
 
-1. Platform: **WebGL**
-2. Click **Switch Platform**
-3. Click **Build**
-4. Choose output folder (e.g., `Builds/WebGL/`)
-
-Output: a folder with `index.html` and supporting files.
-
-### Host the build
-
-You need to serve the folder from a web server. You **cannot** open `index.html` directly in a browser.
-
-**Local testing:**
+### 14c. Chạy thử
+⚠️ **Không mở `index.html` trực tiếp** — phải qua một web server:
 ```bash
 cd Builds/WebGL
 python3 -m http.server 8080
-# Open http://localhost:8080 in browser
+# Mở http://localhost:8080
 ```
 
-**Production hosting options:**
-- **Nginx / Apache** — copy the folder to your web server's root and configure:
-  ```nginx
-  # Required headers for WebGL
-  add_header Cross-Origin-Opener-Policy same-origin;
-  add_header Cross-Origin-Embedder-Policy require-corp;
+### 14d. Lưu ý WebGL
+- Server **phải bật CORS** cho tên miền chứa bản WebGL. Thêm vào `appsettings.json`:
+  ```json
+  "AllowedOrigins": ["https://yourgame.netlify.app", "http://localhost:8080"]
   ```
-- **GitHub Pages** — push the folder to a `gh-pages` branch
-- **Netlify / Vercel** — drag and drop the folder in their dashboard
-
-### CORS configuration
-
-The server must allow requests from your WebGL domain. Add to `appsettings.json`:
-```json
-"AllowedOrigins": ["https://yourgame.netlify.app", "http://localhost:8080"]
-```
-
-### WebGL limitations
-
-- No file system access (PlayerPrefs still works — uses browser localStorage)
-- SignalR uses WebSocket automatically — works fine
-- Large binary files increase load time — use **Gzip** compression (already set above)
-- Mobile browsers may have performance issues — test on target devices
+- SignalR tự dùng WebSocket — hoạt động tốt với WebGL.
+- Trình duyệt di động có thể chậm — hãy test trên thiết bị mục tiêu.
+- Tùy chọn hosting: Nginx/Apache, GitHub Pages, Netlify, Vercel.
 
 ---
 
-## 16. Troubleshooting
+# Phần D — Tra cứu
 
-### Unity Editor issues
+## Khắc phục sự cố
 
-| Problem | Solution |
+### Lỗi trong Unity Editor
+
+| Vấn đề | Cách xử lý |
 |---|---|
-| WorldFaith menu missing | Wait for compile, then **Assets → Refresh** (Ctrl+R) |
-| Red errors on first open | Normal — resolves after packages and shared library are installed |
-| `The type or namespace 'Microsoft.AspNetCore.SignalR' not found` | SignalR DLLs missing — redo Step 4 |
-| `The type or namespace 'WorldFaith.Shared' not found` | Shared Library not linked — redo Step 5 |
-| `NullReferenceException` on any Manager | A `[SerializeField]` is not assigned in the Inspector |
-| Scenes missing from Build Settings | Drag them from the Project window into Build Settings |
-| Touch/mouse input does nothing in `CameraController` | Input System package not installed — redo Step 3a |
+| Không thấy menu WorldFaith | Chờ biên dịch xong → **Assets → Refresh** (`Ctrl+R`) |
+| Đỏ Console khi mới mở project | Bình thường — hết sau khi xong Bước 3, 4, 5 |
+| `The type or namespace 'Microsoft.AspNetCore.SignalR' not found` | Thiếu DLL SignalR → làm lại **Bước 4** |
+| `The type or namespace 'WorldFaith.Shared' not found` | Chưa chép Shared Library → làm lại **Bước 5** |
+| `NullReferenceException` trên một Manager | Một `[SerializeField]` chưa được gán trong Inspector |
+| Scene thiếu trong Build Settings | Kéo scene từ Project window vào Build Settings |
+| Camera không phản hồi chuột/chạm | Chưa cài Input System → làm lại **Bước 3a** |
 
-### Connection issues
+### Lỗi kết nối
 
-| Problem | Solution |
+| Vấn đề | Cách xử lý |
 |---|---|
-| `Failed to connect to server` in Play mode | Server is not running. Run `dotnet run` first. |
-| `401 Unauthorized` | Token expired. Sign out and sign in again. |
-| `CORS error` in Console | Server CORS config doesn't include your origin. Check `appsettings.json`. |
-| Works on PC but not on phone | Phone must use LAN IP (`192.168.x.x`), not `localhost` |
-| WebGL: connection immediately closes | Check browser Console for WebSocket errors. Ensure server has WebSocket enabled. |
+| `Failed to connect to server` khi Play | Server chưa chạy → `dotnet run` trước |
+| `401 Unauthorized` | Token hết hạn → đăng xuất, đăng nhập lại |
+| `CORS error` trong Console | Cấu hình CORS của server thiếu origin của bạn → sửa `appsettings.json` |
+| Chạy được trên PC nhưng không trên điện thoại | Điện thoại phải dùng IP LAN (`192.168.x.x`), không phải `localhost` |
+| WebGL: vừa kết nối là đóng | Kiểm tra lỗi WebSocket ở Console trình duyệt; đảm bảo server bật WebSocket |
 
-### Build issues
+### Lỗi build
 
-| Problem | Solution |
+| Vấn đề | Cách xử lý |
 |---|---|
-| Android: NDK not found | Unity Hub → Installs → gear on 6.3 → Add Modules → Android Build Support |
-| Android: app crashes immediately | `adb logcat -s Unity` to see Unity crash log |
-| iOS: code signing error | Xcode → Signing & Capabilities → select your Team |
-| iOS: provisioning profile error | Click **Fix Issue** in Xcode or enable Automatic Signing |
-| WebGL: black screen | Open browser Developer Tools → Console tab for JavaScript errors |
-| PC: antivirus blocks the build | Add the build folder to antivirus exclusions |
-
-### Performance issues
-
-| Platform | Optimization |
-|---|---|
-| Android | Enable **IL2CPP** scripting backend, enable **ARM64**, disable unused modules in Player Settings |
-| iOS | Same as Android |
-| WebGL | Enable **Gzip compression**, reduce texture sizes, limit active particles |
-| PC | Enable **GPU Instancing** on tile materials if map rendering is slow |
+| Android: NDK not found | Unity Hub → Installs → ⚙️ trên bản 6.3 → Add Modules → Android Build Support |
+| Android: crash ngay khi mở | `adb logcat -s Unity` để xem log |
+| iOS: lỗi code signing | Xcode → Signing & Capabilities → chọn Team |
+| WebGL: màn hình đen | Mở Developer Tools của trình duyệt → tab Console xem lỗi JavaScript |
+| PC: antivirus chặn bản build | Thêm thư mục build vào danh sách loại trừ của antivirus |
 
 ---
 
-## Quick Reference
-
-### Files to configure before building
+## Checklist trước khi build
 
 ```
-client-unity/Assets/WorldFaith/Network/WorldFaithClient.cs  → serverUrl field
-client-unity/Assets/WorldFaith/Network/LobbyClient.cs       → serverUrl field
-client-unity/Assets/WorldFaith/Network/ChatClient.cs        → serverUrl field
-client-unity/Assets/WorldFaith/Managers/AuthManager.cs      → serverUrl field
-```
-
-Set these via the Unity Inspector — do **not** edit the `.cs` files directly. Open each scene, find the GameObject, select it, and change the field in the Inspector panel.
-
-### Scene → GameObjects that need URL configuration
-
-| Scene | GameObject | URL type |
-|---|---|---|
-| LoginScene | `AuthManager` | Base server URL |
-| LobbyScene | `AuthManager`, `LobbyClient` | Base URL + lobby hub |
-| GameScene | `WorldFaithClient`, `ChatClient`, `AuthManager` | World hub + chat hub + base URL |
-
-### Build order checklist
-
-```
-[ ] Unity 6.3 LTS installed with required modules
-[ ] Project opened and initial import completed
-[ ] Input System package installed (Edit → Package Manager → Unity Registry)
-[ ] TextMeshPro installed + Essential Resources imported
-[ ] Newtonsoft JSON installed
-[ ] SignalR DLLs in Assets/Plugins/SignalR/ (6 DLL files)
-[ ] Shared Library copied to Assets/WorldFaith/Shared/
-[ ] LoginScene created and saved in Assets/Scenes/
-[ ] LobbyScene created and saved in Assets/Scenes/
-[ ] GameScene created and saved in Assets/Scenes/
-[ ] Server URLs set in all scenes
-[ ] Tile sprites assigned to WorldRenderer fields (10 types: Grassland, Forest,
-    Mountain, Desert, Tundra, Water, Volcano, Sacred, Beach, River)
-[ ] Main Camera confirmed Orthographic with CameraController pan limits matching map size
-[ ] Audio clips assigned to AudioManager
-[ ] WorldFaith → Validate → Check All Managers → all green
-[ ] Tested in Play mode — login and lobby work
-[ ] Build Settings: 3 scenes in correct order (Login=0, Lobby=1, Game=2)
-[ ] Target platform selected and Switch Platform done
-[ ] Player Settings configured for target platform
-[ ] Build complete and tested on target device
+[ ] Unity 6.3 LTS đã cài kèm module cần thiết
+[ ] Đã mở project, import lần đầu hoàn tất
+[ ] Input System đã cài (Bước 3a)
+[ ] TextMeshPro đã cài + Import TMP Essential Resources (Bước 3b)
+[ ] Newtonsoft JSON đã cài (Bước 3c)
+[ ] Đủ 6 DLL SignalR trong Assets/Plugins/SignalR/ (Bước 4)
+[ ] Shared Library đã chép vào Assets/WorldFaith/Shared/ (Bước 5)
+[ ] Đã tạo & lưu LoginScene, LobbyScene, GameScene trong Assets/Scenes/ (Bước 6)
+[ ] Server URL đã đặt trong mọi scene (Bước 7)
+[ ] Đủ 10 ảnh ô đất gán vào WorldRenderer (Bước 8a)
+[ ] Main Camera là Orthographic, pan limit khớp kích thước bản đồ (Bước 8c)
+[ ] Audio clip đã gán vào AudioManager (Bước 8b)
+[ ] WorldFaith → Validate → Check All Managers → toàn xanh (Bước 9)
+[ ] Đã test Play mode — đăng nhập & lobby chạy được (Bước 10)
+[ ] Build Settings: 3 scene đúng thứ tự (Login=0, Lobby=1, Game=2)
+[ ] Đã chọn nền tảng mục tiêu và Switch Platform
+[ ] Player Settings đã cấu hình cho nền tảng đó
+[ ] Build xong và test trên thiết bị mục tiêu
 ```
 
 ---
 
-*WorldFaith — https://github.com/thanhtinz/Game-new*
+<p align="center">
+  Cần trợ giúp? Mở issue tại <a href="https://github.com/thanhtinz/Game-new/issues">github.com/thanhtinz/Game-new/issues</a><br>
+  ← Quay lại <a href="./SETUP.md">Cài đặt server & admin</a> · <a href="./README.md">Giới thiệu game</a>
+</p>
