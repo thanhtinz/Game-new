@@ -16,10 +16,19 @@ public class WorldGeneratorServiceTests
     private readonly Mock<IEvolutionEntityRepository>  _entityRepo = new();
     private readonly WorldGeneratorService _sut;
 
+    // Captures the tiles passed to UpdateTilesAsync per worldId, since
+    // GenerateAsync now returns the seed (int) rather than the tile list directly.
+    private readonly Dictionary<string, List<WorldTileData>> _savedTiles = new();
+
     public WorldGeneratorServiceTests()
     {
-        _worldRepo.Setup(r => r.UpdateTilesAsync(It.IsAny<string>(), It.IsAny<List<WorldTileData>>()))
-            .Returns(Task.CompletedTask);
+        _worldRepo
+            .Setup(r => r.UpdateTilesAsync(It.IsAny<string>(), It.IsAny<List<WorldTileData>>()))
+            .Returns((string worldId, List<WorldTileData> tiles) =>
+            {
+                _savedTiles[worldId] = tiles; // last call wins (civ-placement re-saves the same list)
+                return Task.CompletedTask;
+            });
         _civRepo.Setup(r => r.CreateAsync(It.IsAny<CivilizationDocument>()))
             .ReturnsAsync((CivilizationDocument c) => c);
         _entityRepo.Setup(r => r.CreateAsync(It.IsAny<EvolutionEntityDocument>()))
@@ -30,19 +39,42 @@ public class WorldGeneratorServiceTests
             NullLogger<WorldGeneratorService>.Instance);
     }
 
+    private async Task<List<WorldTileData>> GenerateAndGetTiles(string worldId, int w, int h, int seed)
+    {
+        await _sut.GenerateAsync(worldId, w, h, seed);
+        return _savedTiles[worldId];
+    }
+
     [Fact]
     public async Task GenerateAsync_ReturnsCorrectTileCount()
     {
-        var tiles = await _sut.GenerateAsync("w1", 32, 32, seed: 12345);
+        var tiles = await GenerateAndGetTiles("w1", 32, 32, seed: 12345);
 
         tiles.Should().HaveCount(32 * 32);
     }
 
     [Fact]
+    public async Task GenerateAsync_WithExplicitSeed_ReturnsThatSameSeed()
+    {
+        var usedSeed = await _sut.GenerateAsync("w1", 32, 32, seed: 777);
+
+        usedSeed.Should().Be(777, "passing a nonzero seed should be used as-is, not replaced");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_WithZeroSeed_ReturnsRandomNonzeroSeed()
+    {
+        var usedSeed = await _sut.GenerateAsync("w1", 32, 32, seed: 0);
+
+        usedSeed.Should().NotBe(0, "seed=0 should be replaced with a randomly generated seed");
+        usedSeed.Should().BeInRange(1, 999999);
+    }
+
+    [Fact]
     public async Task GenerateAsync_SameSeed_ProducesIdenticalTerrain()
     {
-        var tilesA = await _sut.GenerateAsync("w1", 32, 32, seed: 555);
-        var tilesB = await _sut.GenerateAsync("w2", 32, 32, seed: 555);
+        var tilesA = await GenerateAndGetTiles("w1", 32, 32, seed: 555);
+        var tilesB = await GenerateAndGetTiles("w2", 32, 32, seed: 555);
 
         var typesA = tilesA.OrderBy(t => t.X).ThenBy(t => t.Y).Select(t => t.Type).ToList();
         var typesB = tilesB.OrderBy(t => t.X).ThenBy(t => t.Y).Select(t => t.Type).ToList();
@@ -53,8 +85,8 @@ public class WorldGeneratorServiceTests
     [Fact]
     public async Task GenerateAsync_DifferentSeeds_ProduceDifferentTerrain()
     {
-        var tilesA = await _sut.GenerateAsync("w1", 32, 32, seed: 1);
-        var tilesB = await _sut.GenerateAsync("w2", 32, 32, seed: 2);
+        var tilesA = await GenerateAndGetTiles("w1", 32, 32, seed: 1);
+        var tilesB = await GenerateAndGetTiles("w2", 32, 32, seed: 2);
 
         var typesA = tilesA.OrderBy(t => t.X).ThenBy(t => t.Y).Select(t => t.Type).ToList();
         var typesB = tilesB.OrderBy(t => t.X).ThenBy(t => t.Y).Select(t => t.Type).ToList();
@@ -65,7 +97,7 @@ public class WorldGeneratorServiceTests
     [Fact]
     public async Task GenerateAsync_ContainsWaterAndLand_NotAllOneType()
     {
-        var tiles = await _sut.GenerateAsync("w1", 64, 64, seed: 42);
+        var tiles = await GenerateAndGetTiles("w1", 64, 64, seed: 42);
 
         tiles.Should().Contain(t => t.Type == TileType.Water, "world should have ocean");
         tiles.Should().Contain(t => t.Type is TileType.Grassland or TileType.Forest,
@@ -75,7 +107,7 @@ public class WorldGeneratorServiceTests
     [Fact]
     public async Task GenerateAsync_HasMountains_FromRidgeNoise()
     {
-        var tiles = await _sut.GenerateAsync("w1", 64, 64, seed: 99);
+        var tiles = await GenerateAndGetTiles("w1", 64, 64, seed: 99);
 
         tiles.Should().Contain(t => t.Type == TileType.Mountain,
             "ridge noise should produce mountain tiles");
@@ -84,11 +116,9 @@ public class WorldGeneratorServiceTests
     [Fact]
     public async Task GenerateAsync_RiversFlowFromMountainsTowardLowerElevation()
     {
-        var tiles = await _sut.GenerateAsync("w1", 64, 64, seed: 7);
+        var tiles = await GenerateAndGetTiles("w1", 64, 64, seed: 7);
         var riverTiles = tiles.Where(t => t.Type == TileType.River).ToList();
 
-        // Not every seed guarantees a river (depends on mountain placement),
-        // but when rivers exist they must originate near high elevation.
         if (riverTiles.Any())
         {
             var sources = tiles.Where(t => t.IsRiverSource).ToList();
@@ -101,7 +131,7 @@ public class WorldGeneratorServiceTests
     [Fact]
     public async Task GenerateAsync_BeachTilesOnlyBorderWater()
     {
-        var tiles = await _sut.GenerateAsync("w1", 64, 64, seed: 17);
+        var tiles = await GenerateAndGetTiles("w1", 64, 64, seed: 17);
         var tileGrid = tiles.ToDictionary(t => (t.X, t.Y));
         var beachTiles = tiles.Where(t => t.Type == TileType.Beach).ToList();
 
@@ -123,10 +153,7 @@ public class WorldGeneratorServiceTests
     [Fact]
     public async Task GenerateAsync_NoOrphanSingleTileBiomeSpecks()
     {
-        // After smoothing, isolated single-tile deserts inside forests etc. should be rare.
-        // We check that the vast majority of non-protected tiles share their type with
-        // at least 2 of their 8 neighbours (a loose anti-speckle sanity check).
-        var tiles = await _sut.GenerateAsync("w1", 64, 64, seed: 321);
+        var tiles = await GenerateAndGetTiles("w1", 64, 64, seed: 321);
         var tileGrid = tiles.ToDictionary(t => (t.X, t.Y));
         var protectedTypes = new HashSet<TileType>
         {
@@ -158,7 +185,7 @@ public class WorldGeneratorServiceTests
     [Fact]
     public async Task GenerateAsync_PlacesSacredSites()
     {
-        var tiles = await _sut.GenerateAsync("w1", 64, 64, seed: 88);
+        var tiles = await GenerateAndGetTiles("w1", 64, 64, seed: 88);
 
         tiles.Should().Contain(t => t.Type == TileType.Sacred, "world must contain Sacred sites");
         tiles.Count(t => t.Type == TileType.Sacred).Should().BeInRange(5, 8,
@@ -168,7 +195,7 @@ public class WorldGeneratorServiceTests
     [Fact]
     public async Task GenerateAsync_FertilityMatchesTileType()
     {
-        var tiles = await _sut.GenerateAsync("w1", 64, 64, seed: 200);
+        var tiles = await GenerateAndGetTiles("w1", 64, 64, seed: 200);
 
         foreach (var water in tiles.Where(t => t.Type == TileType.Water))
             water.Fertility.Should().Be(0f, "water tiles have zero fertility");
@@ -184,7 +211,7 @@ public class WorldGeneratorServiceTests
     public async Task GenerateAsync_LargeMap_CompletesWithoutError()
     {
         // Verifies the 128x128 default map size works end-to-end without timeout/exception
-        var tiles = await _sut.GenerateAsync("w1", 128, 128, seed: 2024);
+        var tiles = await GenerateAndGetTiles("w1", 128, 128, seed: 2024);
 
         tiles.Should().HaveCount(128 * 128);
     }

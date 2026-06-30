@@ -18,6 +18,7 @@ public class WorldDocument
     public int MaxGods { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
+    public int Seed { get; set; }     // worldgen seed — same seed + size reproduces identical terrain
     public int Cycle { get; set; }
     public long Tick { get; set; }
     public bool IsActive { get; set; }
@@ -182,7 +183,7 @@ public enum NpcTier { Commoner = 1, Servant = 2, Adventurer = 3, Noble = 4, Roya
 
 public enum NpcPersonality { Loyal, Ambitious, Pious, Corrupt, Fearful, Idealistic }
 
-public enum NpcState { Alive, Dead, Exiled, Champion }
+public enum NpcState { Alive, Dead, Exiled, Champion, Captured }
 
 public enum RelationshipType { Ally, Rival, Spouse, Parent, Child, Liege, Vassal }
 

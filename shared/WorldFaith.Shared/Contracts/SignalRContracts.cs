@@ -47,6 +47,7 @@ public class CreateWorldRequest
     public int MaxGods { get; set; } = 4;
     public int WorldWidth { get; set; } = 128;
     public int WorldHeight { get; set; } = 128;
+    public int Seed { get; set; }   // 0 = random; nonzero reproduces identical terrain
     public VictoryCondition VictoryCondition { get; set; }
 }
 

@@ -107,8 +107,8 @@ export const mapsApi = {
   getTiles:     (worldId: string) => apiFetch(`/api/admin/maps/${worldId}/tiles`),
   updateTile:   (worldId: string, x: number, y: number, data: any) =>
     apiFetch(`/api/admin/maps/${worldId}/tiles/${x}/${y}`, { method: 'PUT', body: JSON.stringify(data) }),
-  regen:        (worldId: string) =>
-    apiFetch(`/api/admin/maps/${worldId}/regen`, { method: 'POST' }),
+  regen:        (worldId: string, seed?: number) =>
+    apiFetch(`/api/admin/maps/${worldId}/regen`, { method: 'POST', body: JSON.stringify({ seed }) }),
   placeSacred:  (worldId: string, x: number, y: number) =>
     apiFetch(`/api/admin/maps/${worldId}/sacred`, { method: 'POST', body: JSON.stringify({ x, y }) }),
 }

@@ -61,8 +61,9 @@ public class CreateRoomRequest
     public string GameMode { get; set; } = "Sandbox";
     public string VictoryCondition { get; set; } = "LastSurvivingGod";
     public string ScenarioType { get; set; } = "Standard";
-    public int WorldWidth { get; set; } = 64;
-    public int WorldHeight { get; set; } = 64;
+    public int WorldWidth { get; set; } = 128;
+    public int WorldHeight { get; set; } = 128;
+    public int WorldSeed { get; set; }   // 0 = random seed at game start; nonzero = reproducible map
     public bool IsPrivate { get; set; }
     public string? Password { get; set; }
 }
@@ -84,6 +85,9 @@ public class RoomDto
     public string GameMode { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty; // Waiting, Starting, InGame
     public bool IsPrivate { get; set; }
+    public int WorldWidth { get; set; }
+    public int WorldHeight { get; set; }
+    public int WorldSeed { get; set; }   // 0 = random; shown as "Random" in UI
     public List<RoomPlayerDto> Players { get; set; } = new();
     public long CreatedAt { get; set; }
 }

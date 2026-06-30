@@ -21,6 +21,9 @@ export interface WorldAdmin {
   civCount: number
   religionCount: number
   entityCount: number
+  width: number
+  height: number
+  seed: number
   isActive: boolean
   createdAt: string
 }

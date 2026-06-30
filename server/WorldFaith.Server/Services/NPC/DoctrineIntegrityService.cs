@@ -201,7 +201,7 @@ public class DoctrineIntegrityService : IDoctrineIntegrityService
             integrity.ViolationHistory.Insert(0, "[FALL] Prophet became a False Prophet");
             _logger.LogWarning("NPC {Name} has FALLEN — False Prophet path", npc.Name);
         }
-        else if (npc.IsChampion && profile.ChampionPath == ChampionPath.Holy)
+        else if (npc.IsChampion && profile.ChampionPath == ChampionPath.Saint)
         {
             // Disgraced Champion
             npc.IsChampion = false;

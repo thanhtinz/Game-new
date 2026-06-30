@@ -20,8 +20,10 @@ export default function MapsPage() {
   const [selected, setSelected] = useState<any>(null)
   const [editForm, setEditForm] = useState<any>({})
   const [modal, setModal] = useState(false)
+  const [regenModal, setRegenModal] = useState(false)
+  const [regenSeed, setRegenSeed] = useState('')
   const [msg, setMsg] = useState('')
-  const [zoom, setZoom] = useState(8)
+  const [zoom, setZoom] = useState(6)
 
   useEffect(() => {
     worldsApi.getAll().then(d => { setWorlds(d); if (d[0]) setWorldId(d[0].id) }).catch(() => {})
@@ -46,22 +48,31 @@ export default function MapsPage() {
 
   async function saveTile() {
     await mapsApi.updateTile(worldId, selected.x, selected.y, editForm)
-    setMsg(`Tile (${selected.x},${selected.y}) has cập nhật`); setModal(false); load()
+    setMsg(`Tile (${selected.x},${selected.y}) updated`); setModal(false); load()
   }
 
   async function placeSacred() {
     if (!selected) return
     await mapsApi.placeSacred(worldId, selected.x, selected.y)
-    setMsg('Sacred site has đặt'); setModal(false); load()
+    setMsg('Sacred site placed'); setModal(false); load()
+  }
+
+  function openRegen() {
+    setRegenSeed('')
+    setRegenModal(true)
   }
 
   async function regen() {
-    if (!confirm('Tái sinh toàn bộ map? All tiles sẽ was reset!')) return
-    await mapsApi.regen(worldId); setMsg('Map has tái sinh'); load()
+    const seedNum = regenSeed.trim() === '' ? undefined : parseInt(regenSeed, 10)
+    await mapsApi.regen(worldId, seedNum)
+    setMsg(seedNum ? `Map regenerated with seed ${seedNum}` : 'Map regenerated with a random seed')
+    setRegenModal(false)
+    load()
   }
 
-  const W = worldMeta?.width ?? 64
-  const H = worldMeta?.height ?? 64
+  const W = worldMeta?.width ?? 128
+  const H = worldMeta?.height ?? 128
+  const seed = worldMeta?.seed
 
   const tileAt = (x: number, y: number) => tiles.find(t => t.x === x && t.y === y)
 
@@ -71,14 +82,19 @@ export default function MapsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Maps & Tiles</h2>
-            <p className="text-gray-400 text-sm mt-1">Click tile to edit biome, fertility, temple</p>
+            <p className="text-gray-400 text-sm mt-1">
+              Click tile to edit biome, fertility, temple
+              {worldMeta && (
+                <span className="text-gray-600"> &middot; {W}×{H} &middot; seed {seed ?? '—'}</span>
+              )}
+            </p>
           </div>
           <div className="flex gap-3 items-center">
             <label className="text-xs text-gray-500">Zoom</label>
             <input type="range" min={3} max={16} value={zoom} onChange={e => setZoom(+e.target.value)} className="w-24" />
             <span className="text-xs text-gray-400">{zoom}px</span>
-            <button onClick={regen} className="px-3 py-2 bg-red-900/50 text-red-300 rounded-lg text-sm border border-red-800 hover:bg-red-900">
-              <><Icon name="refresh" className="w-4 h-4" /> Regen Map</>
+            <button onClick={openRegen} className="px-3 py-2 bg-red-900/50 text-red-300 rounded-lg text-sm border border-red-800 hover:bg-red-900 flex items-center gap-1.5">
+              <Icon name="refresh" className="w-4 h-4" /> Regen Map
             </button>
             <select value={worldId} onChange={e => setWorldId(e.target.value)}
               className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm">
@@ -159,8 +175,8 @@ export default function MapsPage() {
               </div>
               <div className="flex gap-3 pt-2">
                 <button onClick={placeSacred}
-                  className="px-3 py-2 text-sm bg-yellow-900/50 border border-yellow-700 text-yellow-300 rounded-lg hover:bg-yellow-900">
-                  <><Icon name="sparkle" className="w-4 h-4" /> Place Sacred</>
+                  className="px-3 py-2 text-sm bg-yellow-900/50 border border-yellow-700 text-yellow-300 rounded-lg hover:bg-yellow-900 flex items-center gap-1.5">
+                  <Icon name="sparkle" className="w-4 h-4" /> Place Sacred
                 </button>
                 <div className="flex-1" />
                 <button onClick={() => setModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Cancel</button>
@@ -168,6 +184,39 @@ export default function MapsPage() {
               </div>
             </div>
           )}
+        </Modal>
+
+        <Modal open={regenModal} title="Regenerate Map" onClose={() => setRegenModal(false)}>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-400">
+              This rebuilds the entire {W}×{H} map from scratch using the WorldBox-style
+              generator (continents, ridge mountains, rivers, coastlines). All current tile
+              edits, civilizations, and placed structures on this world will be lost.
+            </p>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Seed (optional)</label>
+              <input
+                type="number"
+                placeholder="Leave blank for a random seed"
+                value={regenSeed}
+                onChange={e => setRegenSeed(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm font-mono"
+              />
+              <p className="text-xs text-gray-600 mt-1">
+                Same seed + same map size always reproduces identical terrain.
+                Current world seed: <span className="font-mono text-gray-400">{seed ?? '—'}</span>
+              </p>
+            </div>
+            <div className="bg-red-900/20 border border-red-800/50 rounded-lg p-3 text-xs text-red-400">
+              This cannot be undone.
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <button onClick={() => setRegenModal(false)} className="px-4 py-2 text-sm bg-gray-800 rounded-lg">Cancel</button>
+              <button onClick={regen} className="px-4 py-2 text-sm bg-red-700 hover:bg-red-600 rounded-lg flex items-center gap-1.5">
+                <Icon name="refresh" className="w-4 h-4" /> Regenerate
+              </button>
+            </div>
+          </div>
         </Modal>
       </div>
     </AdminLayout>

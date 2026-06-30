@@ -4,6 +4,7 @@ import useSWR from 'swr'
 import { worldsApi } from '@/services/api'
 import { WorldAdmin } from '@/types'
 import AdminLayout from '@/components/layout/AdminLayout'
+import Icon from '@/components/ui/Icon'
 
 export default function WorldsPage() {
   const { data: worlds, mutate, isLoading } = useSWR<WorldAdmin[]>(
@@ -72,7 +73,7 @@ export default function WorldsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 lg:grid-cols-7 gap-3 mt-3">
+              <div className="grid grid-cols-4 lg:grid-cols-8 gap-3 mt-3">
                 {[
                   ['Tick',      w.tick.toLocaleString(), 'clock'],
                   ['Cycle',     w.cycle,                 'cycle'],
@@ -80,11 +81,13 @@ export default function WorldsPage() {
                   ['Civs',      w.civCount,              'pillar'],
                   ['Religions', w.religionCount,         'church'],
                   ['Entities',  w.entityCount,           'dragon'],
+                  ['Map',       `${w.width}×${w.height}`,'map'],
+                  ['Seed',      w.seed,                  'gem'],
                   ['Created',   new Date(w.createdAt).toLocaleDateString('en-US'), 'calendar'],
                 ].map(([label, val, icon]) => (
                   <div key={String(label)} className="bg-gray-800 rounded-lg p-2 text-center">
-                    <div className="text-lg">{icon}</div>
-                    <div className="font-bold text-sm">{val}</div>
+                    <Icon name={icon as any} className="w-4 h-4 mx-auto text-gray-400" />
+                    <div className="font-bold text-sm font-mono">{val}</div>
                     <div className="text-xs text-gray-500">{label}</div>
                   </div>
                 ))}

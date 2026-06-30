@@ -20,7 +20,8 @@ namespace WorldFaith.Server.Services.WorldGen;
 /// </summary>
 public interface IWorldGeneratorService
 {
-    Task<List<WorldTileData>> GenerateAsync(string worldId, int width, int height, int seed = 0);
+    /// <summary>Generates the world and returns the seed actually used (useful when seed=0 requests a random one).</summary>
+    Task<int> GenerateAsync(string worldId, int width, int height, int seed = 0);
 }
 
 public class WorldGeneratorService : IWorldGeneratorService
@@ -42,7 +43,7 @@ public class WorldGeneratorService : IWorldGeneratorService
         _logger = logger;
     }
 
-    public async Task<List<WorldTileData>> GenerateAsync(string worldId, int width, int height, int seed = 0)
+    public async Task<int> GenerateAsync(string worldId, int width, int height, int seed = 0)
     {
         if (seed == 0) seed = Random.Shared.Next(1, 999999);
         _logger.LogInformation("Generating world {WorldId} ({W}x{H}) seed={Seed}", worldId, width, height, seed);
@@ -146,7 +147,7 @@ public class WorldGeneratorService : IWorldGeneratorService
             "World generation complete: {Count} tiles ({Rivers} river, {Beach} beach)",
             tileList.Count, riverTiles, beachTiles);
 
-        return tileList;
+        return seed;
     }
 
     // ─── Stage 1: Continent Mask ────────────────────────────────

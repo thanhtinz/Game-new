@@ -63,6 +63,8 @@ namespace WorldFaith.Client.UI.Game
             { TileType.Water,     new Color(0.2f, 0.5f, 0.8f) },
             { TileType.Volcano,   new Color(0.8f, 0.2f, 0.1f) },
             { TileType.Sacred,    new Color(0.9f, 0.8f, 0.2f) },
+            { TileType.Beach,     new Color(0.9f, 0.85f, 0.65f) },
+            { TileType.River,     new Color(0.3f, 0.55f, 0.85f) },
         };
 
         // Civ colors (phân biệt theo state)

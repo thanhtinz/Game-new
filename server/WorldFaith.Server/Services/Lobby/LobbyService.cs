@@ -82,6 +82,7 @@ public class LobbyService : ILobbyService
             ScenarioType = request.ScenarioType,
             WorldWidth = request.WorldWidth,
             WorldHeight = request.WorldHeight,
+            WorldSeed = request.WorldSeed,
             IsPrivate = request.IsPrivate,
             PasswordHash = passwordHash,
             Players = new List<RoomPlayerEntry>
@@ -237,8 +238,14 @@ public class LobbyService : ILobbyService
             IsActive = true
         };
         await _worldRepo.CreateAsync(world);
-        // WorldGenerator sinh map procedural (tiles + civilizations)
-        await _worldGen.GenerateAsync(world.Id, world.Width, world.Height);
+
+        // WorldGenerator builds the procedural map (tiles + civilizations).
+        // room.WorldSeed = 0 means "random" — GenerateAsync picks a fresh seed in that case.
+        var usedSeed = await _worldGen.GenerateAsync(world.Id, world.Width, world.Height, room.WorldSeed);
+
+        // Persist the actual seed used so the world is reproducible later (Admin can re-roll with it)
+        world.Seed = usedSeed;
+        await _worldRepo.UpdateAsync(world);
 
         // Spawn NPC Tier 2-5 for each civilization (v3)
         var npcSpawn = _serviceProvider?.GetService<INpcSpawnService>();
@@ -327,6 +334,9 @@ public class LobbyService : ILobbyService
         GameMode = r.GameMode,
         Status = r.Status.ToString(),
         IsPrivate = r.IsPrivate,
+        WorldWidth = r.WorldWidth,
+        WorldHeight = r.WorldHeight,
+        WorldSeed = r.WorldSeed,
         Players = r.Players.Select(p => new RoomPlayerDto
         {
             PlayerId = p.PlayerId,

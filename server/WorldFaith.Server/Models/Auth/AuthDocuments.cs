@@ -26,6 +26,7 @@ public class PlayerDocument
 
     public bool IsActive { get; set; } = true;
     public bool IsAdmin { get; set; } = false;
+    public string? BanReason { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime LastLoginAt { get; set; } = DateTime.UtcNow;
 }
@@ -53,8 +54,9 @@ public class RoomDocument
     public string GameMode { get; set; } = "Sandbox";
     public string VictoryCondition { get; set; } = "LastSurvivingGod";
     public string ScenarioType { get; set; } = "Standard";
-    public int WorldWidth { get; set; } = 64;
-    public int WorldHeight { get; set; } = 64;
+    public int WorldWidth { get; set; } = 128;
+    public int WorldHeight { get; set; } = 128;
+    public int WorldSeed { get; set; }   // 0 = random seed chosen at game start; nonzero = host-specified
     public bool IsPrivate { get; set; }
     public string? PasswordHash { get; set; }
     public RoomStatus Status { get; set; } = RoomStatus.Waiting;
