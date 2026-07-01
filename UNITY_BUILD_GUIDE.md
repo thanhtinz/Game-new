@@ -56,7 +56,7 @@ Bạn cần các công cụ sau **trước khi mở Unity**:
 |---|---|---|
 | Unity Hub | Mới nhất | https://unity.com/download |
 | Unity Editor | **6.3 LTS** | Cài qua Unity Hub |
-| .NET SDK | 8.0 | https://dotnet.microsoft.com/download |
+| .NET SDK | 10.0 | https://dotnet.microsoft.com/download |
 | Git | bất kỳ | https://git-scm.com |
 
 ### Cài Unity Editor 6.3 LTS
@@ -150,7 +150,7 @@ cd /tmp
 mkdir signalr_temp && cd signalr_temp
 dotnet new console -n sr -o sr
 cd sr
-dotnet add package Microsoft.AspNetCore.SignalR.Client --version 8.0.0
+dotnet add package Microsoft.AspNetCore.SignalR.Client --version 10.0.9
 dotnet publish -c Release -o pub
 
 # Chép 6 DLL vào Unity
@@ -182,7 +182,7 @@ cd $env:TEMP
 mkdir signalr_temp; cd signalr_temp
 dotnet new console -n sr -o sr
 cd sr
-dotnet add package Microsoft.AspNetCore.SignalR.Client --version 8.0.0
+dotnet add package Microsoft.AspNetCore.SignalR.Client --version 10.0.9
 dotnet publish -c Release -o pub
 
 # Chép 6 DLL (thay đường dẫn cho đúng máy bạn)
