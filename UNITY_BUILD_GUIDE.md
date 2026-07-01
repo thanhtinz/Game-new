@@ -94,11 +94,13 @@ Bạn cần các công cụ sau **trước khi mở Unity**:
 
 ## Bước 3 — Cài các package Unity
 
+> ℹ️ **4 package bên dưới đã được khai báo sẵn trong `client-unity/Packages/manifest.json`.** Unity sẽ tự tải chúng khi bạn mở project lần đầu (Bước 2) — không cần bấm Install thủ công cho từng cái. Các bước 3a–3d dưới đây chỉ còn **một hành động thủ công thật sự**: import **TMP Essential Resources** ở Bước 3b (đây là import tài nguyên, không phải cài package, nên `manifest.json` không tự làm được). Phần còn lại chỉ để bạn **kiểm tra** package đã có trong **In Project**.
+
 Mở **Window → Package Management → Package Manager**.
 
 > 📝 Trong Unity 6, menu này nằm ở **Window → Package Management → Package Manager**. (Ở Unity 2022 cũ hơn thì nó nằm thẳng ở **Window → Package Manager**.)
 
-Cài lần lượt **4 package** sau:
+Kiểm tra/cài lần lượt **4 package** sau:
 
 ### 3a. Input System *(bắt buộc)*
 
