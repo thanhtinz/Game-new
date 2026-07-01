@@ -130,7 +130,7 @@ WorldFaith gồm **bốn thành phần** hoạt động cùng nhau:
 ```
 ┌──────────────┐     SignalR (WebSocket)     ┌──────────────────┐
 │ Unity Client │ ◄─────────────────────────► │   Game Server    │
-│ (người chơi) │        REST + JWT           │  ASP.NET Core 8  │
+│ (người chơi) │        REST + JWT           │  ASP.NET Core 10 │
 └──────────────┘                             └────────┬─────────┘
                                                       │
 ┌──────────────┐     REST + JWT                       │
@@ -143,7 +143,7 @@ WorldFaith gồm **bốn thành phần** hoạt động cùng nhau:
 
 | Thành phần | Công nghệ |
 |---|---|
-| **Game Server** | ASP.NET Core 8 (C#), SignalR WebSocket |
+| **Game Server** | ASP.NET Core 10 (C#), SignalR WebSocket |
 | **Cơ sở dữ liệu** | MongoDB 7.0 (dữ liệu game) + Redis 7.2 (cache realtime) |
 | **Client** | Unity 6.3 LTS (C#) |
 | **Admin Panel** | Next.js 14, TypeScript, Tailwind CSS |
@@ -164,7 +164,7 @@ Game-new/
 ├── WorldFaith_GDD_v1.0.md    ← Tài liệu thiết kế game đầy đủ (cơ chế, công thức)
 ├── ASSETS.md                 ← Danh sách ~204 file tài nguyên (ảnh, âm thanh, font)
 │
-├── server/                   ← Game Server (ASP.NET Core 8)
+├── server/                   ← Game Server (ASP.NET Core 10)
 │   └── WorldFaith.Server/
 ├── client-unity/             ← Client Unity (người chơi)
 │   └── Assets/WorldFaith/

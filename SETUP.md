@@ -32,7 +32,7 @@ WorldFaith gồm 4 phần. Trong tài liệu này bạn sẽ dựng **3 phần p
 ```
    ┌────────────────────────────────────────────────────────┐
    │  ① Cơ sở dữ liệu   →  MongoDB + Redis  (chạy bằng Docker) │
-   │  ② Game Server     →  ASP.NET Core 8   (cổng 5000)        │
+   │  ② Game Server     →  ASP.NET Core 10  (cổng 5000)        │
    │  ③ Admin Panel     →  Next.js          (cổng 3001)        │
    └────────────────────────────────────────────────────────┘
    ④ Client Unity → xem UNITY_BUILD_GUIDE.md (tài liệu riêng)
@@ -48,17 +48,17 @@ Thứ tự khởi động **luôn luôn** là: **① Database → ② Server →
 
 Bạn cần **3 công cụ** sau (Unity là ở tài liệu build client, không bắt buộc ở đây). Cài lần lượt, rồi mở terminal kiểm tra phiên bản.
 
-### 2.1. .NET SDK 8 — để chạy Game Server
+### 2.1. .NET SDK 10 — để chạy Game Server
 
 1. Vào https://dotnet.microsoft.com/download
-2. Chọn **.NET 8.0** → tải bản cho hệ điều hành của bạn → cài đặt.
+2. Chọn **.NET 10.0** → tải bản cho hệ điều hành của bạn → cài đặt.
 3. Mở terminal (Windows: PowerShell; Mac/Linux: Terminal) và kiểm tra:
 
 ```bash
 dotnet --version
 ```
 
-✅ **Đúng khi:** in ra số bắt đầu bằng `8.` (ví dụ `8.0.100`).
+✅ **Đúng khi:** in ra số bắt đầu bằng `10.` (ví dụ `10.0.100`).
 
 ### 2.2. Docker Desktop — để chạy MongoDB + Redis
 
@@ -89,7 +89,7 @@ node --version
 
 | Công cụ | Phiên bản | Dùng để | Lệnh kiểm tra |
 |---|---|---|---|
-| .NET SDK | 8.0 | Chạy Game Server | `dotnet --version` |
+| .NET SDK | 10.0 | Chạy Game Server | `dotnet --version` |
 | Docker Desktop | 24+ | Chạy MongoDB + Redis | `docker --version` |
 | Node.js | 20 LTS | Chạy Admin Panel | `node --version` |
 | Git | bất kỳ | Tải mã nguồn | `git --version` |
