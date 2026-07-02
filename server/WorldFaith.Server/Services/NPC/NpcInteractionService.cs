@@ -3,6 +3,7 @@ using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Achievement;
 using WorldFaith.Server.Services.Admin;
 using WorldFaith.Shared.Contracts;
+using WorldFaith.Shared.Enums;
 
 namespace WorldFaith.Server.Services.NPC;
 

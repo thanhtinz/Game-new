@@ -1,6 +1,7 @@
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Admin;
+using WorldFaith.Server.Services.Faith;
 using WorldFaith.Server.Services.Leaderboard;
 using WorldFaith.Shared.Enums;
 using WorldFaith.Shared.Contracts;

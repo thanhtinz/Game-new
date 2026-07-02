@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Achievement;
+using WorldFaith.Server.Services.Chat;
 using WorldFaith.Server.Services.Leaderboard;
 using WorldFaith.Shared.Enums;
 

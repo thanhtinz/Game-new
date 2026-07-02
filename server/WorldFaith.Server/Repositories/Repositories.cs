@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using WorldFaith.Server.Models;
+using WorldFaith.Shared.Enums;
 
 namespace WorldFaith.Server.Repositories;
 
@@ -249,6 +250,12 @@ public class NpcRepository : MongoRepository<NpcDocument>, INpcRepository
 {
     public NpcRepository(IMongoDatabase db) : base(db, "npcs") { }
 
+    public async Task<NpcDocument> CreateAsync(NpcDocument npc)
+    {
+        await Collection.InsertOneAsync(npc);
+        return npc;
+    }
+
     public async Task<List<NpcDocument>> GetByWorldAsync(string worldId)
         => await Collection.Find(n => n.WorldId == worldId && n.State == NpcState.Alive).ToListAsync();
 
@@ -285,6 +292,12 @@ public interface IOrganizationRepository
 public class OrganizationRepository : MongoRepository<OrganizationDocument>, IOrganizationRepository
 {
     public OrganizationRepository(IMongoDatabase db) : base(db, "organizations") { }
+
+    public async Task<OrganizationDocument> CreateAsync(OrganizationDocument org)
+    {
+        await Collection.InsertOneAsync(org);
+        return org;
+    }
 
     public async Task<List<OrganizationDocument>> GetByWorldAsync(string worldId)
         => await Collection.Find(o => o.WorldId == worldId).ToListAsync();

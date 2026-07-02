@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Repositories;
+using WorldFaith.Server.Services.Admin;
 using WorldFaith.Server.Services.Chat;
 using WorldFaith.Server.Services.Dungeon;
 using WorldFaith.Server.Services.Evolution;
