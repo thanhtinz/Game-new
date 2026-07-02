@@ -1,3 +1,4 @@
+using WorldFaith.Shared.Models;
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Achievement;
@@ -454,7 +455,7 @@ public class NpcInteractionService : INpcInteractionService
             _ => 8f
         };
 
-        civ.AiMemory.GodTrustLevel = MathF.Min(100f, civ.AiMemory.GodTrustLevel + trustGain);
+        civ.AiMemory.GodTrustLevel = Math.Min(100f, civ.AiMemory.GodTrustLevel + trustGain);
         await _civRepo.UpdateAsync(civ);
 
         _logger.LogInformation("God {GodId} responded to event {EventType} with {Miracle} → Trust +{Trust}",

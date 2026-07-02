@@ -1,3 +1,4 @@
+using WorldFaith.Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Achievement;

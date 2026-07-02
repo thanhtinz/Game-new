@@ -90,7 +90,7 @@ public class ScenarioControllerTests
 
         ended.Should().BeTrue();
         winnerId.Should().Be("p1");
-        reason.Should().Contain("70%").Or.Contain("%");
+        reason.Should().Contain("%");
     }
 
     [Fact]

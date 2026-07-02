@@ -191,7 +191,7 @@ public class DoctrineServiceTests
     public async Task MissionarySpeed_FullExpansion_Returns2x()
     {
         _religionRepo.Setup(r => r.GetByIdAsync("r1"))
-            .ReturnsAsync(MakeReligion() with { Doctrine = new DoctrineValues { IsolationVsExpansion = 100f } });
+            .ReturnsAsync(() => { var __r = MakeReligion(); __r.Doctrine = new DoctrineValues { IsolationVsExpansion = 100f }; return __r; });
 
         var speed = await _sut.GetMissionarySpeedModifierAsync("r1");
         speed.Should().Be(2.0f);
@@ -201,7 +201,7 @@ public class DoctrineServiceTests
     public async Task MissionarySpeed_FullIsolation_Returns0_5x()
     {
         _religionRepo.Setup(r => r.GetByIdAsync("r1"))
-            .ReturnsAsync(MakeReligion() with { Doctrine = new DoctrineValues { IsolationVsExpansion = -100f } });
+            .ReturnsAsync(() => { var __r = MakeReligion(); __r.Doctrine = new DoctrineValues { IsolationVsExpansion = -100f }; return __r; });
 
         var speed = await _sut.GetMissionarySpeedModifierAsync("r1");
         speed.Should().Be(0.0f);
@@ -211,7 +211,7 @@ public class DoctrineServiceTests
     public async Task RaceCompatibility_HarmonyDoctrine_ElfGetsBonus()
     {
         _religionRepo.Setup(r => r.GetByIdAsync("r1"))
-            .ReturnsAsync(MakeReligion() with { Doctrine = new DoctrineValues { HarmonyVsDominion = -100f } });
+            .ReturnsAsync(() => { var __r = MakeReligion(); __r.Doctrine = new DoctrineValues { HarmonyVsDominion = -100f }; return __r; });
 
         var compat = await _sut.GetRaceCompatibilityModifierAsync("r1", RaceType.Elf);
         compat.Should().BeGreaterThan(1.0f, "Elves love Harmony doctrine");
@@ -221,7 +221,7 @@ public class DoctrineServiceTests
     public async Task RaceCompatibility_DominionDoctrine_OrcGetsBonus()
     {
         _religionRepo.Setup(r => r.GetByIdAsync("r1"))
-            .ReturnsAsync(MakeReligion() with { Doctrine = new DoctrineValues { HarmonyVsDominion = 100f } });
+            .ReturnsAsync(() => { var __r = MakeReligion(); __r.Doctrine = new DoctrineValues { HarmonyVsDominion = 100f }; return __r; });
 
         var compat = await _sut.GetRaceCompatibilityModifierAsync("r1", RaceType.Orc);
         compat.Should().BeGreaterThan(1.0f, "Orcs prefer Dominion doctrine");
@@ -231,9 +231,11 @@ public class DoctrineServiceTests
     public async Task ShouldExecuteHeretic_HighPunishmentHighOrder_ReturnsTrue()
     {
         _religionRepo.Setup(r => r.GetByIdAsync("r1"))
-            .ReturnsAsync(MakeReligion() with
+            .ReturnsAsync(() =>
             {
-                Doctrine = new DoctrineValues { MercyVsPunishment = 70f, FreedomVsOrder = 60f }
+                var __r = MakeReligion();
+                __r.Doctrine = new DoctrineValues { MercyVsPunishment = 70f, FreedomVsOrder = 60f };
+                return __r;
             });
 
         var result = await _sut.ShouldExecuteHereticAsync("r1");
@@ -244,9 +246,11 @@ public class DoctrineServiceTests
     public async Task ShouldExecuteHeretic_MercyDoctrine_ReturnsFalse()
     {
         _religionRepo.Setup(r => r.GetByIdAsync("r1"))
-            .ReturnsAsync(MakeReligion() with
+            .ReturnsAsync(() =>
             {
-                Doctrine = new DoctrineValues { MercyVsPunishment = -80f }
+                var __r = MakeReligion();
+                __r.Doctrine = new DoctrineValues { MercyVsPunishment = -80f };
+                return __r;
             });
 
         var result = await _sut.ShouldExecuteHereticAsync("r1");

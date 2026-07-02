@@ -176,7 +176,7 @@ public class RaceAffinityService : IRaceAffinityService
         if (npcTraits.Contains(RaceTrait.Fanatic))
             baseAffinity *= 1.3f;
 
-        float total = MathF.Min(200f, baseAffinity + traitBonus);
+        float total = Math.Min(200f, baseAffinity + traitBonus);
 
         // Convert percentage to multiplier: 100% = 1.0x, 150% = 1.5x, 50% = 0.5x
         return total / 100f;
@@ -230,7 +230,7 @@ public class RaceAffinityService : IRaceAffinityService
 
         var key = $"god_{godId}";
         raceDoc.EnvironmentalMemory.TryGetValue(key, out float current);
-        raceDoc.EnvironmentalMemory[key] = MathF.Clamp(current + trustDelta, -50f, 50f);
+        raceDoc.EnvironmentalMemory[key] = Math.Clamp(current + trustDelta, -50f, 50f);
 
         await _raceRepo.UpdateAsync(raceDoc);
         _logger.LogInformation("Race {Race} memory updated for God {GodId}: {Delta:+0.0;-0.0} ({Reason})",

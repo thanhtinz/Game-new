@@ -1,3 +1,4 @@
+using WorldFaith.Shared.Models;
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Leaderboard;
@@ -185,7 +186,7 @@ public class ReligionService : IReligionService
         if (religion == null || civ == null) return;
 
         religion.TempleCount++;
-        religion.DevotionLevel = MathF.Min(1f, religion.DevotionLevel + 0.05f);
+        religion.DevotionLevel = Math.Min(1f, religion.DevotionLevel + 0.05f);
         if (!religion.CivilizationIds.Contains(civId))
             religion.CivilizationIds.Add(civId);
 
@@ -206,7 +207,7 @@ public class ReligionService : IReligionService
         // Tính xác suất spread dựa ando devotion, temple count, follower count
         float spreadChance = religion.DevotionLevel * 0.3f
             + religion.TempleCount * 0.05f
-            + MathF.Log10(MathF.Max(1, religion.FollowerCount)) * 0.02f;
+            + MathF.Log10(Math.Max(1, religion.FollowerCount)) * 0.02f;
 
         // Các civ chưa theo religion này
         var targetCivs = civs
@@ -389,5 +390,5 @@ public class ReligionService : IReligionService
         return targetCiv;
     }
 
-    private static float Clamp01(float v) => MathF.Max(0f, MathF.Min(1f, v));
+    private static float Clamp01(float v) => Math.Max(0f, Math.Min(1f, v));
 }

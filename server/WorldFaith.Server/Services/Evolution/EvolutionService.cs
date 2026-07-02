@@ -1,3 +1,4 @@
+using WorldFaith.Shared.Models;
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Admin;
@@ -339,7 +340,7 @@ public class EvolutionService : IEvolutionService
         if (nearby == null) return false;
 
         float damage = entity.Power * 0.1f;
-        nearby.Military = MathF.Max(0f, nearby.Military - damage);
+        nearby.Military = Math.Max(0f, nearby.Military - damage);
         nearby.Population -= (int)(damage * 2f);
 
         if (nearby.Population < 0) nearby.Population = 0;
@@ -369,8 +370,8 @@ public class EvolutionService : IEvolutionService
 
         foreach (var civ in nearbyCivs)
         {
-            civ.Military = MathF.Max(0f, civ.Military - 20f);
-            civ.Economy = MathF.Max(0f, civ.Economy - 15f);
+            civ.Military = Math.Max(0f, civ.Military - 20f);
+            civ.Economy = Math.Max(0f, civ.Economy - 15f);
             await _civRepo.UpdateAsync(civ);
         }
 

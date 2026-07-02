@@ -71,7 +71,7 @@ public class MemoryService : IMemoryService
             // Forgotten god: relic là nguồn faith duy nhất
             if (god.IsForgotten)
             {
-                god.Faith = MathF.Min(500f, god.Faith + faithGen);
+                god.Faith = Math.Min(500f, god.Faith + faithGen);
                 await _godRepo.UpdateAsync(god);
 
                 // Ghi memory nếu đây là tick quan trọng
@@ -82,7 +82,7 @@ public class MemoryService : IMemoryService
             else
             {
                 // God is alive — relic is a bonus
-                god.Faith = MathF.Min(1000f, god.Faith + faithGen * 0.5f);
+                god.Faith = Math.Min(1000f, god.Faith + faithGen * 0.5f);
                 await _godRepo.UpdateAsync(god);
             }
 
@@ -90,8 +90,8 @@ public class MemoryService : IMemoryService
             bool isAbandoned = relic.CurrentOwnerId == null && relic.LocationCivId == null && relic.LocationDungeonId == null;
             if (isAbandoned && tick % 200 == 0)
             {
-                relic.FaithBonus = MathF.Max(0.1f, relic.FaithBonus - 0.5f);
-                relic.MemoryPower = MathF.Max(5f, relic.MemoryPower - 1f);
+                relic.FaithBonus = Math.Max(0.1f, relic.FaithBonus - 0.5f);
+                relic.MemoryPower = Math.Max(5f, relic.MemoryPower - 1f);
                 await _relicRepo.UpdateAsync(relic);
             }
         }

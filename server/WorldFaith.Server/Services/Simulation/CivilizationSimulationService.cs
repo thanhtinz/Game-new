@@ -116,7 +116,7 @@ public class CivilizationSimulationService : ICivilizationSimulationService
             float rebellionRisk = _govService.GetRebellionRisk(civ);
             if (_rng.NextDouble() < rebellionRisk * 0.01f)  // per tick
             {
-                civ.Stability = MathF.Max(0f, civ.Stability - 10f);
+                civ.Stability = Math.Max(0f, civ.Stability - 10f);
                 civ.AiMemory.GodTrustLevel -= 5f;
                 _logger.LogInformation("Civ {Name} rebellion flare (risk={Risk:P1})", civ.Name, rebellionRisk);
                 changed = true;
@@ -209,7 +209,7 @@ public class CivilizationSimulationService : ICivilizationSimulationService
 
         // Natural food regeneration based on economy
         float regen = civ.Economy * 0.05f;
-        civ.Food = MathF.Clamp(civ.Food + regen, 0f, 200f);
+        civ.Food = Math.Clamp(civ.Food + regen, 0f, 200f);
 
         // Famine
         if (civ.Food < 10f)
@@ -220,11 +220,11 @@ public class CivilizationSimulationService : ICivilizationSimulationService
         }
         else if (civ.Food > 80f)
         {
-            civ.Happiness = MathF.Min(100f, civ.Happiness + 0.5f);
+            civ.Happiness = Math.Min(100f, civ.Happiness + 0.5f);
         }
 
-        civ.Happiness = MathF.Clamp(civ.Happiness, 0f, 100f);
-        civ.Stability = MathF.Clamp(civ.Stability, 0f, 100f);
+        civ.Happiness = Math.Clamp(civ.Happiness, 0f, 100f);
+        civ.Stability = Math.Clamp(civ.Stability, 0f, 100f);
         return true;
     }
 
@@ -255,8 +255,8 @@ public class CivilizationSimulationService : ICivilizationSimulationService
 
         civ.Economy += _rng.Next(1, 5);
         civ.Military += _rng.Next(1, 3);
-        civ.Economy = MathF.Min(civ.Economy, 200f);
-        civ.Military = MathF.Min(civ.Military, 150f);
+        civ.Economy = Math.Min(civ.Economy, 200f);
+        civ.Military = Math.Min(civ.Military, 150f);
         return true;
     }
 
@@ -269,7 +269,7 @@ public class CivilizationSimulationService : ICivilizationSimulationService
         var religion = religions.FirstOrDefault(r => civ.ReligionIds.Contains(r.Id));
         if (religion != null)
         {
-            religion.DevotionLevel = MathF.Min(1f, religion.DevotionLevel + 0.01f);
+            religion.DevotionLevel = Math.Min(1f, religion.DevotionLevel + 0.01f);
         }
 
         return true;

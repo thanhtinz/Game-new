@@ -5,6 +5,7 @@ using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Admin;
 using WorldFaith.Server.Services.Faith;
+using WorldFaith.Server.Services.Race;
 using WorldFaith.Shared.Enums;
 using Xunit;
 
@@ -16,6 +17,7 @@ public class FaithServiceTests
     private readonly Mock<ICivilizationRepository> _civRepo     = new();
     private readonly Mock<IReligionRepository>     _religionRepo= new();
     private readonly Mock<IBalanceConfigService>   _balance     = new();
+    private readonly Mock<IRaceAffinityService>    _raceAffinity= new();
     private readonly FaithService                  _sut;
 
     public FaithServiceTests()
@@ -36,11 +38,16 @@ public class FaithServiceTests
                 _ => 10f
             });
 
+        _raceAffinity.Setup(r => r.GetFaithGainModifierAsync(
+                It.IsAny<string>(), It.IsAny<RaceType>(), It.IsAny<GodArchetype>()))
+            .ReturnsAsync(1f);
+
         _sut = new FaithService(
             _godRepo.Object,
             _civRepo.Object,
             _religionRepo.Object,
             _balance.Object,
+            _raceAffinity.Object,
             NullLogger<FaithService>.Instance);
     }
 

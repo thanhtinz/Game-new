@@ -122,7 +122,7 @@ public class ConversionService : IConversionService
         float chance = openness * raceAffinity * socialPressure * trustModifier * recentEventModifier * doctrineModifier;
 
         // Cap at reasonable range
-        return MathF.Clamp(chance * 0.1f, 0.001f, 0.3f); // Max 30% per attempt
+        return Math.Clamp(chance * 0.1f, 0.001f, 0.3f); // Max 30% per attempt
     }
 
     private async Task<float> GetDoctrinePersonalityMatchAsync(string religionId, NpcDocument npc)
@@ -155,7 +155,7 @@ public class ConversionService : IConversionService
             match += (doc.MercyVsPunishment) / 100f * 0.3f;
         }
 
-        return MathF.Clamp(match, 0.3f, 2.0f);
+        return Math.Clamp(match, 0.3f, 2.0f);
     }
 
     // ─── Trust Change ─────────────────────────────────────────
@@ -174,7 +174,7 @@ public class ConversionService : IConversionService
 
         // Attribution certainty (0-1): was the miracle clearly caused by this god?
         // High certainty = full effect. Low = diluted (mortals might attribute to rival)
-        float trustChange = resultValue * MathF.Clamp(certainty, 0f, 1f);
+        float trustChange = resultValue * Math.Clamp(certainty, 0f, 1f);
 
         // Doctrine affects how civ interprets miracles
         var doc = await _doctrine.GetDoctrineAsync(religionId);

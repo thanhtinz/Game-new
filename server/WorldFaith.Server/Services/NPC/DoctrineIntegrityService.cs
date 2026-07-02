@@ -104,7 +104,7 @@ public class DoctrineIntegrityService : IDoctrineIntegrityService
         };
         loss *= rankMult;
 
-        integrity.Score = MathF.Max(0f, integrity.Score - loss);
+        integrity.Score = Math.Max(0f, integrity.Score - loss);
         integrity.LastViolationTick = tick;
         integrity.ViolationHistory.Insert(0, $"[{severity}] {description}");
         if (integrity.ViolationHistory.Count > 20)
@@ -113,7 +113,7 @@ public class DoctrineIntegrityService : IDoctrineIntegrityService
         // Faith/devotion impact
         if (isPublic)
         {
-            npc.DevotionLevel = MathF.Max(0f, npc.DevotionLevel - loss * 0.005f);
+            npc.DevotionLevel = Math.Max(0f, npc.DevotionLevel - loss * 0.005f);
         }
 
         await UpdateWarningTagsAsync(npc);
@@ -140,9 +140,9 @@ public class DoctrineIntegrityService : IDoctrineIntegrityService
 
         // Higher severity resistance = bigger reward
         float trustGain = 8f;
-        npc.GodTrustLevel = MathF.Min(100f, npc.GodTrustLevel + trustGain);
-        npc.DevotionLevel = MathF.Min(1f, npc.DevotionLevel + 0.03f);
-        integrity.Score = MathF.Min(100f, integrity.Score + gain);
+        npc.GodTrustLevel = Math.Min(100f, npc.GodTrustLevel + trustGain);
+        npc.DevotionLevel = Math.Min(1f, npc.DevotionLevel + 0.03f);
+        integrity.Score = Math.Min(100f, integrity.Score + gain);
 
         integrity.ViolationHistory.Insert(0, $"[Resisted] {description}");
         await UpdateWarningTagsAsync(npc);
@@ -201,7 +201,7 @@ public class DoctrineIntegrityService : IDoctrineIntegrityService
             integrity.ViolationHistory.Insert(0, "[FALL] Prophet became a False Prophet");
             _logger.LogWarning("NPC {Name} has FALLEN — False Prophet path", npc.Name);
         }
-        else if (npc.IsChampion && profile.ChampionPath == ChampionPath.Saint)
+        else if (npc.IsChampion && npc.ChampionPath == ChampionPath.Saint)
         {
             // Disgraced Champion
             npc.IsChampion = false;
@@ -291,12 +291,12 @@ public class DoctrineIntegrityService : IDoctrineIntegrityService
         if (npc == null) return;
 
         var integrity = npc.DivineProfile.DoctrineIntegrity;
-        integrity.RedemptionProgress = MathF.Min(100f, integrity.RedemptionProgress + amount);
+        integrity.RedemptionProgress = Math.Min(100f, integrity.RedemptionProgress + amount);
 
         // Full redemption restores integrity
         if (integrity.RedemptionProgress >= 100f)
         {
-            integrity.Score = MathF.Min(100f, integrity.Score + 25f);
+            integrity.Score = Math.Min(100f, integrity.Score + 25f);
             integrity.RedemptionProgress = 0f;
             integrity.IsExcommunicated = false;
             integrity.ViolationHistory.Insert(0, "[REDEEMED] Redemption quest completed — integrity restored");

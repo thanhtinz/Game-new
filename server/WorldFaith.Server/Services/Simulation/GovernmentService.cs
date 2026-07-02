@@ -184,36 +184,36 @@ public class GovernmentService : IGovernmentService
         if (b.EconomyEfficiency != 1f)
         {
             civ.Economy *= b.EconomyEfficiency;
-            civ.Economy = MathF.Clamp(civ.Economy, 0f, 200f);
+            civ.Economy = Math.Clamp(civ.Economy, 0f, 200f);
             changed = true;
         }
 
         // Religious unity bonus
         if (b.ReligiousUnityBonus > 0f && tick % 10 == 0)
         {
-            civ.ReligiousUnity = MathF.Min(100f, civ.ReligiousUnity + b.ReligiousUnityBonus);
+            civ.ReligiousUnity = Math.Min(100f, civ.ReligiousUnity + b.ReligiousUnityBonus);
             changed = true;
         }
 
         // Theocracy: heresy suppression boosts stability slightly
         if (civ.Government == GovernmentType.Theocracy)
         {
-            civ.Stability = MathF.Min(100f, civ.Stability + 0.1f);
+            civ.Stability = Math.Min(100f, civ.Stability + 0.1f);
             changed = true;
         }
 
         // MonsterHorde: economy decay, military growth
         if (civ.Government == GovernmentType.MonsterHorde && tick % 5 == 0)
         {
-            civ.Economy   = MathF.Max(0f, civ.Economy - 1f);
-            civ.Military  = MathF.Min(200f, civ.Military + 0.5f);
+            civ.Economy   = Math.Max(0f, civ.Economy - 1f);
+            civ.Military  = Math.Min(200f, civ.Military + 0.5f);
             changed = true;
         }
 
         // Merchant State: happiness drives conversion
         if (civ.Government == GovernmentType.MerchantState && tick % 20 == 0)
         {
-            civ.Happiness = MathF.Min(100f, civ.Happiness + civ.Economy * 0.01f);
+            civ.Happiness = Math.Min(100f, civ.Happiness + civ.Economy * 0.01f);
             changed = true;
         }
 
@@ -262,6 +262,6 @@ public class GovernmentService : IGovernmentService
             _ => 1.0f
         };
 
-        return MathF.Clamp(base_risk, 0f, 0.95f);
+        return Math.Clamp(base_risk, 0f, 0.95f);
     }
 }

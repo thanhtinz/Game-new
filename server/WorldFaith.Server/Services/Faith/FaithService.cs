@@ -90,9 +90,9 @@ public class FaithService : IFaithService
         var baseCost  = await GetMiracleCostAsync(miracle);
         // Archetype discount
         float discount = ArchetypeBonus.GetMiracleCostMultiplier(god.Archetype, miracle);
-        var cost = MathF.Max(0f, baseCost * discount);
+        var cost = Math.Max(0f, baseCost * discount);
 
-        var newFaith = MathF.Max(0f, god.Faith - cost);
+        var newFaith = Math.Max(0f, god.Faith - cost);
         await _godRepo.UpdateFaithAsync(godId, newFaith, god.Trust, god.Fear, god.FollowerCount);
 
         _logger.LogInformation("God {GodId}({Arch}) spent {Cost} faith on {Miracle}. Remaining: {Faith}",
@@ -149,7 +149,7 @@ public class FaithService : IFaithService
 
             float gain = (fromFollowers + fromTemples + devotionBonus + fearResource)
                 * archetypeMult * raceAffinityMult * rankMult;
-            float newFaith = MathF.Min(maxFaith, god.Faith + gain);
+            float newFaith = Math.Min(maxFaith, god.Faith + gain);
 
             await _godRepo.UpdateFaithAsync(god.Id, newFaith, god.Trust, god.Fear, god.FollowerCount);
             total += gain;

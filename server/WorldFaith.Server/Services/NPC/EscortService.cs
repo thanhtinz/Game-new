@@ -111,7 +111,7 @@ public class EscortService : IEscortService
                 NpcId = escortNpc.Id,
                 Role = role,
                 CurrentBehavior = EscortBehavior.Follow,
-                Loyalty = MathF.Clamp(loyalty, 0f, 100f),
+                Loyalty = Math.Clamp(loyalty, 0f, 100f),
                 IsCorrupted = corrupted,
             });
         }
@@ -184,8 +184,8 @@ public class EscortService : IEscortService
                         var god = vip.GodInfluenceId != null ? await _godRepo.GetByIdAsync(vip.GodInfluenceId) : null;
                         if (god != null)
                         {
-                            god.Faith = MathF.Min(1000f, god.Faith + 20f);
-                            god.Trust = MathF.Min(100f, god.Trust + 5f);
+                            god.Faith = Math.Min(1000f, god.Faith + 20f);
+                            god.Trust = Math.Min(100f, god.Trust + 5f);
                             await _godRepo.UpdateAsync(god);
                         }
                     }
@@ -239,8 +239,8 @@ public class EscortService : IEscortService
                 var god = await _godRepo.GetByIdAsync(vip.GodInfluenceId);
                 if (god != null)
                 {
-                    god.Faith = MathF.Max(0f, god.Faith - 50f);
-                    god.Trust = MathF.Max(0f, god.Trust - 15f);
+                    god.Faith = Math.Max(0f, god.Faith - 50f);
+                    god.Trust = Math.Max(0f, god.Trust - 15f);
                     await _godRepo.UpdateAsync(god);
                 }
             }
@@ -297,7 +297,7 @@ public class EscortService : IEscortService
         var profile = vip.DivineProfile;
         // GDD §12: Strength = NPC Religious Rank + God Note Rank + Public Fame + Danger Level + Kingdom Support + Church Wealth
         float rankScore = (int)profile.ChurchRank * 10f;
-        float attentionScore = MathF.Min(profile.DivineAttentionScore * 0.2f, 50f);
+        float attentionScore = Math.Min(profile.DivineAttentionScore * 0.2f, 50f);
         float tierScore = (int)vip.Tier * 5f;
         return rankScore + attentionScore + tierScore + 20f; // base 20
     }

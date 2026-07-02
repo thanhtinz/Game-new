@@ -118,11 +118,13 @@ public class WorldGeneratorService : IWorldGeneratorService
         // ── Stage 6: Rivers — gradient descent from peaks to sea ─
         CarveRivers(tiles, elevation, width, height, rng);
 
-        // ── Stage 7: Coastline / Beach insertion ────────────────
-        InsertCoastlines(tiles, width, height);
-
         // ── Stage 8: Biome smoothing (majority filter) ──────────
         SmoothBiomes(tiles, width, height, passes: 2);
+
+        // ── Stage 7: Coastline / Beach insertion ────────────────
+        // Runs after smoothing so every Beach tile is guaranteed to border
+        // Water on the final terrain (smoothing never alters Water tiles).
+        InsertCoastlines(tiles, width, height);
 
         for (int x = 0; x < width; x++)
             for (int y = 0; y < height; y++)
@@ -168,7 +170,7 @@ public class WorldGeneratorService : IWorldGeneratorService
             blobs.Add((
                 cx: (float)(rng.NextDouble() * 0.6 + 0.2) * width,
                 cy: (float)(rng.NextDouble() * 0.6 + 0.2) * height,
-                radius: (float)(rng.NextDouble() * 0.25 + 0.25) * MathF.Min(width, height),
+                radius: (float)(rng.NextDouble() * 0.25 + 0.25) * Math.Min(width, height),
                 strength: (float)(rng.NextDouble() * 0.4 + 0.8)
             ));
         }
@@ -190,12 +192,12 @@ public class WorldGeneratorService : IWorldGeneratorService
                     float dist = MathF.Sqrt(dx * dx + dy * dy);
                     float falloff = 1f - Clamp01(dist / radius);
                     falloff = MathF.Pow(falloff, 1.6f) * strength;
-                    best = MathF.Max(best, falloff);
+                    best = Math.Max(best, falloff);
                 }
 
-                float edgeDistX = MathF.Min(x, width  - 1 - x) / (width  * 0.15f);
-                float edgeDistY = MathF.Min(y, height - 1 - y) / (height * 0.15f);
-                float edgeFalloff = Clamp01(MathF.Min(edgeDistX, edgeDistY));
+                float edgeDistX = Math.Min(x, width  - 1 - x) / (width  * 0.15f);
+                float edgeDistY = Math.Min(y, height - 1 - y) / (height * 0.15f);
+                float edgeFalloff = Clamp01(Math.Min(edgeDistX, edgeDistY));
 
                 mask[x, y] = best * edgeFalloff;
             }
@@ -399,7 +401,10 @@ public class WorldGeneratorService : IWorldGeneratorService
             .ToList();
 
         foreach (var tile in landTiles)
+        {
             tile.Type = TileType.Sacred;
+            tile.Fertility = 1f;   // sacred sites have maximum fertility
+        }
     }
 
     // ─── Civilization Placement ───────────────────────────────────
@@ -502,7 +507,7 @@ public class WorldGeneratorService : IWorldGeneratorService
         return list;
     }
 
-    private static float Clamp01(float v) => MathF.Max(0f, MathF.Min(1f, v));
+    private static float Clamp01(float v) => Math.Max(0f, Math.Min(1f, v));
 }
 
 // ─── Perlin Noise Implementation ──────────────────────────────

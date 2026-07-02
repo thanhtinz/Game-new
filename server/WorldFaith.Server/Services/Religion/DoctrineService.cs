@@ -39,7 +39,7 @@ public class DoctrineService : IDoctrineService
         var religion = await _religionRepo.GetByIdAsync(religionId);
         if (religion == null) return;
 
-        float clamped = MathF.Clamp(value, -100f, 100f);
+        float clamped = Math.Clamp(value, -100f, 100f);
 
         switch (axis.ToLower())
         {
@@ -148,7 +148,7 @@ public class DoctrineService : IDoctrineService
                 break;
         }
 
-        return MathF.Clamp(modifier, 0.3f, 2.5f);
+        return Math.Clamp(modifier, 0.3f, 2.5f);
     }
 
     /// <summary>
@@ -213,11 +213,11 @@ public class DoctrineService : IDoctrineService
         }
 
         // Clamp all axes
-        religion.Doctrine.MercyVsPunishment    = MathF.Clamp(religion.Doctrine.MercyVsPunishment, -100f, 100f);
-        religion.Doctrine.IsolationVsExpansion = MathF.Clamp(religion.Doctrine.IsolationVsExpansion, -100f, 100f);
-        religion.Doctrine.HarmonyVsDominion    = MathF.Clamp(religion.Doctrine.HarmonyVsDominion, -100f, 100f);
-        religion.Doctrine.FreedomVsOrder       = MathF.Clamp(religion.Doctrine.FreedomVsOrder, -100f, 100f);
-        religion.Doctrine.SacrificeVsProsperity= MathF.Clamp(religion.Doctrine.SacrificeVsProsperity, -100f, 100f);
+        religion.Doctrine.MercyVsPunishment    = Math.Clamp(religion.Doctrine.MercyVsPunishment, -100f, 100f);
+        religion.Doctrine.IsolationVsExpansion = Math.Clamp(religion.Doctrine.IsolationVsExpansion, -100f, 100f);
+        religion.Doctrine.HarmonyVsDominion    = Math.Clamp(religion.Doctrine.HarmonyVsDominion, -100f, 100f);
+        religion.Doctrine.FreedomVsOrder       = Math.Clamp(religion.Doctrine.FreedomVsOrder, -100f, 100f);
+        religion.Doctrine.SacrificeVsProsperity= Math.Clamp(religion.Doctrine.SacrificeVsProsperity, -100f, 100f);
 
         await _religionRepo.UpdateAsync(religion);
         _logger.LogDebug("Doctrine evolved for '{Religion}' after {Event}: M/P={MP:+0;-0}", 

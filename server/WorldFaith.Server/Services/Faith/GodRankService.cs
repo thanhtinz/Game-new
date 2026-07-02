@@ -152,7 +152,7 @@ public class GodRankService : IGodRankService
             // Faith from relics and hidden cults
             float relicFaith = relics.Sum(r => r.FaithBonus);
             float cultFaith  = activeCults.Sum(c => c.FollowerCount * 0.01f);
-            god.Faith = MathF.Min(god.Faith + relicFaith + cultFaith, 500f); // low cap when Forgotten
+            god.Faith = Math.Min(god.Faith + relicFaith + cultFaith, 500f); // low cap when Forgotten
 
             await _godRepo.UpdateAsync(god);
 

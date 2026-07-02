@@ -4,6 +4,7 @@ using Moq;
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Achievement;
+using WorldFaith.Server.Services.NPC;
 using WorldFaith.Shared.Enums;
 using Xunit;
 
@@ -15,6 +16,7 @@ public class AchievementServiceTests
     private readonly Mock<IGodRepository>          _godRepo      = new();
     private readonly Mock<IReligionRepository>     _religionRepo = new();
     private readonly Mock<ICivilizationRepository> _civRepo      = new();
+    private readonly Mock<IDoctrineIntegrityService> _doctrineIntegrity = new();
     private readonly AchievementService _sut;
 
     public AchievementServiceTests()
@@ -22,7 +24,8 @@ public class AchievementServiceTests
         _npcRepo.Setup(r => r.UpdateAsync(It.IsAny<NpcDocument>())).Returns(Task.CompletedTask);
         _sut = new AchievementService(
             _npcRepo.Object, _godRepo.Object, _religionRepo.Object,
-            _civRepo.Object, NullLogger<AchievementService>.Instance);
+            _civRepo.Object, _doctrineIntegrity.Object,
+            NullLogger<AchievementService>.Instance);
     }
 
     // ─── Achievement Earning ──────────────────────────────
@@ -36,7 +39,7 @@ public class AchievementServiceTests
         var result = await _sut.EarnAchievementAsync("n1", "cleared_dungeon", tick: 50);
 
         result.Should().NotBeNull();
-        result.Name.Should().Be("Chiến Thắng Bóng Tối");
+        result.Name.Should().Be("Conqueror of Darkness");
         result.Rarity.Should().Be(AchievementRarity.Rare);
         npc.DivineProfile.Achievements.Should().HaveCount(1);
         npc.DivineProfile.AchievementValue.Should().Be(20); // weight=20

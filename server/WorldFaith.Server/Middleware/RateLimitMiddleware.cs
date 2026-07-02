@@ -46,26 +46,31 @@ public class RateLimitMiddleware
         var key = $"{ip}:{path.Split('/').Take(3).Aggregate((a, b) => $"{a}/{b}")}";
         var window = _windows.GetOrAdd(key, _ => new Queue<DateTime>());
 
+        bool limited;
+        int currentCount;
         lock (window)
         {
             var cutoff = now.AddSeconds(-windowSec);
             while (window.Count > 0 && window.Peek() < cutoff)
                 window.Dequeue();
 
-            if (window.Count >= maxReq)
-            {
-                _logger.LogWarning("Rate limit hit: {Ip} → {Path} ({Count}/{Max})",
-                    ip, path, window.Count, maxReq);
+            currentCount = window.Count;
+            limited = currentCount >= maxReq;
+            if (!limited)
+                window.Enqueue(now);
+        }
 
-                context.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
-                context.Response.Headers["Retry-After"] = windowSec.ToString();
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync(
-                    $"{{\"error\":\"Too many requests\",\"retryAfter\":{windowSec}}}");
-                return;
-            }
+        if (limited)
+        {
+            _logger.LogWarning("Rate limit hit: {Ip} → {Path} ({Count}/{Max})",
+                ip, path, currentCount, maxReq);
 
-            window.Enqueue(now);
+            context.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
+            context.Response.Headers["Retry-After"] = windowSec.ToString();
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsync(
+                $"{{\"error\":\"Too many requests\",\"retryAfter\":{windowSec}}}");
+            return;
         }
 
         // Add rate limit headers

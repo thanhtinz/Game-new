@@ -210,7 +210,7 @@ public class CommandmentService : ICommandmentService
         bool obeyed = trustLevel >= trustRequired;
 
         // Faith consumed whether civ obeys or not
-        var newFaith = MathF.Max(0f, god.Faith - cost);
+        var newFaith = Math.Max(0f, god.Faith - cost);
         await _godRepo.UpdateFaithAsync(godId, newFaith, god.Trust, god.Fear, god.FollowerCount);
 
         // Apply effect if civ obeys
@@ -223,7 +223,7 @@ public class CommandmentService : ICommandmentService
         else
         {
             // Refusal reaction: trust decreases slightly
-            civ.AiMemory.GodTrustLevel = MathF.Max(0f, trustLevel - 5f);
+            civ.AiMemory.GodTrustLevel = Math.Max(0f, trustLevel - 5f);
             await _civRepo.UpdateAsync(civ);
             obeyReason = $"{civ.Name} ignored the divine command (Trust too low: {trustLevel:F0}/{trustRequired:F0})";
         }
@@ -331,7 +331,7 @@ public class CommandmentService : ICommandmentService
                 break;
         }
 
-        civ.AiMemory.GodTrustLevel = MathF.Min(100f, civ.AiMemory.GodTrustLevel);
+        civ.AiMemory.GodTrustLevel = Math.Min(100f, civ.AiMemory.GodTrustLevel);
         await _civRepo.UpdateAsync(civ);
     }
 

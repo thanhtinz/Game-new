@@ -306,7 +306,7 @@ public enum NpcEventType
     // Political
     Election, Rebellion, Coronation, AllianceFormed, AllianceBroken,
     // Lucky/Unlucky
-    TreasureFound, BattleMiracle, BusinessFailure, CrisisOfFaith
+    TreasureFound, BattleMiracle, BusinessFailure, CrisisOfFaith, LuckGood
 }
 
 public class NpcEventDocument

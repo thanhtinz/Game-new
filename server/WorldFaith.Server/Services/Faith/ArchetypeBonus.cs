@@ -65,7 +65,7 @@ public static class ArchetypeBonus
                 break;
         }
 
-        return MathF.Min(mult, 3f); // Cap 3x
+        return Math.Min(mult, 3f); // Cap 3x
     }
 
     /// <summary>

@@ -166,16 +166,21 @@ public class AchievementService : IAchievementService
         var npc = await _npcRepo.GetByIdAsync(npcId);
         if (npc == null) return;
 
-        // Talent has awakened chưa?
-        if (npc.DivineProfile.Talents.Any(t => t.Name == talentName && t.IsAwakened)) return;
+        // Resolve to the catalogue's canonical display name so storage and lookups match
+        // (the catalogue key is snake_case but talents are stored under the display name).
+        var inCatalogue = TalentCatalogue.TryGetValue(talentName, out var def);
+        var canonicalName = inCatalogue ? def.name : talentName;
 
-        var existing = npc.DivineProfile.Talents.FirstOrDefault(t => t.Name == talentName);
+        // Talent has awakened chưa?
+        if (npc.DivineProfile.Talents.Any(t => t.Name == canonicalName && t.IsAwakened)) return;
+
+        var existing = npc.DivineProfile.Talents.FirstOrDefault(t => t.Name == canonicalName);
         if (existing != null)
         {
             existing.IsAwakened = true;
             existing.AwakenedByEvent = triggeredByEvent;
         }
-        else if (TalentCatalogue.TryGetValue(talentName, out var def))
+        else if (inCatalogue)
         {
             npc.DivineProfile.Talents.Add(new NpcTalent
             {
@@ -200,7 +205,9 @@ public class AchievementService : IAchievementService
     public async Task<float> CalculateDivineAttentionAsync(string npcId)
     {
         var npc = await _npcRepo.GetByIdAsync(npcId);
-        return npc?.DivineProfile.DivineAttentionScore ?? 0f;
+        if (npc == null) return 0f;
+        await RecalcDivineAttentionAsync(npc);
+        return npc.DivineProfile.DivineAttentionScore;
     }
 
     private async Task RecalcDivineAttentionAsync(NpcDocument npc)
@@ -228,12 +235,14 @@ public class AchievementService : IAchievementService
             + npc.DivineProfile.Achievements
                 .Count(a => a.Category == AchievementCategory.MiracleExposure) * 10f;
 
-        // CorruptionRisk
+        // CorruptionRisk — derived from dark achievements, traits, and dark divine actions
         npc.DivineProfile.CorruptionRisk =
             npc.DivineProfile.Achievements
                 .Count(a => a.Category == AchievementCategory.DarkForbidden) * 8f
             + (npc.Ambition > 70 ? 15f : 0f)
-            + (npc.Loyalty < 30 ? 20f : 0f);
+            + (npc.Loyalty < 30 ? 20f : 0f)
+            + npc.DivineProfile.ReceivedDivineActions
+                .Count(a => a == nameof(DivineAction.Corrupt)) * 25f;
     }
 
     private async Task UpdateCandidacyAsync(NpcDocument npc)
@@ -405,9 +414,9 @@ public class AchievementService : IAchievementService
         {
             case DivineAction.Bless:
                 // Increase devotion, giảm corruption risk, có thể awaken talent
-                npc.DevotionLevel = MathF.Min(1f, npc.DevotionLevel + 0.1f);
-                npc.DivineProfile.CorruptionRisk = MathF.Max(0f, npc.DivineProfile.CorruptionRisk - 10f);
-                npc.GodTrustLevel = MathF.Min(100f, npc.GodTrustLevel + 10f);
+                npc.DevotionLevel = Math.Min(1f, npc.DevotionLevel + 0.1f);
+                npc.DivineProfile.CorruptionRisk = Math.Max(0f, npc.DivineProfile.CorruptionRisk - 10f);
+                npc.GodTrustLevel = Math.Min(100f, npc.GodTrustLevel + 10f);
                 // 20% chance awaken a spiritual talent
                 if (_rng.NextDouble() < 0.2f)
                     await AwakentTalentAsync(npcId, "strong_faith", "Bless from God");
@@ -417,10 +426,10 @@ public class AchievementService : IAchievementService
             case DivineAction.SendDream:
                 npc.DreamsReceived++;
                 npc.DivineProfile.MiracleExposure += 5f;
-                npc.GodTrustLevel = MathF.Min(100f, npc.GodTrustLevel + 5f);
+                npc.GodTrustLevel = Math.Min(100f, npc.GodTrustLevel + 5f);
                 // Dream-sensitive NPCs react more
                 bool isDreamSens = npc.DivineProfile.Talents.Any(t => t.Name.Contains("Dream") && t.IsAwakened);
-                if (isDreamSens) npc.GodTrustLevel = MathF.Min(100f, npc.GodTrustLevel + 10f);
+                if (isDreamSens) npc.GodTrustLevel = Math.Min(100f, npc.GodTrustLevel + 10f);
                 changed = true;
                 break;
 
@@ -453,13 +462,13 @@ public class AchievementService : IAchievementService
 
             case DivineAction.Protect:
                 // Reduce accident/assassination risk → tracked via CorruptionRisk proxy
-                npc.DivineProfile.CorruptionRisk = MathF.Max(0f, npc.DivineProfile.CorruptionRisk - 15f);
+                npc.DivineProfile.CorruptionRisk = Math.Max(0f, npc.DivineProfile.CorruptionRisk - 15f);
                 changed = true;
                 break;
 
             case DivineAction.Punish:
-                npc.DivineProfile.CorruptionRisk = MathF.Max(0f, npc.DivineProfile.CorruptionRisk - 5f);
-                npc.Loyalty = MathF.Max(0f, npc.Loyalty - 5f);  // Bị phạt → bớt tự tin nhưng loyalty thay đổi
+                npc.DivineProfile.CorruptionRisk = Math.Max(0f, npc.DivineProfile.CorruptionRisk - 5f);
+                npc.Loyalty = Math.Max(0f, npc.Loyalty - 5f);  // Bị phạt → bớt tự tin nhưng loyalty thay đổi
                 changed = true;
                 break;
 

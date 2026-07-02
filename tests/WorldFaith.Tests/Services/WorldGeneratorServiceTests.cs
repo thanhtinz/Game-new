@@ -100,7 +100,7 @@ public class WorldGeneratorServiceTests
         var tiles = await GenerateAndGetTiles("w1", 64, 64, seed: 42);
 
         tiles.Should().Contain(t => t.Type == TileType.Water, "world should have ocean");
-        tiles.Should().Contain(t => t.Type is TileType.Grassland or TileType.Forest,
+        tiles.Should().Contain(t => t.Type == TileType.Grassland || t.Type == TileType.Forest,
             "world should have habitable land");
     }
 

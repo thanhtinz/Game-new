@@ -1,3 +1,4 @@
+using WorldFaith.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 using WorldFaith.Server.Hubs;
 using WorldFaith.Server.Models.Auth;

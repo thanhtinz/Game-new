@@ -126,7 +126,7 @@ public class DungeonService : IDungeonService
             if (age > 200 && dungeon.State == DungeonState.Active && _rng.NextDouble() < 0.05)
             {
                 dungeon.State = DungeonState.Infested;
-                dungeon.DangerLevel = MathF.Min(100f, dungeon.DangerLevel * 1.3f);
+                dungeon.DangerLevel = Math.Min(100f, dungeon.DangerLevel * 1.3f);
                 await _dungeonRepo.UpdateAsync(dungeon);
                 deltas.Add(new DeltaEvent
                 {
@@ -186,8 +186,8 @@ public class DungeonService : IDungeonService
             if (npc != null) adventurers.Add(npc);
         }
 
-        float partyStrength = adventurers.Sum(a => a.EvolutionPoints + a.Piety * 0.5f) / MathF.Max(1, adventurers.Count);
-        float survivalChance = MathF.Clamp(partyStrength / dungeon.DangerLevel, 0.1f, 0.95f);
+        float partyStrength = adventurers.Sum(a => a.EvolutionPoints + a.Piety * 0.5f) / Math.Max(1, adventurers.Count);
+        float survivalChance = Math.Clamp(partyStrength / dungeon.DangerLevel, 0.1f, 0.95f);
 
         bool succeeded = _rng.NextDouble() < survivalChance;
 
@@ -227,7 +227,7 @@ public class DungeonService : IDungeonService
                 ? GuildMissionState.Corrupted  // was corrupt bởi dungeon
                 : GuildMissionState.Failed;
 
-            int deaths = _rng.Next(1, MathF.Min(3, adventurers.Count) + 1);
+            int deaths = _rng.Next(1, Math.Min(3, adventurers.Count) + 1);
             var fallen = adventurers.OrderBy(_ => _rng.Next()).Take(deaths).ToList();
             foreach (var adv in fallen)
             {

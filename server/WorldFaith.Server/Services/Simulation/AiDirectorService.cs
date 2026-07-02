@@ -1,3 +1,4 @@
+using WorldFaith.Shared.Models;
 using WorldFaith.Server.Models;
 using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Services.Admin;
@@ -204,7 +205,7 @@ public class AiDirectorService : IAiDirectorService
                 {
                     target.Stability -= 20f;
                     target.Economy   -= 15f;
-                    target.Stability = MathF.Clamp(target.Stability, 0f, 100f);
+                    target.Stability = Math.Clamp(target.Stability, 0f, 100f);
                     await _civRepo.UpdateAsync(target);
                     deltas.Add(new DeltaEvent
                     {
@@ -251,7 +252,7 @@ public class AiDirectorService : IAiDirectorService
         {
             // Schism in dominant religion — some followers become curious
             float schismBonus = weakest.Faith + 50f;
-            weakest.Faith = MathF.Min(1000f, schismBonus);
+            weakest.Faith = Math.Min(1000f, schismBonus);
             await _godRepo.UpdateAsync(weakest);
 
             deltas.Add(new DeltaEvent
