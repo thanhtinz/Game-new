@@ -1,0 +1,38 @@
+# ── .NET / C# build output ─────────────────────────────
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# ── Test / coverage ────────────────────────────────────
+[Tt]est[Rr]esults/
+*.trx
+coverage*.json
+*.coverage
+
+# ── Node / Admin Panel ─────────────────────────────────
+node_modules/
+.next/
+npm-debug.log*
+yarn-error.log*
+
+# ── Unity client ───────────────────────────────────────
+client-unity/Library/
+client-unity/Temp/
+client-unity/Obj/
+client-unity/Build/
+client-unity/Builds/
+client-unity/Logs/
+client-unity/UserSettings/
+client-unity/Assets/Plugins/SignalR/
+client-unity/Assets/WorldFaith/Shared/
+
+# ── Env / local config ─────────────────────────────────
+.env
+.env.local
+*.local
+
+# ── OS / editor ────────────────────────────────────────
+.DS_Store
+Thumbs.db
