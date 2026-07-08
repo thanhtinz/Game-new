@@ -341,3 +341,19 @@ public enum NpcTrait
     Genius, Fanatic, Compassionate, Ambitious, Traumatized,
     Curious, Traditional, Reckless, Cowardly, Honorable, Cruel, Merciful
 }
+
+// What a named NPC remembers about a god's actions (NPC Master Spec §8).
+// Distinct from MemoryType (relic / faith-economy memory) above.
+public enum NpcMemoryType
+{
+    MiracleSavedLife, MiracleFailed, FamineEnded, ForestBurned,
+    MonsterAttackStopped, NobleScandalExposed, SacredSiteDestroyed,
+    SaintFell, ProphetMartyred, WarVictory, WarDefeat
+}
+
+// Hidden facts an NPC holds — used for blackmail, cults, court intrigue (Spec §4).
+public enum NpcSecretType
+{
+    HiddenFaith, ForbiddenGodWorship, Corruption, Heresy, Affair,
+    Treason, ConcealedIdentity, CultMembership
+}

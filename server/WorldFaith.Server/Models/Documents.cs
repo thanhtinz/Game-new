@@ -191,9 +191,44 @@ public enum ChampionPath { Saint, FallenDemonLord }
 
 public class NpcRelationship
 {
-    public string NpcId { get; set; } = string.Empty;
+    public string NpcId { get; set; } = string.Empty; // target NPC id
     public RelationshipType Type { get; set; }
-    public float Strength { get; set; } = 50f; // 0-100
+    public float Strength { get; set; } = 50f; // 0-100 (legacy general bond)
+
+    // NPC Master Spec §9 — richer social graph for faith spread
+    public float Trust { get; set; } = 50f;            // personal trust
+    public float Loyalty { get; set; } = 50f;          // duty / bond
+    public float InfluenceWeight { get; set; } = 1f;   // how strongly this tie carries faith
+    public bool IsSecret { get; set; }                 // hidden ties (servants, cults, handlers)
+}
+
+// NPC Master Spec §4 / §8 — a hidden fact an NPC holds.
+public class NpcSecret
+{
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+    public NpcSecretType Type { get; set; }
+    public string? AboutNpcId { get; set; }   // who the secret concerns (null = about self)
+    public string? RelatedGodId { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public bool IsExposed { get; set; }
+    public long CreatedTick { get; set; }
+}
+
+// NPC Master Spec §8 — memory of a god's action, reinterpreted over time.
+public class NpcMemory
+{
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+    public string EventId { get; set; } = string.Empty;
+    public string? GodId { get; set; }
+    public NpcMemoryType Type { get; set; }
+    public string RegionId { get; set; } = string.Empty;
+    public float TrustChange { get; set; }
+    public float FearChange { get; set; }
+    public float DoubtChange { get; set; }
+    public long CreatedTick { get; set; }
+    public float Strength { get; set; } = 1.0f;
+    public float DecayPerAge { get; set; } = 0.10f;
+    public bool IsCulturalMemory { get; set; }  // survives the individual, shared by a region
 }
 
 public class NpcDocument
@@ -217,6 +252,21 @@ public class NpcDocument
     public float Piety { get; set; } = 40f;     // religious devotion
     public float Wealth { get; set; } = 30f;
 
+    // NPC Master Spec §4 — belief state (0-100). Gods push these via signals.
+    public float Faith { get; set; } = 30f;     // personal belief strength
+    public float Trust { get; set; } = 40f;     // confidence in current god/religion
+    public float Fear { get; set; }             // fear pressure
+    public float Doubt { get; set; }            // accumulated uncertainty
+
+    // NPC Master Spec §4 — extended personality driving decisions
+    public float Morality { get; set; } = 50f;
+    public float Intelligence { get; set; } = 50f;
+    public float Courage { get; set; } = 50f;
+    public float Trauma { get; set; }
+    public float Openness { get; set; } = 50f;  // willingness to change belief
+
+    public List<NpcTrait> Traits { get; set; } = new();
+
     // Religion
     public string? PersonalReligionId { get; set; }
     public float DevotionLevel { get; set; } = 0.3f;
@@ -237,9 +287,13 @@ public class NpcDocument
     public string? SpouseId { get; set; }
     public List<string> ChildrenIds { get; set; } = new();
 
-    // Secrets (for blackmail)
+    // Secrets (for blackmail) — legacy single-secret fields
     public string? KnownSecretAboutNpcId { get; set; }
     public string? SecretType { get; set; } // "corruption", "heresy", "affair"
+
+    // NPC Master Spec §4 / §8 — persistent secrets and memory
+    public List<NpcSecret> Secrets { get; set; } = new();
+    public List<NpcMemory> Memories { get; set; } = new();
 
     // Lifecycle
     public int AgeInTicks { get; set; }
