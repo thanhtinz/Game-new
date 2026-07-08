@@ -477,7 +477,7 @@ public class AchievementService : IAchievementService
                 npc.DivineProfile.CorruptionRisk += 25f;
                 npc.DivineProfile.IsDarkPathCandidate = true;
                 await AwakentTalentAsync(npcId, "cursed_blood", "Corrupted by Dark God");
-                await _doctrineIntegrity.ApplyViolationAsync(npcId, "", ViolationSeverity.SevereBetral,
+                await _doctrineIntegrity.ApplyViolationAsync(npcId, "", ViolationSeverity.SevereBetrayal,
                     "Corrupted by a dark god's influence", false, godId, tick);
                 changed = true;
                 break;

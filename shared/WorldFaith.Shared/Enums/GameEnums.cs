@@ -291,7 +291,7 @@ public enum ViolationSeverity
     MinorContradiction, // -2 to -5
     ModerateViolation,  // -8 to -15
     MajorViolation,     // -20 to -35
-    SevereBetral,       // -40 to -70
+    SevereBetrayal,       // -40 to -70
     DoctrineInversion,  // -80 to -100 → triggers fall
 }
 

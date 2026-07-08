@@ -55,7 +55,7 @@ public class DoctrineIntegrityService : IDoctrineIntegrityService
         [ViolationSeverity.MinorContradiction] = (2f, 5f),
         [ViolationSeverity.ModerateViolation]  = (8f, 15f),
         [ViolationSeverity.MajorViolation]     = (20f, 35f),
-        [ViolationSeverity.SevereBetral]       = (40f, 70f),
+        [ViolationSeverity.SevereBetrayal]       = (40f, 70f),
         [ViolationSeverity.DoctrineInversion]  = (80f, 100f),
     };
 
@@ -65,7 +65,7 @@ public class DoctrineIntegrityService : IDoctrineIntegrityService
         [ViolationSeverity.MinorContradiction] = 1f,
         [ViolationSeverity.ModerateViolation]  = 5f,
         [ViolationSeverity.MajorViolation]     = 12f,
-        [ViolationSeverity.SevereBetral]       = 20f,
+        [ViolationSeverity.SevereBetrayal]       = 20f,
         [ViolationSeverity.DoctrineInversion]  = 30f,
     };
 
