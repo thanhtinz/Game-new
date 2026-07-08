@@ -10,6 +10,7 @@ using WorldFaith.Server.Repositories;
 using WorldFaith.Server.Middleware;
 using WorldFaith.Server.Services.Auth;
 using WorldFaith.Server.Services.Achievement;
+using WorldFaith.Server.Services.Common;
 using WorldFaith.Server.Services.NPC;
 using WorldFaith.Server.Services.Organization;
 using WorldFaith.Server.Services.Race;
@@ -142,6 +143,9 @@ builder.Services.AddSingleton<IAchievementService, AchievementService>();
 // Add-On v1.2: Doctrine Integrity & Escort System
 builder.Services.AddSingleton<IDoctrineIntegrityService, DoctrineIntegrityService>();
 builder.Services.AddSingleton<IEscortService, EscortService>();
+// NPC Master Spec Phase 2: belief math
+builder.Services.AddSingleton<IRandomService, RandomService>();
+builder.Services.AddSingleton<INpcFaithDecisionService, NpcFaithDecisionService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();

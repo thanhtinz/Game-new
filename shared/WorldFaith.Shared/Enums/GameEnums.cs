@@ -333,3 +333,11 @@ public enum DoctrineTag
     Purity, War, Knowledge, Nature, Darkness, Order,
     Chaos, Death, Light, Balance
 }
+
+// NPC personality traits (NPC Master Spec §4). Traits can override race
+// expectations and create rare story exceptions in belief decisions.
+public enum NpcTrait
+{
+    Genius, Fanatic, Compassionate, Ambitious, Traumatized,
+    Curious, Traditional, Reckless, Cowardly, Honorable, Cruel, Merciful
+}
