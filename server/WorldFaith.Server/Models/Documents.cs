@@ -440,6 +440,22 @@ public class DoctrineValues
     public float HarmonyVsDominion { get; set; } = 0f;    // -100=harmony, +100=dominion
     public float FreedomVsOrder { get; set; } = 0f;       // -100=freedom, +100=order
     public float SacrificeVsProsperity { get; set; } = 0f;// -100=sacrifice, +100=prosperity
+
+    // NPC Master Spec §7 — tags this doctrine forbids or holds sacred
+    public List<DoctrineTag> ForbiddenTags { get; set; } = new();
+    public List<DoctrineTag> SacredTags { get; set; } = new();
+}
+
+// NPC Master Spec §7 — a concrete act judged against a doctrine to derive severity.
+public class DoctrineEvent
+{
+    public string NpcId { get; set; } = string.Empty;
+    public List<DoctrineTag> Tags { get; set; } = new();
+    public float MercyImpact { get; set; }    // where the act sits on mercy↔punishment
+    public float OrderImpact { get; set; }    // freedom↔order
+    public float DominionImpact { get; set; } // harmony↔dominion
+    public bool WasPublic { get; set; }
+    public bool WasIntentional { get; set; }
 }
 
 // ─── Dungeon System (GDD v1.0 Section 12, 16) ────────────────
