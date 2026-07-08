@@ -146,6 +146,8 @@ builder.Services.AddSingleton<IEscortService, EscortService>();
 // NPC Master Spec Phase 2: belief math
 builder.Services.AddSingleton<IRandomService, RandomService>();
 builder.Services.AddSingleton<INpcFaithDecisionService, NpcFaithDecisionService>();
+// NPC Master Spec Phase 5: social influence
+builder.Services.AddSingleton<INpcSocialInfluenceService, NpcSocialInfluenceService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();
