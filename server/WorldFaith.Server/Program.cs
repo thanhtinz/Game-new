@@ -150,6 +150,8 @@ builder.Services.AddSingleton<INpcFaithDecisionService, NpcFaithDecisionService>
 builder.Services.AddSingleton<INpcSocialInfluenceService, NpcSocialInfluenceService>();
 // NPC Master Spec Phase 6: population-scale grouped simulation
 builder.Services.AddSingleton<IPopulationFaithService, PopulationFaithService>();
+// NPC Master Spec Phase 8: player-facing risk indicators
+builder.Services.AddSingleton<INpcIndicatorService, NpcIndicatorService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();
