@@ -148,6 +148,8 @@ builder.Services.AddSingleton<IRandomService, RandomService>();
 builder.Services.AddSingleton<INpcFaithDecisionService, NpcFaithDecisionService>();
 // NPC Master Spec Phase 5: social influence
 builder.Services.AddSingleton<INpcSocialInfluenceService, NpcSocialInfluenceService>();
+// NPC Master Spec Phase 6: population-scale grouped simulation
+builder.Services.AddSingleton<IPopulationFaithService, PopulationFaithService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();

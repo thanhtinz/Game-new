@@ -446,6 +446,28 @@ public class DoctrineValues
     public List<DoctrineTag> SacredTags { get; set; } = new();
 }
 
+// NPC Master Spec §10 — commoners are simulated as groups, not individual AI brains.
+// A group holds averaged belief state; conversion splits the group rather than
+// flipping every member at once.
+public class PopulationFaithGroup
+{
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+    public string WorldId { get; set; } = string.Empty;
+    public string CivilizationId { get; set; } = string.Empty;
+    public string RegionId { get; set; } = string.Empty;
+    public RaceType Race { get; set; }
+    public NpcTier Class { get; set; } = NpcTier.Commoner;
+    public string? GodId { get; set; }
+    public string? ReligionId { get; set; }
+    public int Count { get; set; }
+    public float AverageDevotion { get; set; } = 0.3f;
+    public float AverageTrust { get; set; } = 40f;
+    public float AverageFear { get; set; }
+    public float AverageDoubt { get; set; }
+}
+
 // NPC Master Spec §7 — a concrete act judged against a doctrine to derive severity.
 public class DoctrineEvent
 {
