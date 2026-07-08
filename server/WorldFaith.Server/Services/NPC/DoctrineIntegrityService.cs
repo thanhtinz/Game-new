@@ -13,7 +13,8 @@ namespace WorldFaith.Server.Services.NPC;
 public interface IDoctrineIntegrityService
 {
     Task<float> ApplyViolationAsync(string npcId, string worldId, ViolationSeverity severity, string description, bool isPublic, string? triggeredByGodId = null, long tick = 0);
-    Task<float> ApplyResistanceAsync(string npcId, string description, long tick = 0);
+    Task<float> ApplyResistanceAsync(string npcId, string description, long tick = 0,
+        ViolationSeverity resistedSeverity = ViolationSeverity.ModerateViolation);
     Task<float> GetPowerModifierAsync(string npcId);
     Task CheckFallConditionAsync(string worldId, string npcId, long tick);
     Task UpdateWarningTagsAsync(string npcId);
@@ -130,13 +131,15 @@ public class DoctrineIntegrityService : IDoctrineIntegrityService
 
     // ─── Apply Resistance ─────────────────────────────────
 
-    public async Task<float> ApplyResistanceAsync(string npcId, string description, long tick = 0)
+    public async Task<float> ApplyResistanceAsync(string npcId, string description, long tick = 0,
+        ViolationSeverity resistedSeverity = ViolationSeverity.ModerateViolation)
     {
         var npc = await _npcRepo.GetByIdAsync(npcId);
         if (npc == null) return 0f;
 
         var integrity = npc.DivineProfile.DoctrineIntegrity;
-        float gain = 5f; // base resistance reward
+        // Reward scales with the severity of the temptation resisted (config table)
+        float gain = ResistanceGain.TryGetValue(resistedSeverity, out var configured) ? configured : 5f;
 
         // Higher severity resistance = bigger reward
         float trustGain = 8f;
