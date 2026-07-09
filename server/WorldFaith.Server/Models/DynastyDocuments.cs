@@ -146,3 +146,33 @@ public class DynastyHistoryEvent
     public DynastyEventType EventType { get; set; }
     public string Summary { get; set; } = string.Empty;
 }
+
+// ─── Population-scale genealogy (Dynasty Spec §9, §10, §12) ────
+// Race lifespan sets the pace of bloodline evolution: short-lived races diversify
+// fast, long-lived races preserve purity and memory.
+public class RaceAgeProfile
+{
+    public RaceType Race { get; set; }
+    public int AverageLifespanYears { get; set; }
+    public int AdultAgeYears { get; set; }
+    public int TypicalParenthoodStart { get; set; }
+    public int TypicalGenerationYears { get; set; }
+    public float FertilityModifier { get; set; } = 1f;
+    public float BloodlineDecayModifier { get; set; } = 1f;
+    public float MutationModifier { get; set; } = 1f;
+}
+
+// Aggregated commoner lineage — no individual tree unless a member is promoted.
+public class PopulationFamilyGroup
+{
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+    public string WorldId { get; set; } = string.Empty;
+    public string RegionId { get; set; } = string.Empty;
+    public RaceType Race { get; set; }
+    public string? FaithId { get; set; }
+    public int Count { get; set; }
+    public float BirthRatePerGeneration { get; set; } = 0.28f;
+    public float DeathRatePerGeneration { get; set; } = 0.20f;
+}

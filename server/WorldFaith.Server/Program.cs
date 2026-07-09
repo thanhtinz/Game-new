@@ -169,6 +169,8 @@ builder.Services.AddSingleton<IBloodlineAwakeningService, BloodlineAwakeningServ
 builder.Services.AddSingleton<INpcMarriageDecisionService, NpcMarriageDecisionService>();
 builder.Services.AddSingleton<IDynastyReputationService, DynastyReputationService>();
 builder.Services.AddSingleton<ISuccessionService, SuccessionService>();
+// Dynasty / Bloodline Spec Phase 6: population-scale genealogy
+builder.Services.AddSingleton<IPopulationFamilyService, PopulationFamilyService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();
