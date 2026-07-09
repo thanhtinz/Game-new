@@ -156,6 +156,9 @@ builder.Services.AddSingleton<INpcIndicatorService, NpcIndicatorService>();
 // Dynasty / Bloodline Spec Phase 1: inheritance
 builder.Services.AddSingleton<IBloodlineAffinityService, BloodlineAffinityService>();
 builder.Services.AddSingleton<IBloodlineInheritanceService, BloodlineInheritanceService>();
+// Dynasty / Bloodline Spec Phase 2: family trees
+builder.Services.AddSingleton<IGeneMixingService, GeneMixingService>();
+builder.Services.AddSingleton<IFamilyTreeService, FamilyTreeService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();
