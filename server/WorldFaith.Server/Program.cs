@@ -161,6 +161,10 @@ builder.Services.AddSingleton<IGeneMixingService, GeneMixingService>();
 builder.Services.AddSingleton<IFamilyTreeService, FamilyTreeService>();
 // Dynasty / Bloodline Spec Phase 3: blessing/curse founding
 builder.Services.AddSingleton<IBloodlineFoundingService, BloodlineFoundingService>();
+// Dynasty / Bloodline Spec Phase 4: hybrids & awakening
+builder.Services.AddSingleton<IReadOnlyList<HybridBloodlineRule>>(HybridBloodlineRules.Default);
+builder.Services.AddSingleton<IHybridBloodlineService, HybridBloodlineService>();
+builder.Services.AddSingleton<IBloodlineAwakeningService, BloodlineAwakeningService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();
