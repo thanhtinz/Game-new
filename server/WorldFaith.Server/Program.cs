@@ -159,6 +159,8 @@ builder.Services.AddSingleton<IBloodlineInheritanceService, BloodlineInheritance
 // Dynasty / Bloodline Spec Phase 2: family trees
 builder.Services.AddSingleton<IGeneMixingService, GeneMixingService>();
 builder.Services.AddSingleton<IFamilyTreeService, FamilyTreeService>();
+// Dynasty / Bloodline Spec Phase 3: blessing/curse founding
+builder.Services.AddSingleton<IBloodlineFoundingService, BloodlineFoundingService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();
