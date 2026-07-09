@@ -165,6 +165,10 @@ builder.Services.AddSingleton<IBloodlineFoundingService, BloodlineFoundingServic
 builder.Services.AddSingleton<IReadOnlyList<HybridBloodlineRule>>(HybridBloodlineRules.Default);
 builder.Services.AddSingleton<IHybridBloodlineService, HybridBloodlineService>();
 builder.Services.AddSingleton<IBloodlineAwakeningService, BloodlineAwakeningService>();
+// Dynasty / Bloodline Spec Phase 5: dynasty politics
+builder.Services.AddSingleton<INpcMarriageDecisionService, NpcMarriageDecisionService>();
+builder.Services.AddSingleton<IDynastyReputationService, DynastyReputationService>();
+builder.Services.AddSingleton<ISuccessionService, SuccessionService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();
