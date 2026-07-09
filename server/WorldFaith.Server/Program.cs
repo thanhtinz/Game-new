@@ -12,6 +12,7 @@ using WorldFaith.Server.Services.Auth;
 using WorldFaith.Server.Services.Achievement;
 using WorldFaith.Server.Services.Common;
 using WorldFaith.Server.Services.NPC;
+using WorldFaith.Server.Services.NPC.Dynasty;
 using WorldFaith.Server.Services.Organization;
 using WorldFaith.Server.Services.Race;
 using WorldFaith.Server.Services.Dungeon;
@@ -152,6 +153,9 @@ builder.Services.AddSingleton<INpcSocialInfluenceService, NpcSocialInfluenceServ
 builder.Services.AddSingleton<IPopulationFaithService, PopulationFaithService>();
 // NPC Master Spec Phase 8: player-facing risk indicators
 builder.Services.AddSingleton<INpcIndicatorService, NpcIndicatorService>();
+// Dynasty / Bloodline Spec Phase 1: inheritance
+builder.Services.AddSingleton<IBloodlineAffinityService, BloodlineAffinityService>();
+builder.Services.AddSingleton<IBloodlineInheritanceService, BloodlineInheritanceService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();

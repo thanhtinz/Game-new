@@ -295,6 +295,20 @@ public class NpcDocument
     public List<NpcSecret> Secrets { get; set; } = new();
     public List<NpcMemory> Memories { get; set; } = new();
 
+    // ── Dynasty / Bloodline (Dynasty Spec §4) ──────────────────
+    public string? FamilyName { get; set; }
+    public RaceType Race { get; set; } = RaceType.Human;
+    public SexType Sex { get; set; } = SexType.Unknown;
+    public int BirthYear { get; set; }
+    public int? DeathYear { get; set; }
+    public string? FamilyId { get; set; }
+    public string? FatherNpcId { get; set; }
+    public string? MotherNpcId { get; set; }
+    public string? PrimaryBloodlineId { get; set; }
+    public List<string> BloodlineIds { get; set; } = new();
+    public List<InheritedBlessingInstance> InheritedBlessings { get; set; } = new();
+    public NpcGeneProfile Genes { get; set; } = new();
+
     // Lifecycle
     public int AgeInTicks { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

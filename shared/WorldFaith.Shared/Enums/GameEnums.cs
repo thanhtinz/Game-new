@@ -357,3 +357,28 @@ public enum NpcSecretType
     HiddenFaith, ForbiddenGodWorship, Corruption, Heresy, Affair,
     Treason, ConcealedIdentity, CultMembership
 }
+
+// ═══ Dynasty / Bloodline System (Dynasty Spec) ═══════════════
+public enum SexType { Male, Female, Unknown }
+
+// Bloodline flavor domain (Dynasty Spec §4). Superset of GodArchetype with
+// lineage-specific flavors (Moon, Fire) used by hereditary blessings.
+public enum GodDomain { Light, Darkness, Nature, War, Knowledge, Order, Chaos, Death, Moon, Fire }
+
+public enum BloodlineKind
+{
+    MortalFamily, BlessedLineage, DivineLineage, CursedLineage, HybridLineage, CorruptedLineage
+}
+
+// Current state of an inherited blessing inside one NPC (Dynasty Spec §5).
+public enum BlessingState { Active, Dormant, Faded, Mutated, Corrupted, Sealed }
+
+public enum FamilyStatus { Active, Declining, Extinct, Hidden, Exiled, Revived }
+
+public enum ParentType { Biological, Adoptive, Unknown, DivineCreated }
+
+public enum DynastyEventType
+{
+    Founded, Blessed, Cursed, Marriage, Birth, Death, Awakening,
+    HybridMutation, Exile, Extinction, Revival, SuccessionDispute
+}
