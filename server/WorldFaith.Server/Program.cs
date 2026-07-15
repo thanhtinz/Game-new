@@ -176,6 +176,8 @@ builder.Services.AddSingleton<IPopulationFamilyService, PopulationFamilyService>
 builder.Services.AddSingleton<ISettlementGrowthService, SettlementGrowthService>();
 // Gameplay Foundation Spec §3.2: population capacity & migration
 builder.Services.AddSingleton<IPopulationPressureService, PopulationPressureService>();
+// Gameplay Foundation Spec §7: prayer & request board priority
+builder.Services.AddSingleton<IPrayerPriorityService, PrayerPriorityService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();
