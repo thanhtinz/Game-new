@@ -183,6 +183,8 @@ builder.Services.AddSingleton<IGiftPermissionService, GiftPermissionService>();
 builder.Services.AddSingleton<IDivineAttentionService, DivineAttentionService>();
 // Gameplay Foundation Spec §10: rival aura traces
 builder.Services.AddSingleton<IAuraTraceService, AuraTraceService>();
+// Gameplay Foundation Spec §11: connected shared-event stories
+builder.Services.AddSingleton<IStoryEventService, StoryEventService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();
