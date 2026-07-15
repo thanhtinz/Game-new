@@ -181,6 +181,8 @@ builder.Services.AddSingleton<IPrayerPriorityService, PrayerPriorityService>();
 // Gameplay Foundation Spec §9.3 / §13.2: gift permission & divine attention
 builder.Services.AddSingleton<IGiftPermissionService, GiftPermissionService>();
 builder.Services.AddSingleton<IDivineAttentionService, DivineAttentionService>();
+// Gameplay Foundation Spec §10: rival aura traces
+builder.Services.AddSingleton<IAuraTraceService, AuraTraceService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();
