@@ -11,6 +11,7 @@ using WorldFaith.Server.Middleware;
 using WorldFaith.Server.Services.Auth;
 using WorldFaith.Server.Services.Achievement;
 using WorldFaith.Server.Services.Common;
+using WorldFaith.Server.Services.Gameplay;
 using WorldFaith.Server.Services.NPC;
 using WorldFaith.Server.Services.NPC.Dynasty;
 using WorldFaith.Server.Services.Organization;
@@ -171,6 +172,8 @@ builder.Services.AddSingleton<IDynastyReputationService, DynastyReputationServic
 builder.Services.AddSingleton<ISuccessionService, SuccessionService>();
 // Dynasty / Bloodline Spec Phase 6: population-scale genealogy
 builder.Services.AddSingleton<IPopulationFamilyService, PopulationFamilyService>();
+// Gameplay Foundation Spec §4: settlement growth
+builder.Services.AddSingleton<ISettlementGrowthService, SettlementGrowthService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();

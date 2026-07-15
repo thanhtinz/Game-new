@@ -382,3 +382,23 @@ public enum DynastyEventType
     Founded, Blessed, Cursed, Marriage, Birth, Death, Awakening,
     HybridMutation, Exile, Extinction, Revival, SuccessionDispute
 }
+
+// ═══ Gameplay Foundation (Gameplay Spec) ═════════════════════
+// Settlement growth stages (§4.1). "Kingdom" is a political organization, not a
+// settlement stage — see KingdomFormation (§4.3).
+public enum SettlementStage { Camp, Hamlet, Village, Town, City }
+
+// Prayer/request priority (Gameplay Spec §7.3).
+public enum RequestPriority { Critical, Important, Routine, Resolved }
+
+// Faith relationship tier that gates personal-gift permission (§9.3).
+public enum FaithRelationshipTier { Unknown, Curious, Believer, Devoted, Consecrated, Champion }
+
+// Strength of a rival god's aura trace on an NPC (§10.3).
+public enum AuraTraceStrength { None, Faint, Recognizable, Identified, Revealed }
+
+// A participant's role within a shared story event (§11.2).
+public enum StoryRole { Actor, Target, Witness, Helper, Victim, Beneficiary, Leader, Messenger }
+
+// Confidence layer for observed world events (§10.2).
+public enum EventConfidence { Unknown, Faint, Likely, Strong, Confirmed }
