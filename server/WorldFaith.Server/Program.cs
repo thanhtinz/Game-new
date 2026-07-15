@@ -174,6 +174,8 @@ builder.Services.AddSingleton<ISuccessionService, SuccessionService>();
 builder.Services.AddSingleton<IPopulationFamilyService, PopulationFamilyService>();
 // Gameplay Foundation Spec §4: settlement growth
 builder.Services.AddSingleton<ISettlementGrowthService, SettlementGrowthService>();
+// Gameplay Foundation Spec §3.2: population capacity & migration
+builder.Services.AddSingleton<IPopulationPressureService, PopulationPressureService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 builder.Services.AddSingleton<IAdminService, AdminService>();

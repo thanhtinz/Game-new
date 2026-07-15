@@ -402,3 +402,7 @@ public enum StoryRole { Actor, Target, Witness, Helper, Victim, Beneficiary, Lea
 
 // Confidence layer for observed world events (§10.2).
 public enum EventConfidence { Unknown, Faint, Likely, Strong, Confirmed }
+
+// How a population responds to local carrying capacity (§3.2) — it never just
+// multiplies without limit.
+public enum PopulationOutcome { Growing, Stable, Migrating, Competing, Declining }
